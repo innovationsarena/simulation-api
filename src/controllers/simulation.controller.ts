@@ -28,13 +28,13 @@ export const createSimulation = asyncHandler(
 
     // Create simulation
     await supabase
-      .from(process.env.SIMULATIONS_TABLE_NAME)
+      .from(process.env.SIMULATIONS_TABLE_NAME as string)
       .insert([simulation])
       .select()
       .single();
 
     // Generate agents
-    const resp = await fetch(process.env.AGENTS_API_URL, {
+    const resp = await fetch(process.env.AGENTS_API_URL as string, {
       method: "post",
       headers: {
         authentication: `Bearer ${process.env.API_KEY}`,
