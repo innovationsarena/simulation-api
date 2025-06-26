@@ -1,0 +1,546 @@
+openapi: 3.0.0
+info:
+  title: Agent API
+  description: API for managing and interacting with agents
+  version: 1.0.0
+servers:
+  - url: https://api.innovationsarenan.dev/hbm/v1/
+    description: Main production server
+paths:
+  /agents:
+    post:
+      summary: Create a new agent
+      description: Creates one or more agents with the provided details
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - version
+              properties:
+                version:
+                  type: integer
+                  description: Agent version
+                  example: 2
+                count:
+                  type: integer
+                  description: Number of agents to create (defaults to 1)
+                  example: 3
+                simulationId:
+                  type: string
+                  description: Simulation ID to associate with the agents
+                  example: iLVieMGDrI6GTBLq
+      responses:
+        "201":
+          description: Agents created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Agent"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+
+  /agents/random:
+    post:
+      summary: Create random agents
+      description: Creates one or more agents by randomly generating personality values
+      operationId: createRandomAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - version
+              properties:
+                version:
+                  type: integer
+                  description: Agent version
+                  example: 3
+                count:
+                  type: integer
+                  description: Number of agents to create (defaults to 1)
+                  example: 3
+                simulationId:
+                  type: string
+                  description: Simulation ID to associate with the agents
+                  example: iLVieMGDrI6GTBLq
+      responses:
+        "201":
+          description: Random agents created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Agent"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+
+  /parse:
+    post:
+      summary: Parse agent data
+      description: Converts agent data to LLM friendly prompt
+      operationId: parseAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Agent"
+      responses:
+        "200":
+          description: Agent data parsed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prompt:
+                    type: string
+                    description: LLM-friendly prompt generated from agent data
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+
+components:
+  schemas:
+    Agent:
+      type: object
+      required:
+        - id
+        - version
+        - name
+        - state
+        - personality
+        - objectives
+        - llmSettings
+      properties:
+        id:
+          type: string
+          example: uC3BVPe3
+        version:
+          type: integer
+          description: Agent version
+          example: 2
+        name:
+          type: string
+          description: Random swe name based on sex
+          example: Kim Svensson
+        simulationId:
+          type: string
+          description: Is the Agent belonging to certain simulation?
+          example: iLVieMGDrI6GTBLq
+        state:
+          type: string
+          enum: [idle, waiting, occupied]
+          example: idle
+        demographics:
+          $ref: "#/components/schemas/Demographics"
+        personality:
+          oneOf:
+            - $ref: "#/components/schemas/BigFivePersonalityModel"
+            - $ref: "#/components/schemas/ExtendedBigFivePersonalityModel"
+            - type: string
+        objectives:
+          type: array
+          description: "[Agent Name/Type] aims to [verb] [target/resource] to achieve [desired state/outcome]"
+          items:
+            type: string
+            example: Protect your intrests
+        dynamicProps:
+          type: array
+          items:
+            type: object
+        llmSettings:
+          $ref: "#/components/schemas/LLMSettings"
+        stats:
+          $ref: "#/components/schemas/Stats"
+
+    Demographics:
+      type: object
+      required:
+        - age
+        - sex
+      properties:
+        age:
+          type: integer
+          example: 32
+        sex:
+          type: string
+          enum: [male, female]
+          example: male
+        educationLevel:
+          type: string
+          example: academic
+        role:
+          type: string
+          description: Role description
+          example: ninja
+        ethnicity:
+          type: string
+          example: caucasian
+
+    LLMSettings:
+      type: object
+      required:
+        - provider
+        - model
+        - temperature
+        - messageToken
+      properties:
+        provider:
+          type: string
+          description: LLM provider
+          example: openai
+        model:
+          type: string
+          description: LLM model
+          example: "gpt-4o-mini"
+        temperature:
+          type: number
+          description: LLM teperature. Dynamically set based on personality?
+          example: 0.5
+        messageToken:
+          type: integer
+          description: Long or short messages
+          example: 300
+    Tokens:
+      type: object
+      required:
+        - promptTokens
+        - completionTokens
+      properties:
+        promptTokens:
+          type: integer
+          example: 234
+        completionTokens:
+          type: integer
+          example: 544
+
+    Stats:
+      type: object
+      properties:
+        messages:
+          type: integer
+          example: 12
+        conversations:
+          type: integer
+          example: 3
+        tokens:
+          $ref: "#/components/schemas/Tokens"
+
+    Facet:
+      type: object
+      required:
+        - code
+        - value
+      properties:
+        code:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: number
+
+    BigFivePersonalityModel:
+      type: object
+      required:
+        - source
+        - traits
+      properties:
+        source:
+          type: string
+          description: Source of data.
+          example: ESS
+        traits:
+          type: object
+          description: Big five personality traits
+          required:
+            - openness
+            - conscientiousness
+            - extraversion
+            - agreeableness
+            - neuroticism
+          properties:
+            openness:
+              type: number
+              description: Curiosity, imagination, appreciation for art and beauty, emotional depth, and willingness to try new experiences and entertain unconventional ideas.
+              minimum: 1
+              maximum: 10
+              example: 9
+            conscientiousness:
+              type: number
+              description: Reflects a tendency toward organization, responsibility, reliability, and goal-directed behavior.
+              minimum: 1
+              maximum: 10
+              example: 7
+            extraversion:
+              type: number
+              description: Reflects a tendency toward sociability, assertiveness, talkativeness, and the seeking of stimulation and energy from interactions with others.
+              minimum: 1
+              maximum: 10
+              example: 6
+            agreeableness:
+              type: number
+              description: Reflects a tendency toward cooperation, compassion, politeness, and concern for maintaining social harmony and positive relationships with others.
+              minimum: 1
+              maximum: 10
+              example: 8
+            neuroticism:
+              type: number
+              description: Reflects a tendency toward emotional instability, anxiety, moodiness, irritability, and vulnerability to psychological stress.
+              minimum: 1
+              maximum: 10
+              example: 3
+
+    ExtendedBigFivePersonalityModel:
+      type: object
+      required:
+        - source
+        - traits
+      properties:
+        source:
+          type: string
+          description: Source of data.
+          example: ESS
+        traits:
+          type: object
+          description: Big five personality traits
+          required:
+            - openness
+            - conscientiousness
+            - extraversion
+            - agreeableness
+            - neuroticism
+          properties:
+            openness:
+              type: object
+              properties:
+                fantasy:
+                  type: number
+                  description: Reflects a tendency to have a vivid imagination, enjoy daydreaming, and create rich inner worlds as a form of creative expression or mental escape.
+                  minimum: 1
+                  maximum: 20
+                aesthetics:
+                  type: number
+                  description: Reflects appreciation for art, beauty, and poetry, with a tendency to be moved by aesthetic experiences and value creative expression.
+                  minimum: 1
+                  maximum: 10
+                feelings:
+                  type: number
+                  description: Reflects awareness of and receptivity to one's own emotions, experiencing them deeply and valuing emotional experiences as an important part of life.
+                  minimum: 1
+                  maximum: 10
+                actions:
+                  type: number
+                  description: Reflects willingness to try new activities, visit unfamiliar places, and prefer variety and novelty over routine and familiarity.
+                  minimum: 1
+                  maximum: 10
+                ideas:
+                  type: number
+                  description: Reflects intellectual curiosity, enjoyment of philosophical discussions, and willingness to consider new or unconventional concepts and theories.
+                  minimum: 1
+                  maximum: 10
+                values:
+                  type: number
+                  description: Reflects willingness to reexamine social, political, and religious values, showing readiness to question authority and consider multiple viewpoints rather than accepting conventional beliefs.
+                  minimum: 1
+                  maximum: 10
+            conscientiousness:
+              type: object
+              properties:
+                competence:
+                  type: number
+                  description: Reflects the belief in one's own capability, effectiveness, and good judgment when dealing with life's challenges and tasks.
+                  minimum: 1
+                  maximum: 10
+                order:
+                  type: number
+                  description: Reflects a preference for neatness, organization, and structure, with a tendency to keep things tidy and follow a systematic approach to tasks.
+                  minimum: 1
+                  maximum: 10
+                dutifulness:
+                  type: number
+                  description: Reflects adherence to ethical principles, fulfillment of moral obligations, and reliability in meeting commitments and responsibilities.
+                  minimum: 1
+                  maximum: 10
+                achievementStriving:
+                  type: number
+                  description: Reflects ambition, diligence, and determination to accomplish goals, with a tendency to work hard and aspire to excellence and success.
+                  minimum: 1
+                  maximum: 10
+                selfDiscipline:
+                  type: number
+                  description: Reflects the ability to begin tasks promptly and carry them through to completion despite boredom or distractions, showing persistence in the face of challenges.
+                  minimum: 1
+                  maximum: 10
+                deliberation:
+                  type: number
+                  description: Reflects the tendency to think carefully before acting, considering consequences and planning ahead rather than making impulsive decisions or speaking without reflection.
+                  minimum: 1
+                  maximum: 10
+            extraversion:
+              type: object
+              properties:
+                warmth:
+                  type: number
+                  description: Reflects genuine interest in and friendliness toward others, with an ability to form close attachments and express affection easily.
+                  minimum: 1
+                  maximum: 10
+                gregariousness:
+                  type: number
+                  description: Reflects preference for the company of others, enjoyment of social gatherings, and a tendency to seek out and thrive in situations with many people.
+                  minimum: 1
+                  maximum: 10
+                assertiveness:
+                  type: number
+                  description: Reflects a tendency to be dominant, forceful, and take charge in social situations, often speaking without hesitation and becoming group leaders.
+                  minimum: 1
+                  maximum: 10
+                activity:
+                  type: number
+                  description: Reflects high energy levels, vigor, and a fast-paced lifestyle, with a tendency to stay busy, move quickly, and maintain an active schedule.
+                  minimum: 1
+                  maximum: 10
+                excitementSeeking:
+                  type: number
+                  description: Reflects desire for thrills, stimulation, and intense experiences, with a preference for bright colors, noisy environments, and activities that provide an adrenaline rush.
+                  minimum: 1
+                  maximum: 10
+                positiveEmotions:
+                  type: number
+                  description: Reflects tendency to experience joy, happiness, love, and enthusiasm, with frequent feelings of optimism and a tendency to laugh easily and often.
+                  minimum: 1
+                  maximum: 10
+            agreeableness:
+              type: object
+              properties:
+                trust:
+                  type: number
+                  description: Reflects the belief that others are generally honest and well-intentioned, with a tendency to take people at their word and assume the best about their motives.
+                  minimum: 1
+                  maximum: 10
+                straightforwardness:
+                  type: number
+                  description: Reflects sincerity, honesty, and directness in dealing with others, with a reluctance to manipulate through flattery or deception.
+                  minimum: 1
+                  maximum: 10
+                altruism:
+                  type: number
+                  description: Reflects active concern for others' welfare, demonstrated through generosity, consideration, and willingness to help those in need.
+                  minimum: 1
+                  maximum: 10
+                compliance:
+                  type: number
+                  description: Reflects the tendency to defer to others during interpersonal conflict, inhibit aggression, forgive, and cooperate rather than compete.
+                  minimum: 1
+                  maximum: 10
+                modesty:
+                  type: number
+                  description: Reflects humility and lack of arrogance, with a tendency to downplay one's achievements and maintain a humble view of oneself.
+                  minimum: 1
+                  maximum: 10
+                tenderMindedness:
+                  type: number
+                  description: Reflects sympathy and concern for others, with sensitivity to human needs and emphasis on the human side of social policies.
+                  minimum: 1
+                  maximum: 10
+            neuroticism:
+              type: object
+              properties:
+                anxiety:
+                  type: number
+                  description: Reflects tendency to feel fearful, worried, and tense, with proneness to rumination about things that might go wrong and heightened sensitivity to potential threats.
+                  minimum: 1
+                  maximum: 10
+                angryHostility:
+                  type: number
+                  description: Reflects tendency to experience anger, frustration, and bitterness, with a readiness to feel annoyance and express displeasure, sometimes through aggression.
+                  minimum: 1
+                  maximum: 10
+                depression:
+                  type: number
+                  description: Reflects tendency to experience feelings of guilt, sadness, hopelessness, and loneliness, with a proneness to discouragement and dejection when facing difficulties.
+                  minimum: 1
+                  maximum: 10
+                selfConsciousness:
+                  type: number
+                  description: Reflects discomfort around others, sensitivity to ridicule, and feelings of inferiority or awkwardness in social situations, often manifesting as shyness or social anxiety.
+                  minimum: 1
+                  maximum: 10
+                impulsiveness:
+                  type: number
+                  description: Reflects inability to control cravings and urges, with difficulty resisting temptations and tendency to act on desires without considering consequences.
+                  minimum: 1
+                  maximum: 10
+                vulnerability:
+                  type: number
+                  description: Reflects difficulty coping with stress, tendency to become dependent or hopeless when facing emergency situations, and susceptibility to feeling overwhelmed by challenges.
+                  minimum: 1
+                  maximum: 10
+    DataItem:
+      type: object
+      required:
+        - id
+        - sex
+        - age
+        - openness
+        - conscientiousness
+        - extraversion
+        - agreeableness
+        - neuroticism
+      properties:
+        id:
+          type: string
+          example: uC3BVPe3
+          description: Agent id
+        age:
+          type: integer
+          example: 32
+        sex:
+          type: string
+          enum: [male, female]
+          example: male
+        openness:
+          type: number
+          description: Openness value
+          minimum: 1
+          maximum: 10
+        conscientiousness:
+          type: number
+          description: Conscientiousness value
+          minimum: 1
+          maximum: 10
+        extraversion:
+          type: number
+          description: Extraversion value
+          minimum: 1
+          maximum: 10
+        agreeableness:
+          type: number
+          description: Agreeableness value
+          minimum: 1
+          maximum: 10
+        neuroticism:
+          type: number
+          description: Neuroticism value
+          minimum: 1
+          maximum: 10
