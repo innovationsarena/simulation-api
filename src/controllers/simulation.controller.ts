@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { asyncHandler, id, Simulation, supabase } from "../core";
+import axios from "axios";
 
 type CreateSimulationRequest = FastifyRequest<{
   Body: Pick<
@@ -35,20 +36,22 @@ export const createSimulation = asyncHandler(
         .single();
 
       // Generate agents
-      const resp = await fetch(process.env.AGENTS_API_URL as string, {
-        method: "post",
-        headers: {
-          authorization: `Bearer ${process.env.API_KEY}`,
-          contentType: "application/json",
-        },
-        body: JSON.stringify({
+      const {
+        data: { agents },
+      } = await axios.post(
+        process.env.AGENTS_API_URL as string,
+        {
           version: 2,
           count: request.body.agentCount ?? 1,
           simulationId: simulationId,
-        }),
-      });
-
-      const { agents } = await resp.json();
+        },
+        {
+          headers: {
+            authorization: `Bearer ${process.env.API_KEY}`,
+            contentType: "application/json",
+          },
+        }
+      );
 
       // Create agents in db
       await supabase
