@@ -44,10 +44,18 @@ export const createSimulation = asyncHandler(
         body: JSON.stringify({
           version: 2,
           count: request.body.agentCount ?? 1,
+          simulationId: simulationId,
         }),
       });
 
       const { agents } = await resp.json();
+
+      // Create agents in db
+      await supabase
+        .from(process.env.AGENTS_TABLE_NAME as string)
+        .insert([...agents])
+        .select();
+
       // Start unity /init
 
       // Return sim
