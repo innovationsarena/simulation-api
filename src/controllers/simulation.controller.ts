@@ -18,39 +18,48 @@ export const createSimulation = asyncHandler(
     request: CreateSimulationRequest,
     reply: FastifyReply
   ): Promise<FastifyReply> => {
-    const simulationId = id(12);
+    try {
+      const simulationId = id(12);
 
-    const simulation: Simulation = {
-      ...request.body,
-      type: "discussion",
-      id: simulationId,
-    };
+      const simulation: Simulation = {
+        ...request.body,
+        type: "discussion",
+        id: simulationId,
+      };
 
-    // Create simulation
-    await supabase
-      .from(process.env.SIMULATIONS_TABLE_NAME as string)
-      .insert([simulation])
-      .select()
-      .single();
+      // Create simulation
+      await supabase
+        .from(process.env.SIMULATIONS_TABLE_NAME as string)
+        .insert([simulation])
+        .select()
+        .single();
 
-    // Generate agents
-    const resp = await fetch(process.env.AGENTS_API_URL as string, {
-      method: "post",
-      headers: {
-        authentication: `Bearer ${process.env.API_KEY}`,
-      },
-    });
+      // Generate agents
+      const resp = await fetch(process.env.AGENTS_API_URL as string, {
+        method: "post",
+        headers: {
+          authorization: `Bearer ${process.env.API_KEY}`,
+          contentType: "application/json",
+        },
+        body: JSON.stringify({
+          version: 2,
+          count: request.body.agentCount ?? 1,
+        }),
+      });
 
-    const { agents } = await resp.json();
+      const { agents } = await resp.json();
+      // Start unity /init
 
-    // Start unity /init
+      // Return sim
+      const response: CreateSimulationResponse = {
+        simulation,
+        agents,
+      };
 
-    // Return sim
-    const response: CreateSimulationResponse = {
-      simulation,
-      agents,
-    };
-
-    return reply.status(200).send(response);
+      return reply.status(200).send(response);
+    } catch (error) {
+      console.error(error);
+      return reply.status(500).send({ message: "Generic error message" });
+    }
   }
 );

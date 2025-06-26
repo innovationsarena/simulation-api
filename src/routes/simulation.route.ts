@@ -12,7 +12,8 @@ export const simulatorRouter = (fastify: FastifyInstance) => {
           properties: {
             agentCount: { type: "integer" },
             name: { type: "string" },
-            description: { type: "string", optional: true },
+            description: { type: "string" },
+            topic: { type: "string" },
           },
           required: ["agentCount", "name"],
           additionalProperties: false,
