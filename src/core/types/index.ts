@@ -131,3 +131,21 @@ export type DataItem = {
   agreeableness: number;
   neuroticism: number;
 };
+
+export type Message = {
+  conversationId: string; // Conversation id
+  senderId: string; // Agent Id
+  content: string; // Says what
+  simulationId: string;
+  tokens: Tokens;
+};
+
+export type Conversation = {
+  id: string; // hashed(agent-id + agent-id)
+  simulationId: string; // simulation id
+  topic: string;
+  active: boolean;
+  dialogists: string[]; // Agent Ids
+  messages: Message[];
+  stats?: Stats;
+};
