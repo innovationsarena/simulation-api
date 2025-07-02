@@ -1,5 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { asyncHandler, Environment, id, Simulation, supabase } from "../core";
+import {
+  asyncHandler,
+  Environment,
+  handleControllerError,
+  id,
+  Simulation,
+  supabase,
+} from "../core";
 import axios from "axios";
 import {
   PostgrestResponse,
@@ -24,10 +31,7 @@ type CreateSimulationResponse = {
 };
 
 export const createSimulation = asyncHandler(
-  async (
-    request: CreateSimulationRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply> => {
+  async (request: CreateSimulationRequest, reply: FastifyReply) => {
     try {
       const simulationId = id(12);
 
@@ -94,10 +98,7 @@ export const createSimulation = asyncHandler(
 
       return reply.status(201).send(response);
     } catch (error) {
-      console.error(error);
-      return reply
-        .status(500)
-        .send({ message: "Oh no, something went wrong." });
+      handleControllerError(error, reply);
     }
   }
 );

@@ -1,16 +1,14 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   Conversation,
+  getAgent,
   getConversation,
+  handleControllerError,
   id,
-  Message,
   Simulation,
   supabase,
 } from "../core";
-import {
-  PostgrestResponse,
-  PostgrestSingleResponse,
-} from "@supabase/supabase-js";
+import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export const createConversationController = async (
   request: FastifyRequest<{
@@ -55,9 +53,8 @@ export const createConversationController = async (
       ...conversation,
       messages: [],
     });
-  } catch (error: any) {
-    reply.log.error(error.message);
-    throw new Error(error.message);
+  } catch (error) {
+    handleControllerError(error, reply);
   }
 };
 
@@ -72,10 +69,9 @@ export const getConversationController = async (
 
     const conversation = await getConversation(conversationId, reply);
 
-    await reply.status(200).send(conversation);
-  } catch (error: any) {
-    reply.log.error(error.message);
-    throw new Error(error.message);
+    reply.status(200).send(conversation);
+  } catch (error) {
+    handleControllerError(error, reply);
   }
 };
 
@@ -91,15 +87,16 @@ export const makeConversationController = async (
     const { senderId } = request.body;
 
     // get Agent
+    const agent = await getAgent(senderId, reply);
+
     // Parse prompt
     // Call LLM
     // Create message
     // Update conversation
 
-    await reply.status(200).send();
-  } catch (error: any) {
-    reply.log.error(error.message);
-    throw new Error(error.message);
+    reply.status(200).send();
+  } catch (error) {
+    handleControllerError(error, reply);
   }
 };
 
@@ -114,8 +111,7 @@ export const endConversationController = async (
     await reply
       .status(200)
       .send({ message: `Conversation ${conversation} ended.` });
-  } catch (error: any) {
-    reply.log.error(error.message);
-    throw new Error(error.message);
+  } catch (error) {
+    handleControllerError(error, reply);
   }
 };
