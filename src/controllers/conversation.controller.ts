@@ -1,5 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Conversation, id, Message, Simulation, supabase } from "../core";
+import {
+  Conversation,
+  getConversation,
+  id,
+  Message,
+  Simulation,
+  supabase,
+} from "../core";
 import {
   PostgrestResponse,
   PostgrestSingleResponse,
@@ -33,10 +40,16 @@ export const createConversationController = async (
       dialogists: [senderId, recieverId],
     };
 
-    await supabase
-      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-      .insert(conversation)
-      .select();
+    const { data: createConversation, error: createConversationError } =
+      await supabase
+        .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+        .insert(conversation)
+        .select();
+
+    if (createConversationError)
+      return reply
+        .status(createConversationError.code as unknown as number)
+        .send(createConversationError.message);
 
     await reply.status(201).send({
       ...conversation,
@@ -57,21 +70,9 @@ export const getConversationController = async (
   try {
     const { conversation: conversationId } = request.params;
 
-    const { data: conversation }: PostgrestSingleResponse<Conversation> =
-      await supabase
-        .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-        .select("*")
-        .eq("id", conversationId)
-        .single();
+    const conversation = await getConversation(conversationId, reply);
 
-    if (!conversation) throw new Error("No conversation found.");
-
-    const { data: messages }: PostgrestResponse<Message> = await supabase
-      .from(process.env.MESSAGES_TABLE_NAME as string)
-      .select("*")
-      .eq("conversationId", conversationId);
-
-    await reply.status(200).send({ ...conversation, messages });
+    await reply.status(200).send(conversation);
   } catch (error: any) {
     reply.log.error(error.message);
     throw new Error(error.message);
@@ -81,18 +82,21 @@ export const getConversationController = async (
 export const makeConversationController = async (
   request: FastifyRequest<{
     Params: { conversation: string };
+    Body: { senderId: string };
   }>,
   reply: FastifyReply
 ) => {
   try {
     const { conversation } = request.params;
-    await reply.status(200).send({
-      id: conversation,
-      title: "Sample Conversation",
-      description: "A sample conversation",
-      created_at: new Date().toISOString(),
-      messages: [],
-    });
+    const { senderId } = request.body;
+
+    // get Agent
+    // Parse prompt
+    // Call LLM
+    // Create message
+    // Update conversation
+
+    await reply.status(200).send();
   } catch (error: any) {
     reply.log.error(error.message);
     throw new Error(error.message);
