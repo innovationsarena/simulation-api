@@ -4,6 +4,7 @@ export type Agent = {
   name: string; // Random swe name based on sex
   simulationId?: string; // Is the Agent belonging to certain simulation?
   state: "idle" | "waiting" | "occupied";
+  inCoversationId: null | string;
   demographics?: Demographics;
   personality:
     | string
@@ -52,8 +53,15 @@ export type Simulation = {
   type: "discussion" | "attitude";
   name: string;
   description?: string;
-  topic: string; // What topic should the Agents discuss?
+  environment?: Environment;
+  topic: string;
   stats?: Stats;
+};
+
+export type Environment = {
+  id: string;
+  description: string;
+  objectives: [];
 };
 
 export type CreateSimulationInput = {

@@ -1,17 +1,26 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { asyncHandler, id, Simulation, supabase } from "../core";
+import { asyncHandler, Environment, id, Simulation, supabase } from "../core";
 import axios from "axios";
+import {
+  PostgrestResponse,
+  PostgrestSingleResponse,
+} from "@supabase/supabase-js";
+import { Agent } from "http";
 
 type CreateSimulationRequest = FastifyRequest<{
   Body: Pick<
     Simulation,
-    "id" | "name" | "description" | "agentCount" | "topic"
+    "id" | "name" | "description" | "agentCount" | "topic" | "environment"
   >;
 }>;
 
 type CreateSimulationResponse = {
   simulation: Simulation;
-  agents: { id: string; name: string; sex: string }[];
+  agents: {
+    id: string;
+    name: string;
+    sex: string;
+  }[];
 };
 
 export const createSimulation = asyncHandler(
@@ -29,11 +38,19 @@ export const createSimulation = asyncHandler(
       };
 
       // Create simulation
-      await supabase
+      const {
+        data: simulationData,
+        error: createSimulationError,
+      }: PostgrestSingleResponse<Simulation> = await supabase
         .from(process.env.SIMULATIONS_TABLE_NAME as string)
-        .insert([simulation])
+        .insert(simulation)
         .select()
         .single();
+
+      if (createSimulationError)
+        return reply
+          .status(createSimulationError.code as unknown as number)
+          .send(createSimulationError.message);
 
       // Generate agents
       const {
@@ -54,10 +71,18 @@ export const createSimulation = asyncHandler(
       );
 
       // Create agents in db
-      await supabase
+      const {
+        data: agentsData,
+        error: createAgentsError,
+      }: PostgrestResponse<Agent> = await supabase
         .from(process.env.AGENTS_TABLE_NAME as string)
         .insert([...agents])
         .select();
+
+      if (createAgentsError)
+        return reply
+          .status(createAgentsError.code as unknown as number)
+          .send(createAgentsError.message);
 
       // Start unity /init
 
@@ -67,10 +92,12 @@ export const createSimulation = asyncHandler(
         agents,
       };
 
-      return reply.status(200).send(response);
+      return reply.status(201).send(response);
     } catch (error) {
       console.error(error);
-      return reply.status(500).send({ message: "Generic error message" });
+      return reply
+        .status(500)
+        .send({ message: "Oh no, something went wrong." });
     }
   }
 );

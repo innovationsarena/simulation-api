@@ -1,6 +1,11 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
-import { createConversationController, getConversationController } from "../controllers/conversation.controller";
+import {
+  createConversationController,
+  getConversationController,
+  makeConversationController,
+  endConversationController,
+} from "../controllers/conversation.controller";
 
 export const conversationRouter = (fastify: FastifyInstance) => {
   fastify.post(
@@ -10,8 +15,9 @@ export const conversationRouter = (fastify: FastifyInstance) => {
         body: {
           type: "object",
           properties: {
-            title: { type: "string" },
-            description: { type: "string" },
+            senderId: { type: "string" },
+            recieverId: { type: "string" },
+            simulationId: { type: "string" },
           },
           additionalProperties: false,
         },
@@ -28,16 +34,6 @@ export const conversationRouter = (fastify: FastifyInstance) => {
   fastify.get(
     "/conversations/:conversation",
     {
-      schema: {
-        params: {
-          type: "object",
-          properties: {
-            conversation: { type: "string" },
-          },
-          required: ["conversation"],
-          additionalProperties: false,
-        },
-      },
       config: {
         description: "Get a single conversation.",
       },
@@ -45,5 +41,39 @@ export const conversationRouter = (fastify: FastifyInstance) => {
       preHandler: [validateKey],
     },
     getConversationController as unknown as RouteHandlerMethod
+  );
+  fastify.patch(
+    "/conversations/:conversation",
+    {
+      schema: {
+        body: {
+          type: "object",
+          properties: {
+            senderId: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+      },
+      config: {
+        description: "Conversate.",
+      },
+      preValidation: [],
+      preHandler: [validateKey],
+    },
+    makeConversationController as unknown as RouteHandlerMethod
+  );
+  fastify.delete(
+    "/conversations/:conversation",
+    {
+      schema: {
+        body: {},
+      },
+      config: {
+        description: "End conversation.",
+      },
+      preValidation: [],
+      preHandler: [validateKey],
+    },
+    endConversationController as unknown as RouteHandlerMethod
   );
 };
