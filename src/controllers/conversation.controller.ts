@@ -6,6 +6,8 @@ import {
   handleControllerError,
   id,
   Message,
+  parseMessages,
+  parsePrompt,
   Simulation,
   supabase,
 } from "../core";
@@ -90,22 +92,29 @@ export const makeConversationController = async (
     const { senderId } = request.body;
 
     // get Agent
-    const { inCoversationId, llmSettings } = await getAgent(senderId, reply);
+    const agent = await getAgent(senderId, reply);
     // Get Conversation
-    const { simulationId, topic } = await getConversation(
+    const { simulationId, topic, messages } = await getConversation(
       conversationId,
       reply
     );
 
-    if (inCoversationId !== conversationId) {
+    if (agent.inCoversationId !== conversationId) {
       // you turn to talk --->
-      // Parse prompt
+
+      // Parse system prompt
+      const system = await parsePrompt(agent);
+      // Parse messages
+      const parsedMessages = parseMessages(messages, senderId);
+      // Fetch conversation
+
       // Call LLM
       const { text } = await generateText({
-        model: openai(llmSettings.model),
-        temperature: llmSettings.temperature,
-        maxTokens: llmSettings.messageToken,
-        prompt: "Write a vegetarian lasagna recipe for 4 people.",
+        model: openai(agent.llmSettings.model),
+        temperature: agent.llmSettings.temperature,
+        maxTokens: agent.llmSettings.messageToken,
+        system: system as string,
+        messages: parsedMessages,
       });
 
       // Create message
@@ -124,6 +133,7 @@ export const makeConversationController = async (
         .insert([firstMessage])
         .select()
         .single();
+
       // Update conversation
       // Update agents inConversation
     } else {

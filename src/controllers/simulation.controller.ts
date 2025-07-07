@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   asyncHandler,
+  generateSimName,
   handleControllerError,
   id,
   Simulation,
@@ -36,6 +37,7 @@ export const createSimulation = asyncHandler(
 
       const simulation: Simulation = {
         ...request.body,
+        name: request.body.name.length ? request.body.name : generateSimName(),
         type: "discussion",
         id: simulationId,
       };
@@ -50,7 +52,7 @@ export const createSimulation = asyncHandler(
         .select()
         .single();
 
-      if (createSimulationError)
+      if (!simulationData && createSimulationError)
         return reply
           .status(createSimulationError.code as unknown as number)
           .send(createSimulationError.message);
@@ -82,7 +84,7 @@ export const createSimulation = asyncHandler(
         .insert([...agents])
         .select();
 
-      if (createAgentsError)
+      if (!agentsData && createAgentsError)
         return reply
           .status(createAgentsError.code as unknown as number)
           .send(createAgentsError.message);

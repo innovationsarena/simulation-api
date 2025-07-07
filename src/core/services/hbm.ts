@@ -7,7 +7,8 @@ export const parsePrompt = async (agent: Agent): Promise<string | null> => {
     agent,
     {
       headers: {
-        Authorization: `Bearer ${process.env.API_KEY}`,
+        authorization: `Bearer ${process.env.API_KEY}`,
+        contentType: "application/json",
       },
     }
   );

@@ -1,5 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createHash } from "node:crypto";
+import { Message } from "../types";
+import { CoreMessage } from "ai";
 
 export const validateKey = async (
   request: FastifyRequest,
@@ -71,6 +73,18 @@ export const generateSimName = () => {
   return `${pre[Math.floor(Math.random() * pre.length)]} ${
     post[Math.floor(Math.random() * post.length)]
   }`;
+};
+
+export const parseMessages = (
+  messages: Message[],
+  senderid: string
+): CoreMessage[] => {
+  return messages.map((message) => {
+    return {
+      role: message.senderId === senderid ? "user" : "assistant",
+      content: message.content,
+    };
+  });
 };
 
 export * from "./errorHandler";
