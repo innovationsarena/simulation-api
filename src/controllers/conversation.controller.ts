@@ -5,10 +5,13 @@ import {
   getConversation,
   handleControllerError,
   id,
+  Message,
   Simulation,
   supabase,
 } from "../core";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 export const createConversationController = async (
   request: FastifyRequest<{
@@ -83,16 +86,49 @@ export const makeConversationController = async (
   reply: FastifyReply
 ) => {
   try {
-    const { conversation } = request.params;
+    const { conversation: conversationId } = request.params;
     const { senderId } = request.body;
 
     // get Agent
-    const agent = await getAgent(senderId, reply);
+    const { inCoversationId, llmSettings } = await getAgent(senderId, reply);
+    // Get Conversation
+    const { simulationId, topic } = await getConversation(
+      conversationId,
+      reply
+    );
 
-    // Parse prompt
-    // Call LLM
-    // Create message
-    // Update conversation
+    if (inCoversationId !== conversationId) {
+      // you turn to talk --->
+      // Parse prompt
+      // Call LLM
+      const { text } = await generateText({
+        model: openai(llmSettings.model),
+        temperature: llmSettings.temperature,
+        maxTokens: llmSettings.messageToken,
+        prompt: "Write a vegetarian lasagna recipe for 4 people.",
+      });
+
+      // Create message
+      const firstMessage: Message = {
+        senderId,
+        conversationId,
+        simulationId,
+        content: text,
+        tokens: {
+          promptTokens: 0,
+          completionTokens: 0,
+        },
+      };
+      await supabase
+        .from(process.env.MESSAGES_TABLE_NAME as string)
+        .insert([firstMessage])
+        .select()
+        .single();
+      // Update conversation
+      // Update agents inConversation
+    } else {
+      // Your turn to wait
+    }
 
     reply.status(200).send();
   } catch (error) {

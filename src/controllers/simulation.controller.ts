@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   asyncHandler,
-  Environment,
   handleControllerError,
   id,
   Simulation,

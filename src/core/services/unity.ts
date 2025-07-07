@@ -1,6 +1,6 @@
 // Talks to unity
 
-const updateAgent = async (
+export const updateAgent = async (
   agentId: string,
   action: string
 ): Promise<boolean> => {
