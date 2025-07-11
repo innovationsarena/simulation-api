@@ -50,6 +50,7 @@ export type Facet = {
 export type Simulation = {
   id: string;
   agentCount: number;
+  state: "primed" | "running" | "ended" | "stopped";
   type: "discussion" | "attitude";
   name: string;
   description?: string;
@@ -61,7 +62,9 @@ export type Simulation = {
 export type Environment = {
   id: string;
   description: string;
-  objectives: [];
+  objectives: string[]; // Goals
+  constraints: string[]; // Budget?
+  values: string[]; // Values
 };
 
 export type CreateSimulationInput = {

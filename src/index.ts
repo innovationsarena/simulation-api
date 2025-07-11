@@ -35,6 +35,9 @@ server.get(`/`, (request, reply) => {
 // Routes
 server.register(pingRouter);
 server.register(simulatorRouter);
+server.register(agentRouter);
+server.register(parseRouter);
+
 
 server.listen({
   port: PORT,

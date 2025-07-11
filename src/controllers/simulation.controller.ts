@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import {
   asyncHandler,
   generateSimName,
+  getSimulation,
   handleControllerError,
   id,
   Simulation,
@@ -37,9 +38,10 @@ export const createSimulation = asyncHandler(
 
       const simulation: Simulation = {
         ...request.body,
-        name: request.body.name.length ? request.body.name : generateSimName(),
-        type: "discussion",
         id: simulationId,
+        name: request.body.name.length ? request.body.name : generateSimName(),
+        state: "primed",
+        type: "discussion",
       };
 
       // Create simulation
@@ -100,6 +102,39 @@ export const createSimulation = asyncHandler(
       return reply.status(201).send(response);
     } catch (error) {
       handleControllerError(error, reply);
+    }
+  }
+);
+
+export const startSimulation = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulation: string };
+      Body: { state: Pick<Simulation, "state"> };
+    }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      if (!request.params.simulation)
+        reply.status(400).send("Missing simulationId in URL.");
+
+      const simulation = await getSimulation(request.params.simulation, reply);
+
+      supabase
+        .from(process.env.SIMULATIONS_TABLE_NAME as string)
+        .update({ state: request.body.state })
+        .eq("id", "running")
+        .select();
+
+      // Start conversations
+
+      return reply.status(200).send({
+        ...simulation,
+        state: request.body.state,
+      });
+    } catch (error) {
+      // Handle errors
+      reply.status(500).send({ error: "Failed to start simulation." });
     }
   }
 );

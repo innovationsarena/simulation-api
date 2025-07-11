@@ -3,15 +3,14 @@ import {
   Conversation,
   getAgent,
   getConversation,
+  getSimulation,
   handleControllerError,
   id,
   Message,
   parseMessages,
   parsePrompt,
-  Simulation,
   supabase,
 } from "../core";
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
@@ -24,22 +23,16 @@ export const createConversationController = async (
   try {
     const { senderId, recieverId, simulationId } = request.body;
 
-    // get simulation data
-    const { data }: PostgrestSingleResponse<Simulation> = await supabase
-      .from(process.env.SIMULATIONS_TABLE_NAME as string)
-      .select("*")
-      .eq("id", simulationId)
-      .single();
+    const { topic } = await getSimulation(simulationId, reply);
 
-    // Create conversation
-
+    // CREATE CONVERSATION
     const conversationId = id(12);
 
     const conversation: Omit<Conversation, "messages"> = {
       id: conversationId,
       simulationId,
       active: true,
-      topic: data?.topic as string,
+      topic: topic,
       dialogists: [senderId, recieverId],
     };
 
@@ -49,10 +42,12 @@ export const createConversationController = async (
         .insert(conversation)
         .select();
 
-    if (createConversationError)
+    if (!createConversation && createConversationError)
       return reply
         .status(createConversationError.code as unknown as number)
         .send(createConversationError.message);
+
+    // First message? Incl topic framing?
 
     await reply.status(201).send({
       ...conversation,
@@ -99,14 +94,16 @@ export const makeConversationController = async (
       reply
     );
 
+    const simulation = await getSimulation(simulationId, reply);
+
     if (agent.inCoversationId !== conversationId) {
       // you turn to talk --->
 
       // Parse system prompt
-      const system = await parsePrompt(agent);
-      // Parse messages
+      const system = await parsePrompt(agent, simulation);
+
+      // Parse messages in conversation
       const parsedMessages = parseMessages(messages, senderId);
-      // Fetch conversation
 
       // Call LLM
       const { text } = await generateText({
@@ -118,7 +115,7 @@ export const makeConversationController = async (
       });
 
       // Create message
-      const firstMessage: Message = {
+      const Msg: Message = {
         senderId,
         conversationId,
         simulationId,
@@ -130,11 +127,12 @@ export const makeConversationController = async (
       };
       await supabase
         .from(process.env.MESSAGES_TABLE_NAME as string)
-        .insert([firstMessage])
+        .insert([Msg])
         .select()
         .single();
 
       // Update conversation
+
       // Update agents inConversation
     } else {
       // Your turn to wait

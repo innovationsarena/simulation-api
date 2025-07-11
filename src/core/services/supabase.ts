@@ -65,6 +65,7 @@ export const getConversation = async (
 
   return { ...conversation, messages };
 };
+
 export const getAgent = async (
   agentId: string,
   reply: FastifyReply
