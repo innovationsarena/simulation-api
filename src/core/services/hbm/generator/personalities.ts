@@ -2,7 +2,7 @@ import {
   BigFivePersonalityModel,
   ExtendedBigFivePersonalityModel,
   DataItem,
-} from "../../core/types";
+} from "../../../types";
 import { personalities } from "../parser/personality.models.sv";
 import { items } from "./bigfivedata";
 

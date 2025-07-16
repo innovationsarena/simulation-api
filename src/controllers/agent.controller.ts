@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Agent, id, asyncHandler } from "../core";
-import { generateAgent, generateRandomAgent } from "../services";
+import { generateAgent, generateRandomAgent } from "../core/services";
 
 type CreateAgentRequest = FastifyRequest<{
   Body: {

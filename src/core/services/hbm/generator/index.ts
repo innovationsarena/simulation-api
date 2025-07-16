@@ -1,6 +1,6 @@
-import { getRandomNumber, id } from "../../core/utils";
+import { getRandomNumber, id } from "../../../utils";
 import { generateName } from "./names";
-import type { Agent } from "../../core/types";
+import type { Agent } from "../../../types";
 import {
   getBigFivePersonality,
   getExtendedBigFivePersonality,
@@ -22,8 +22,9 @@ export const generateAgent = async (
 
   const base = {
     id: id(),
-    state: "idle",
+    state: "idle" as const,
     simulationId,
+    inCoversationId: null,
     demographics: {
       age: age,
       sex: sex,
@@ -87,8 +88,9 @@ export const generateRandomAgent = async (
 
   const base = {
     id: id(),
-    state: "idle",
+    state: "idle" as const,
     simulationId,
+    inCoversationId: null,
     demographics: {
       age: age,
       sex: sex,

@@ -4,7 +4,7 @@ import formbody from "@fastify/formbody";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 
-import { pingRouter, simulatorRouter } from "./routes";
+import { pingRouter, simulatorRouter, agentRouter } from "./routes";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -36,7 +36,6 @@ server.get(`/`, (request, reply) => {
 server.register(pingRouter);
 server.register(simulatorRouter);
 server.register(agentRouter);
-server.register(parseRouter);
 
 
 server.listen({

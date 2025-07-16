@@ -77,7 +77,7 @@ export type CreateSimulationInput = {
 export type BigFivePersonalityModel<T = string> = {
   source: T; // ESS / LUP?
   traits: {
-    openness: number; // 1-6
+    openness: number; // 1-10
     conscientiousness: number;
     extraversion: number;
     agreeableness: number;
@@ -136,7 +136,7 @@ export type DataItem = {
   id: string;
   sex: "male" | "female";
   age: number;
-  openness: number; // 1-6
+  openness: number; // 1-10
   conscientiousness: number;
   extraversion: number;
   agreeableness: number;

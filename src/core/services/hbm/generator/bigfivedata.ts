@@ -1,4 +1,4 @@
-import { DataItem } from "../../core/types";
+import { DataItem } from "../../../types";
 
 export const items: DataItem[] = [
   {
