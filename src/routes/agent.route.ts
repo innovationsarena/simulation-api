@@ -7,7 +7,6 @@ export const agentRouter = (fastify: FastifyInstance) => {
     "/agents",
 
     {
-      /*
       schema: {
         body: {
           type: "object",
@@ -16,11 +15,11 @@ export const agentRouter = (fastify: FastifyInstance) => {
             count: { type: "integer" },
             simulationId: { type: "string" },
           },
-          required: ["version"],
+          required: ["count", "version", "simulationId"],
           additionalProperties: false,
         },
       },
-      */
+
       config: {
         description: "Creates one or more Agent.",
       },
@@ -32,7 +31,6 @@ export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agents/random",
     {
-      /*
       schema: {
         body: {
           type: "object",
@@ -41,11 +39,11 @@ export const agentRouter = (fastify: FastifyInstance) => {
             count: { type: "integer" },
             simulationId: { type: "string" },
           },
-          required: ["version"],
+          required: ["count", "version", "simulationId"],
           additionalProperties: false,
         },
       },
-      */
+
       config: {
         description:
           "Creates one or more Agent by randomly generate values in personality values.",
