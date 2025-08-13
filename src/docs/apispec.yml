@@ -185,13 +185,13 @@ paths:
         "500":
           description: Server error
 
-  /simulations/{simulation}/start:
+  /simulations/{simulationId}/start:
     patch:
       summary: Start a simulation
       description: Changes the state of a simulation from 'primed' to 'running' and initiates conversations between agents
       operationId: startSimulation
       parameters:
-        - name: simulation
+        - name: simulationId
           in: path
           required: true
           description: ID of the simulation to start
@@ -212,13 +212,13 @@ paths:
         "500":
           description: Server error
 
-  /simulations/{simulation}/stop:
+  /simulations/{simulationId}/stop:
     patch:
       summary: Stop a simulation
       description: Changes the state of a simulation from 'running' to 'stopped'
       operationId: stopSimulation
       parameters:
-        - name: simulation
+        - name: simulationId
           in: path
           required: true
           description: ID of the simulation to stop

@@ -109,22 +109,22 @@ export const createSimulation = asyncHandler(
 export const startSimulation = asyncHandler(
   async (
     request: FastifyRequest<{
-      Params: { simulation: string };
+      Params: { simulationId: string };
     }>,
     reply: FastifyReply
   ) => {
     try {
-      if (!request.params.simulation)
+      if (!request.params.simulationId)
         reply
           .status(400)
-          .send("Missing simulationId in URL - /simulations/:simulation/start");
+          .send("Missing simulationId in URL - /simulations/:simulationId/start");
 
-      const simulation = await getSimulation(request.params.simulation, reply);
+      const simulation = await getSimulation(request.params.simulationId, reply);
 
       supabase
         .from(process.env.SIMULATIONS_TABLE_NAME as string)
         .update({ state: "running" })
-        .eq("id", request.params.simulation)
+        .eq("id", request.params.simulationId)
         .select();
 
       // Start conversations
@@ -143,22 +143,22 @@ export const startSimulation = asyncHandler(
 export const stopSimulation = asyncHandler(
   async (
     request: FastifyRequest<{
-      Params: { simulation: string };
+      Params: { simulationId: string };
     }>,
     reply: FastifyReply
   ) => {
     try {
-      if (!request.params.simulation)
+      if (!request.params.simulationId)
         reply
           .status(400)
-          .send("Missing simulationId in URL - /simulations/:simulation/stop");
+          .send("Missing simulationId in URL - /simulations/:simulationId/stop");
 
-      const simulation = await getSimulation(request.params.simulation, reply);
+      const simulation = await getSimulation(request.params.simulationId, reply);
 
       supabase
         .from(process.env.SIMULATIONS_TABLE_NAME as string)
         .update({ state: "stopped" })
-        .eq("id", request.params.simulation)
+        .eq("id", request.params.simulationId)
         .select();
 
       // Start conversations
