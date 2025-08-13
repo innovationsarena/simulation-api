@@ -32,18 +32,11 @@ export const simulatorRouter = (fastify: FastifyInstance) => {
   );
 
   fastify.patch(
-    "/simulation/:simulation/start",
+    "/simulations/:simulation/start",
     {
       schema: {
         description: "Starts a simulation.",
         tags: ["simulations"],
-        params: {
-          type: "object",
-          properties: {
-            simulation: { type: "string" },
-          },
-          required: ["simulation"],
-        },
       },
       preValidation: [],
       preHandler: [validateKey],
@@ -52,7 +45,7 @@ export const simulatorRouter = (fastify: FastifyInstance) => {
   );
 
   fastify.patch(
-    "/simulation/:simulation/stop",
+    "/simulations/:simulation/stop",
     {
       schema: {
         description: "Stops a simulation.",

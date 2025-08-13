@@ -185,6 +185,60 @@ paths:
         "500":
           description: Server error
 
+  /simulations/{simulation}/start:
+    patch:
+      summary: Start a simulation
+      description: Changes the state of a simulation from 'primed' to 'running' and initiates conversations between agents
+      operationId: startSimulation
+      parameters:
+        - name: simulation
+          in: path
+          required: true
+          description: ID of the simulation to start
+          schema:
+            type: string
+            example: "iLVieMGDrI6GTBLq"
+      responses:
+        "200":
+          description: Simulation started successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Simulation"
+        "400":
+          description: Missing simulation ID or invalid input
+        "404":
+          description: Simulation not found
+        "500":
+          description: Server error
+
+  /simulations/{simulation}/stop:
+    patch:
+      summary: Stop a simulation
+      description: Changes the state of a simulation from 'running' to 'stopped'
+      operationId: stopSimulation
+      parameters:
+        - name: simulation
+          in: path
+          required: true
+          description: ID of the simulation to stop
+          schema:
+            type: string
+            example: "iLVieMGDrI6GTBLq"
+      responses:
+        "200":
+          description: Simulation stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Simulation"
+        "400":
+          description: Missing simulation ID or invalid input
+        "404":
+          description: Simulation not found
+        "500":
+          description: Server error
+
   /conversations:
     post:
       summary: Create a new conversation
