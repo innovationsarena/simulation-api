@@ -53,6 +53,8 @@ export const createRandomAgent = asyncHandler(
       );
     }
 
+    console.log(agents);
+
     const response: AgentResponse = { agents };
     return reply.status(201).send(response);
   }

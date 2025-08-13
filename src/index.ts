@@ -4,7 +4,7 @@ import formbody from "@fastify/formbody";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 
-import { pingRouter, simulatorRouter, agentRouter } from "./routes";
+import { pingRouter, simulatorRouter, agentRouter, docsRouter } from "./routes";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -27,12 +27,9 @@ server.setErrorHandler((error, _request, reply) => {
   }
 });
 
-server.get(`/`, (request, reply) => {
-  // Replace with swagger docs?
-  reply.status(200).send({ message: "Hello from GR Simulator API!" });
-});
 
 // Routes
+server.register(docsRouter);
 server.register(pingRouter);
 server.register(simulatorRouter);
 server.register(agentRouter);

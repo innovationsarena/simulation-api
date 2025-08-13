@@ -12,6 +12,8 @@ export const conversationRouter = (fastify: FastifyInstance) => {
     "/conversations",
     {
       schema: {
+        description: "Create a new conversation.",
+        tags: ["conversations"],
         body: {
           type: "object",
           properties: {
@@ -22,9 +24,6 @@ export const conversationRouter = (fastify: FastifyInstance) => {
           additionalProperties: false,
         },
       },
-      config: {
-        description: "Create a new conversation.",
-      },
       preValidation: [],
       preHandler: [validateKey],
     },
@@ -34,8 +33,9 @@ export const conversationRouter = (fastify: FastifyInstance) => {
   fastify.get(
     "/conversations/:conversation",
     {
-      config: {
+      schema: {
         description: "Get a single conversation.",
+        tags: ["conversations"],
       },
       preValidation: [],
       preHandler: [validateKey],
@@ -46,6 +46,8 @@ export const conversationRouter = (fastify: FastifyInstance) => {
     "/conversations/:conversation",
     {
       schema: {
+        description: "Conversate.",
+        tags: ["conversations"],
         body: {
           type: "object",
           properties: {
@@ -53,9 +55,6 @@ export const conversationRouter = (fastify: FastifyInstance) => {
           },
           additionalProperties: false,
         },
-      },
-      config: {
-        description: "Conversate.",
       },
       preValidation: [],
       preHandler: [validateKey],
@@ -66,10 +65,9 @@ export const conversationRouter = (fastify: FastifyInstance) => {
     "/conversations/:conversation",
     {
       schema: {
-        body: {},
-      },
-      config: {
         description: "End conversation.",
+        tags: ["conversations"],
+        body: {},
       },
       preValidation: [],
       preHandler: [validateKey],

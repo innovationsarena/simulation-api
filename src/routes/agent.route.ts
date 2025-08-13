@@ -8,6 +8,8 @@ export const agentRouter = (fastify: FastifyInstance) => {
 
     {
       schema: {
+        description: "Creates one or more Agent.",
+        tags: ["agents"],
         body: {
           type: "object",
           properties: {
@@ -18,10 +20,6 @@ export const agentRouter = (fastify: FastifyInstance) => {
           required: ["count", "version", "simulationId"],
           additionalProperties: false,
         },
-      },
-
-      config: {
-        description: "Creates one or more Agent.",
       },
       preValidation: [],
       preHandler: [validateKey],
@@ -32,6 +30,8 @@ export const agentRouter = (fastify: FastifyInstance) => {
     "/agents/random",
     {
       schema: {
+        description: "Creates one or more Agent by randomly generate values in personality values.",
+        tags: ["agents"],
         body: {
           type: "object",
           properties: {
@@ -42,11 +42,6 @@ export const agentRouter = (fastify: FastifyInstance) => {
           required: ["count", "version", "simulationId"],
           additionalProperties: false,
         },
-      },
-
-      config: {
-        description:
-          "Creates one or more Agent by randomly generate values in personality values.",
       },
       preValidation: [],
       preHandler: [validateKey],

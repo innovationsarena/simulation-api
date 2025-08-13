@@ -58,7 +58,7 @@ export const createSimulation = asyncHandler(
         return reply
           .status(createSimulationError.code as unknown as number)
           .send(createSimulationError.message);
-
+      console.log("Generating agents...");
       // Generate agents
       const {
         data: { agents },
@@ -77,6 +77,8 @@ export const createSimulation = asyncHandler(
         }
       );
 
+      console.log(agents);
+
       // Create agents in db
       const {
         data: agentsData,
@@ -91,7 +93,7 @@ export const createSimulation = asyncHandler(
           .status(createAgentsError.code as unknown as number)
           .send(createAgentsError.message);
 
-      // Start unity /init
+      // Init simulation ( agents find convo partner and start conversate )
 
       // Return sim
       const response: CreateSimulationResponse = {

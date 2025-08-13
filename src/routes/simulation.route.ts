@@ -7,6 +7,8 @@ export const simulatorRouter = (fastify: FastifyInstance) => {
     "/simulations",
     {
       schema: {
+        description: "Creates a simulation.",
+        tags: ["simulations"],
         body: {
           type: "object",
           properties: {
@@ -15,12 +17,9 @@ export const simulatorRouter = (fastify: FastifyInstance) => {
             description: { type: "string" },
             topic: { type: "string" },
           },
-          required: ["agentCount", "name"],
+          required: ["agentCount", "name", "topic"],
           additionalProperties: false,
         },
-      },
-      config: {
-        description: "Creates a simulation.",
       },
       preValidation: [],
       preHandler: [validateKey],
