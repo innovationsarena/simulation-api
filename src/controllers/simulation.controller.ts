@@ -77,8 +77,6 @@ export const createSimulation = asyncHandler(
         }
       );
 
-      console.log(agents);
-
       // Create agents in db
       const {
         data: agentsData,
@@ -112,31 +110,66 @@ export const startSimulation = asyncHandler(
   async (
     request: FastifyRequest<{
       Params: { simulation: string };
-      Body: { state: Pick<Simulation, "state"> };
     }>,
     reply: FastifyReply
   ) => {
     try {
       if (!request.params.simulation)
-        reply.status(400).send("Missing simulationId in URL.");
+        reply
+          .status(400)
+          .send("Missing simulationId in URL - /simulations/:simulation/start");
 
       const simulation = await getSimulation(request.params.simulation, reply);
 
       supabase
         .from(process.env.SIMULATIONS_TABLE_NAME as string)
-        .update({ state: request.body.state })
-        .eq("id", "running")
+        .update({ state: "running" })
+        .eq("id", request.params.simulation)
         .select();
 
       // Start conversations
 
       return reply.status(200).send({
         ...simulation,
-        state: request.body.state,
+        state: "running",
       });
     } catch (error) {
       // Handle errors
       reply.status(500).send({ error: "Failed to start simulation." });
+    }
+  }
+);
+
+export const stopSimulation = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulation: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      if (!request.params.simulation)
+        reply
+          .status(400)
+          .send("Missing simulationId in URL - /simulations/:simulation/stop");
+
+      const simulation = await getSimulation(request.params.simulation, reply);
+
+      supabase
+        .from(process.env.SIMULATIONS_TABLE_NAME as string)
+        .update({ state: "stopped" })
+        .eq("id", request.params.simulation)
+        .select();
+
+      // Start conversations
+
+      return reply.status(200).send({
+        ...simulation,
+        state: "stopped",
+      });
+    } catch (error) {
+      // Handle errors
+      reply.status(500).send({ error: "Failed to stop simulation." });
     }
   }
 );

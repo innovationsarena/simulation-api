@@ -1,6 +1,10 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
-import { createSimulation } from "../controllers";
+import {
+  createSimulation,
+  startSimulation,
+  stopSimulation,
+} from "../controllers";
 
 export const simulatorRouter = (fastify: FastifyInstance) => {
   fastify.post(
@@ -25,5 +29,45 @@ export const simulatorRouter = (fastify: FastifyInstance) => {
       preHandler: [validateKey],
     },
     createSimulation as unknown as RouteHandlerMethod
+  );
+
+  fastify.patch(
+    "/simulation/:simulation/start",
+    {
+      schema: {
+        description: "Starts a simulation.",
+        tags: ["simulations"],
+        params: {
+          type: "object",
+          properties: {
+            simulation: { type: "string" },
+          },
+          required: ["simulation"],
+        },
+      },
+      preValidation: [],
+      preHandler: [validateKey],
+    },
+    startSimulation as unknown as RouteHandlerMethod
+  );
+
+  fastify.patch(
+    "/simulation/:simulation/stop",
+    {
+      schema: {
+        description: "Stops a simulation.",
+        tags: ["simulations"],
+        params: {
+          type: "object",
+          properties: {
+            simulation: { type: "string" },
+          },
+          required: ["simulation"],
+        },
+      },
+      preValidation: [],
+      preHandler: [validateKey],
+    },
+    stopSimulation as unknown as RouteHandlerMethod
   );
 };
