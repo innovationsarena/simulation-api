@@ -21,6 +21,7 @@ export const conversationRouter = (fastify: FastifyInstance) => {
             recieverId: { type: "string" },
             simulationId: { type: "string" },
           },
+          required: ["senderId", "recieverId", "simulationId"],
           additionalProperties: false,
         },
       },

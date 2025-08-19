@@ -18,7 +18,13 @@ import { Agent } from "http";
 type CreateSimulationRequest = FastifyRequest<{
   Body: Pick<
     Simulation,
-    "id" | "name" | "description" | "agentCount" | "topic" | "environment"
+    | "id"
+    | "name"
+    | "description"
+    | "type"
+    | "agentCount"
+    | "topic"
+    | "environment"
   >;
 }>;
 
@@ -41,10 +47,10 @@ export const createSimulation = asyncHandler(
         id: simulationId,
         name: request.body.name.length ? request.body.name : generateSimName(),
         state: "primed",
-        type: "discussion",
+        type: request.body.type,
       };
 
-      // Create simulation
+      // Write simulation to db
       const {
         data: simulationData,
         error: createSimulationError,
@@ -58,8 +64,9 @@ export const createSimulation = asyncHandler(
         return reply
           .status(createSimulationError.code as unknown as number)
           .send(createSimulationError.message);
-      console.log("Generating agents...");
+
       // Generate agents
+      console.log("Generating agents...");
       const {
         data: { agents },
       } = await axios.post(
@@ -77,7 +84,7 @@ export const createSimulation = asyncHandler(
         }
       );
 
-      // Create agents in db
+      // Writes agents to db
       const {
         data: agentsData,
         error: createAgentsError,
@@ -91,9 +98,7 @@ export const createSimulation = asyncHandler(
           .status(createAgentsError.code as unknown as number)
           .send(createAgentsError.message);
 
-      // Init simulation ( agents find convo partner and start conversate )
-
-      // Return sim
+      // Return simulation object
       const response: CreateSimulationResponse = {
         simulation,
         agents,
@@ -117,15 +122,24 @@ export const startSimulation = asyncHandler(
       if (!request.params.simulationId)
         reply
           .status(400)
-          .send("Missing simulationId in URL - /simulations/:simulationId/start");
+          .send(
+            "Missing simulationId in URL - /simulations/:simulationId/start"
+          );
 
-      const simulation = await getSimulation(request.params.simulationId, reply);
+      const simulation = await getSimulation(
+        request.params.simulationId,
+        reply
+      );
 
-      supabase
+      const { data, error } = await supabase
         .from(process.env.SIMULATIONS_TABLE_NAME as string)
         .update({ state: "running" })
         .eq("id", request.params.simulationId)
         .select();
+
+      if (error) {
+        reply.status(500).send(error.message);
+      }
 
       // Start conversations
 
@@ -151,9 +165,14 @@ export const stopSimulation = asyncHandler(
       if (!request.params.simulationId)
         reply
           .status(400)
-          .send("Missing simulationId in URL - /simulations/:simulationId/stop");
+          .send(
+            "Missing simulationId in URL - /simulations/:simulationId/stop"
+          );
 
-      const simulation = await getSimulation(request.params.simulationId, reply);
+      const simulation = await getSimulation(
+        request.params.simulationId,
+        reply
+      );
 
       supabase
         .from(process.env.SIMULATIONS_TABLE_NAME as string)

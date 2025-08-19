@@ -890,7 +890,7 @@ components:
         - simulationId
         - topic
         - active
-        - dialogists
+        - participants
         - messages
       properties:
         id:
@@ -909,7 +909,7 @@ components:
           type: boolean
           description: Whether the conversation is currently active
           example: true
-        dialogists:
+        participants:
           type: array
           description: IDs of agents participating in the conversation
           items:

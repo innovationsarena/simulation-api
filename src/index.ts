@@ -4,7 +4,13 @@ import formbody from "@fastify/formbody";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 
-import { pingRouter, simulatorRouter, agentRouter, docsRouter } from "./routes";
+import {
+  pingRouter,
+  simulatorRouter,
+  agentRouter,
+  docsRouter,
+  conversationRouter,
+} from "./routes";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -27,13 +33,12 @@ server.setErrorHandler((error, _request, reply) => {
   }
 });
 
-
 // Routes
 server.register(docsRouter);
 server.register(pingRouter);
 server.register(simulatorRouter);
+server.register(conversationRouter);
 server.register(agentRouter);
-
 
 server.listen({
   port: PORT,

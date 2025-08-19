@@ -66,6 +66,25 @@ export const getConversation = async (
   return { ...conversation, messages };
 };
 
+export const listAgents = async (simulationId: string, reply: FastifyReply) => {
+  const { data, error } = await supabase
+    .from(process.env.AGENTS_TABLE_NAME as string)
+    .select("*")
+    .eq("simulationId", simulationId);
+
+  if (error)
+    return reply.status(error.code as unknown as number).send(error.message);
+
+  return data;
+};
+
+export const getDiscussion = async (
+  discussionId: string,
+  reply: FastifyReply
+) => {
+  return [];
+};
+
 export const getAgent = async (
   agentId: string,
   reply: FastifyReply
@@ -83,4 +102,38 @@ export const getAgent = async (
       .send(getAgentError.message);
 
   return agent;
+};
+
+export const getIdleAgent = async (
+  agentId: string,
+  reply: FastifyReply
+): Promise<Agent> => {
+  const {
+    data: idleAgent,
+    error: getIdleAgentError,
+  }: PostgrestSingleResponse<Agent> = await supabase
+    .from(process.env.AGENTS_TABLE_NAME as string)
+    .select("*")
+    .eq("state", "idle")
+    .eq("inConversationId", null)
+    .single();
+
+  if (getIdleAgentError)
+    return reply
+      .status(getIdleAgentError.code as unknown as number)
+      .send(getIdleAgentError.message);
+
+  return idleAgent;
+};
+
+export const createMessage = async (message: Message, reply: FastifyReply) => {
+  const { data, error } = await supabase
+    .from(process.env.MESSAGES_TABLE_NAME as string)
+    .insert(message)
+    .select();
+
+  if (error)
+    return reply.status(error.code as unknown as number).send(error.message);
+
+  return data;
 };

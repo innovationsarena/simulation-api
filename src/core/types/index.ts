@@ -3,7 +3,7 @@ export type Agent = {
   version: number; // Agent version
   name: string; // Random swe name based on sex
   simulationId?: string; // Is the Agent belonging to certain simulation?
-  state: "idle" | "waiting" | "occupied";
+  state: "idle" | "waiting" | "active";
   inCoversationId: null | string;
   demographics?: Demographics;
   personality:
@@ -51,7 +51,7 @@ export type Simulation = {
   id: string;
   agentCount: number;
   state: "primed" | "running" | "ended" | "stopped";
-  type: "discussion" | "attitude";
+  type: "discussion" | "conversation" | "survey";
   name: string;
   description?: string;
   environment?: Environment;
@@ -69,6 +69,7 @@ export type Environment = {
 
 export type CreateSimulationInput = {
   name: string;
+  type: string;
   description?: string;
   agentCount: number;
 };
@@ -152,11 +153,22 @@ export type Message = {
 };
 
 export type Conversation = {
-  id: string; // hashed(agent-id + agent-id)
+  id: string;
   simulationId: string; // simulation id
   topic: string;
   active: boolean;
-  dialogists: string[]; // Agent Ids
+  participants: string[]; // Agent Ids
   messages: Message[];
+  stats?: Stats;
+};
+
+export type Discussion = {
+  id: string;
+  simulationId: string; // simulation id
+  topic: string;
+  active: boolean;
+  participants: string[]; // Agent Ids
+  messages: Message[];
+  minRounds?: number;
   stats?: Stats;
 };

@@ -31,23 +31,45 @@ export const createConversationController = async (
     const conversation: Omit<Conversation, "messages"> = {
       id: conversationId,
       simulationId,
-      active: true,
+      active: false,
       topic: topic,
-      dialogists: [senderId, recieverId],
+      participants: [senderId, recieverId],
     };
 
+    // Update user states
+    const { data: senderData, error: senderError } = await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .update({ state: "active", inCoversationId: conversationId })
+      .eq("id", senderId)
+      .select();
+
+    if (senderError)
+      return reply
+        .status(senderError.code as unknown as number)
+        .send(senderError.message);
+
+    const { data: recieverData, error: recieverError } = await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .update({ state: "active", inCoversationId: conversationId })
+      .eq("id", recieverId)
+      .select();
+
+    if (recieverError)
+      return reply
+        .status(recieverError.code as unknown as number)
+        .send(recieverError.message);
+
+    // Create conversation
     const { data: createConversation, error: createConversationError } =
       await supabase
         .from(process.env.CONVERSATIONS_TABLE_NAME as string)
         .insert(conversation)
         .select();
 
-    if (!createConversation && createConversationError)
+    if (createConversationError)
       return reply
         .status(createConversationError.code as unknown as number)
         .send(createConversationError.message);
-
-    // First message? Incl topic framing?
 
     await reply.status(201).send({
       ...conversation,
@@ -139,6 +161,53 @@ export const makeConversationController = async (
     }
 
     reply.status(200).send();
+  } catch (error) {
+    handleControllerError(error, reply);
+  }
+};
+
+export const startConversationController = async (
+  request: FastifyRequest<{
+    Params: { conversation: string };
+    Body: { senderId: string; recieverId: string };
+  }>,
+  reply: FastifyReply
+) => {
+  try {
+    const { conversation: conversationId } = request.params;
+    const { senderId, recieverId } = request.body;
+
+    // get Agent
+    const sender = await getAgent(senderId, reply);
+    const reciever = await getAgent(recieverId, reply);
+    const { topic } = await getConversation(conversationId, reply);
+
+    // Update user states
+    await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .update({ state: "active", inCoversationId: conversationId })
+      .eq("id", senderId)
+      .select();
+
+    await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .update({ state: "active", inCoversationId: conversationId })
+      .eq("id", recieverId)
+      .select();
+
+    // Update conversation state and updated_at = onChange
+    await supabase
+      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+      .update({ active: true })
+      .eq("id", conversationId)
+      .select();
+
+    // Send first message
+    const prompt = `Hej! Vi har fått i uppdrag att diskutera följande fråga: ${topic}. Vad är dina tankar kring detta ämne?`;
+
+    await reply.status(200).send({
+      message: `Conversation ${conversationId} between ${sender.name} and ${reciever.name} has started.`,
+    });
   } catch (error) {
     handleControllerError(error, reply);
   }
