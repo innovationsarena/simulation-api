@@ -3,7 +3,7 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import { Agent, Conversation, Message, Simulation } from "../types";
+import { Agent, Conversation, Discussion, Message, Simulation } from "../types";
 import { FastifyReply } from "fastify";
 
 export const supabase = createClient(
@@ -83,18 +83,18 @@ export const getDiscussion = async (
   reply: FastifyReply
 ) => {
   const {
-    data: conversation,
-    error: getConversationError,
-  }: PostgrestSingleResponse<Conversation> = await supabase
+    data: discussion,
+    error: getDiscussionError,
+  }: PostgrestSingleResponse<Discussion> = await supabase
     .from(process.env.DISCUSSIONS_TABLE_NAME as string)
     .select("*")
     .eq("id", discussionId)
     .single();
 
-  if (getConversationError)
+  if (getDiscussionError)
     return reply
-      .status(getConversationError.code as unknown as number)
-      .send(getConversationError.message);
+      .status(getDiscussionError.code as unknown as number)
+      .send(getDiscussionError.message);
 
   const {
     data: messages,
@@ -109,7 +109,7 @@ export const getDiscussion = async (
       .status(getMessagesError.code as unknown as number)
       .send(getMessagesError.message);
 
-  return { ...conversation, messages };
+  return { ...discussion, messages } as Discussion;
 };
 
 export const getAgentById = async (
