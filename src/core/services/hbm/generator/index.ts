@@ -24,7 +24,7 @@ export const generateAgent = async (
     id: id(),
     state: "idle" as const,
     simulationId,
-    inCoversationId: null,
+    inActivityId: null,
     demographics: {
       age: age,
       sex: sex,
@@ -90,7 +90,7 @@ export const generateRandomAgent = async (
     id: id(),
     state: "idle" as const,
     simulationId,
-    inCoversationId: null,
+    inActivityId: null,
     demographics: {
       age: age,
       sex: sex,
