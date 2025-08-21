@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   Conversation,
-  getAgent,
+  getAgentById,
   getConversation,
   getSimulation,
   handleControllerError,
@@ -109,7 +109,7 @@ export const makeConversationController = async (
     const { senderId } = request.body;
 
     // get Agent
-    const agent = await getAgent(senderId, reply);
+    const agent = await getAgentById(senderId, reply);
     // Get Conversation
     const { simulationId, topic, messages } = await getConversation(
       conversationId,
@@ -118,7 +118,7 @@ export const makeConversationController = async (
 
     const simulation = await getSimulation(simulationId, reply);
 
-    if (agent.inCoversationId !== conversationId) {
+    if (agent.inActivityId !== conversationId) {
       // you turn to talk --->
 
       // Parse system prompt
@@ -139,7 +139,7 @@ export const makeConversationController = async (
       // Create message
       const Msg: Message = {
         senderId,
-        conversationId,
+        parentId: conversationId,
         simulationId,
         content: text,
         tokens: {
@@ -147,6 +147,7 @@ export const makeConversationController = async (
           completionTokens: 0,
         },
       };
+
       await supabase
         .from(process.env.MESSAGES_TABLE_NAME as string)
         .insert([Msg])
@@ -178,8 +179,8 @@ export const startConversationController = async (
     const { senderId, recieverId } = request.body;
 
     // get Agent
-    const sender = await getAgent(senderId, reply);
-    const reciever = await getAgent(recieverId, reply);
+    const sender = await getAgentById(senderId, reply);
+    const reciever = await getAgentById(recieverId, reply);
     const { topic } = await getConversation(conversationId, reply);
 
     // Update user states

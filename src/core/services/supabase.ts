@@ -82,18 +82,64 @@ export const getDiscussion = async (
   discussionId: string,
   reply: FastifyReply
 ) => {
-  return [];
+  const {
+    data: conversation,
+    error: getConversationError,
+  }: PostgrestSingleResponse<Conversation> = await supabase
+    .from(process.env.DISCUSSIONS_TABLE_NAME as string)
+    .select("*")
+    .eq("id", discussionId)
+    .single();
+
+  if (getConversationError)
+    return reply
+      .status(getConversationError.code as unknown as number)
+      .send(getConversationError.message);
+
+  const {
+    data: messages,
+    error: getMessagesError,
+  }: PostgrestResponse<Message> = await supabase
+    .from(process.env.MESSAGES_TABLE_NAME as string)
+    .select("*")
+    .eq("parentId", discussionId);
+
+  if (getMessagesError)
+    return reply
+      .status(getMessagesError.code as unknown as number)
+      .send(getMessagesError.message);
+
+  return { ...conversation, messages };
 };
 
-export const getAgent = async (
+export const getAgentById = async (
   agentId: string,
   reply: FastifyReply
 ): Promise<Agent> => {
   const { data: agent, error: getAgentError }: PostgrestSingleResponse<Agent> =
     await supabase
-      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+      .from(process.env.AGENTS_TABLE_NAME as string)
       .select("*")
       .eq("id", agentId)
+      .single();
+
+  if (getAgentError)
+    return reply
+      .status(getAgentError.code as unknown as number)
+      .send(getAgentError.message);
+
+  return agent;
+};
+
+export const getAgentByName = async (
+  name: string,
+  reply: FastifyReply
+): Promise<Agent> => {
+  const { data: agent, error: getAgentError }: PostgrestSingleResponse<Agent> =
+    await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .select("*")
+      .eq("name", name)
       .single();
 
   if (getAgentError)
@@ -115,7 +161,7 @@ export const getIdleAgent = async (
     .from(process.env.AGENTS_TABLE_NAME as string)
     .select("*")
     .eq("state", "idle")
-    .eq("inConversationId", null)
+    .eq("inActivityId", null)
     .single();
 
   if (getIdleAgentError)

@@ -3,7 +3,7 @@ import {
   Agent,
   Conversation,
   Discussion,
-  getAgent,
+  getAgentByName,
   getDiscussion,
   getSimulation,
   handleControllerError,
@@ -14,20 +14,25 @@ import {
   parsePrompt,
   supabase,
 } from "../core";
-import { generateText } from "ai";
+import { generateText, tool } from "ai";
 import { openai } from "@ai-sdk/openai";
+import z from "zod";
 
 export const createDiscussionController = async (
   request: FastifyRequest<{
-    Body: { simulationId: string; minRounds?: number };
+    Body: { simulationId: string; minRounds?: number; agents?: Agent[] };
   }>,
   reply: FastifyReply
 ) => {
   try {
-    const { simulationId, minRounds = 3 } = request.body;
-
+    const { simulationId, agents, minRounds = 3 } = request.body;
     const { topic } = await getSimulation(simulationId, reply);
-    const agents: Agent[] = await listAgents(simulationId, reply);
+
+    // If agents are given in body
+    let participants: Agent[] =
+      agents && agents.length > 1
+        ? agents
+        : await listAgents(simulationId, reply);
 
     // CREATE DISCUSSION
     const discussionId = id(12);
@@ -38,17 +43,48 @@ export const createDiscussionController = async (
       topic,
       active: true,
       minRounds,
-      participants: [...agents.map((agent) => agent.id)],
+      participants: participants.map((agent) => agent.id),
     };
 
-    const { data: c, error: discussionError } = await supabase
+    const { data: c, error: createDiscussionError } = await supabase
       .from(process.env.DISCUSSIONS_TABLE_NAME as string)
       .insert(discussion);
 
-    if (discussionError)
+    if (createDiscussionError)
       reply
-        .status(discussionError.code as unknown as number)
-        .send(discussionError.message);
+        .status(createDiscussionError.code as unknown as number)
+        .send(createDiscussionError.message);
+
+    // Run discussion
+    const resp = await generateText({
+      model: openai("gpt-4o"),
+      tools: {
+        askAgent: tool({
+          description: "Agents",
+          parameters: z.object({
+            agentName: z.string(),
+            simulationId: z.string(),
+            messageHistory: z.array(z.any()),
+          }),
+
+          execute: async (args) => {
+            // Execute agent
+
+            const agent = await getAgentByName(args.agentName, reply);
+
+            // Get messages
+
+            generateText({
+              model: openai("gpt-4.1-mini"),
+              system: await parsePrompt(agent),
+            });
+
+            // Save message to db
+          },
+        }),
+      },
+      system: `You are a moderator in a discussion forum. You have via 'askAgent' tool access to the following persons: <AGENT_NAMES>. Make sure every one get a saying in at least MIN_ROUNDS.`,
+    });
   } catch (error) {
     handleControllerError(error, reply);
   }

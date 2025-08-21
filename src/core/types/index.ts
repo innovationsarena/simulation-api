@@ -2,9 +2,9 @@ export type Agent = {
   id: string;
   version: number; // Agent version
   name: string; // Random swe name based on sex
-  simulationId?: string; // Is the Agent belonging to certain simulation?
+  simulationId: string; // Is the Agent belonging to certain simulation?
   state: "idle" | "waiting" | "active";
-  inCoversationId: null | string;
+  inActivityId: null | string;
   demographics?: Demographics;
   personality:
     | string
@@ -145,7 +145,7 @@ export type DataItem = {
 };
 
 export type Message = {
-  conversationId: string; // Conversation id
+  parentId: string; // Conversation/Discussion id
   senderId: string; // Agent Id
   content: string; // Says what
   simulationId: string;
