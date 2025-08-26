@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import {
   Agent,
   Conversation,
+  createMessage,
   Discussion,
   getAgentByName,
   getDiscussion,
@@ -14,7 +15,7 @@ import {
   parsePrompt,
   supabase,
 } from "../core";
-import { generateText, tool } from "ai";
+import { generateText, streamText, tool } from "ai";
 import { openai } from "@ai-sdk/openai";
 import z from "zod";
 
@@ -27,12 +28,11 @@ export const createDiscussionController = async (
   try {
     const { simulationId, agents, minRounds = 3 } = request.body;
     const { topic } = await getSimulation(simulationId, reply);
+    const simAgents = await listAgents(simulationId, reply);
 
     // If agents are given in body
     let participants: Agent[] =
-      agents && agents.length > 1
-        ? agents
-        : await listAgents(simulationId, reply);
+      agents && agents.length > 1 ? agents : simAgents;
 
     // CREATE DISCUSSION
     const discussionId = id(12);
@@ -46,7 +46,7 @@ export const createDiscussionController = async (
       participants: participants.map((agent) => agent.id),
     };
 
-    const { data: c, error: createDiscussionError } = await supabase
+    const { data, error: createDiscussionError } = await supabase
       .from(process.env.DISCUSSIONS_TABLE_NAME as string)
       .insert(discussion);
 
@@ -55,36 +55,72 @@ export const createDiscussionController = async (
         .status(createDiscussionError.code as unknown as number)
         .send(createDiscussionError.message);
 
+    const systemPrompt = `You are a moderator in a discussion forum. 
+    
+    ## Instructions
+    - You have via 'askAgent' tool access to the following agents: ${participants
+      ?.map((agent) => agent.name)
+      .join(", ")}.
+      - You ask one at at the time and wait for their reply before moving on to next participant. Make sure every agent get a saying in at least ${minRounds} times.
+      
+      ## Tools
+      
+      - 'askAgent' when you want to pass the word to one of the agents.`;
     // Run discussion
-    const resp = await generateText({
+    const resp = streamText({
       model: openai("gpt-4o"),
+      maxSteps: 10,
       tools: {
         askAgent: tool({
           description: "Agents",
           parameters: z.object({
             agentName: z.string(),
-            simulationId: z.string(),
-            messageHistory: z.array(z.any()),
           }),
 
           execute: async (args) => {
             // Execute agent
-
             const agent = await getAgentByName(args.agentName, reply);
 
             // Get messages
+            const { messages } = await getDiscussion(discussionId, reply);
 
-            generateText({
+            const m = messages.length
+              ? messages
+              : ([
+                  {
+                    senderId: "moderator",
+                    parentId: discussionId,
+                    content: `We must discuss: ${topic}.`,
+                    simulationId,
+                  },
+                ] as Message[]);
+
+            const { text, usage } = await generateText({
               model: openai("gpt-4.1-mini"),
               system: await parsePrompt(agent),
+              messages: parseMessages(m, agent.id),
             });
 
             // Save message to db
+            const replyMessage: Message = {
+              senderId: agent.id,
+              parentId: discussionId,
+              content: text,
+              simulationId,
+              tokens: usage,
+            };
+
+            await createMessage(replyMessage, reply);
           },
         }),
       },
-      system: `You are a moderator in a discussion forum. You have via 'askAgent' tool access to the following persons: <AGENT_NAMES>. Make sure every one get a saying in at least MIN_ROUNDS.`,
+      system: systemPrompt,
+      prompt: `We must discuss: ${topic}. `,
     });
+
+    console.log(resp);
+
+    return resp;
   } catch (error) {
     handleControllerError(error, reply);
   }

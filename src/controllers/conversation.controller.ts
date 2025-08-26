@@ -39,7 +39,7 @@ export const createConversationController = async (
     // Update user states
     const { data: senderData, error: senderError } = await supabase
       .from(process.env.AGENTS_TABLE_NAME as string)
-      .update({ state: "active", inCoversationId: conversationId })
+      .update({ state: "active", inActivityId: conversationId })
       .eq("id", senderId)
       .select();
 
@@ -50,7 +50,7 @@ export const createConversationController = async (
 
     const { data: recieverData, error: recieverError } = await supabase
       .from(process.env.AGENTS_TABLE_NAME as string)
-      .update({ state: "active", inCoversationId: conversationId })
+      .update({ state: "active", inActivityId: conversationId })
       .eq("id", recieverId)
       .select();
 
@@ -186,13 +186,13 @@ export const startConversationController = async (
     // Update user states
     await supabase
       .from(process.env.AGENTS_TABLE_NAME as string)
-      .update({ state: "active", inCoversationId: conversationId })
+      .update({ state: "active", inActivityId: conversationId })
       .eq("id", senderId)
       .select();
 
     await supabase
       .from(process.env.AGENTS_TABLE_NAME as string)
-      .update({ state: "active", inCoversationId: conversationId })
+      .update({ state: "active", inActivityId: conversationId })
       .eq("id", recieverId)
       .select();
 

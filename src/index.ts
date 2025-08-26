@@ -11,6 +11,7 @@ import {
   docsRouter,
   conversationRouter,
 } from "./routes";
+import { discussionRouter } from "./routes/discussion.route";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -38,6 +39,7 @@ server.register(docsRouter);
 server.register(pingRouter);
 server.register(simulatorRouter);
 server.register(conversationRouter);
+server.register(discussionRouter);
 server.register(agentRouter);
 
 server.listen({

@@ -66,7 +66,10 @@ export const getConversation = async (
   return { ...conversation, messages };
 };
 
-export const listAgents = async (simulationId: string, reply: FastifyReply) => {
+export const listAgents = async (
+  simulationId: string,
+  reply: FastifyReply
+): Promise<Agent[]> => {
   const { data, error } = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
     .select("*")
@@ -74,8 +77,7 @@ export const listAgents = async (simulationId: string, reply: FastifyReply) => {
 
   if (error)
     return reply.status(error.code as unknown as number).send(error.message);
-
-  return data;
+  return data as Agent[];
 };
 
 export const getDiscussion = async (
@@ -104,10 +106,13 @@ export const getDiscussion = async (
     .select("*")
     .eq("parentId", discussionId);
 
-  if (getMessagesError)
+  if (getMessagesError) {
+    console.log("NO adkskjdaj");
+
     return reply
       .status(getMessagesError.code as unknown as number)
       .send(getMessagesError.message);
+  }
 
   return { ...discussion, messages } as Discussion;
 };
@@ -146,7 +151,6 @@ export const getAgentByName = async (
     return reply
       .status(getAgentError.code as unknown as number)
       .send(getAgentError.message);
-
   return agent;
 };
 
