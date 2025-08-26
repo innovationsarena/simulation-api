@@ -51,10 +51,7 @@ export const createDiscussionController = async (
       .insert(discussion);
 
     if (createDiscussionError)
-      reply
-        .status(createDiscussionError.code as unknown as number)
-        .send(createDiscussionError.message);
-
+      handleControllerError(createDiscussionError, reply);
     const systemPrompt = `You are a moderator in a discussion forum. 
     
     ## Instructions

@@ -43,10 +43,7 @@ export const createConversationController = async (
       .eq("id", senderId)
       .select();
 
-    if (senderError)
-      return reply
-        .status(senderError.code as unknown as number)
-        .send(senderError.message);
+    if (senderError) handleControllerError(senderError, reply);
 
     const { data: recieverData, error: recieverError } = await supabase
       .from(process.env.AGENTS_TABLE_NAME as string)
@@ -54,10 +51,7 @@ export const createConversationController = async (
       .eq("id", recieverId)
       .select();
 
-    if (recieverError)
-      return reply
-        .status(recieverError.code as unknown as number)
-        .send(recieverError.message);
+    if (recieverError) handleControllerError(recieverError, reply);
 
     // Create conversation
     const { data: createConversation, error: createConversationError } =
@@ -67,9 +61,7 @@ export const createConversationController = async (
         .select();
 
     if (createConversationError)
-      return reply
-        .status(createConversationError.code as unknown as number)
-        .send(createConversationError.message);
+      handleControllerError(createConversationError, reply);
 
     await reply.status(201).send({
       ...conversation,
