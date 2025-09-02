@@ -1,7 +1,7 @@
 import type {
   BigFivePersonalityModel,
   ExtendedBigFivePersonalityModel,
-} from "../../../types";
+} from "../../../core/types";
 import {
   bigFivePersonalityModel as bigFivePersonalityModelEnglish,
   extendedBigFivePersonalityModel as extendedBigFivePersonalityModelEnglish,

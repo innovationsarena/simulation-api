@@ -1,20 +1,23 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   Agent,
-  Conversation,
-  createMessage,
   Discussion,
+  handleControllerError,
+  id,
+  Message,
+  parseMessages,
+} from "../core";
+
+import {
+  createMessage,
   getAgentByName,
   getDiscussion,
   getSimulation,
-  handleControllerError,
-  id,
   listAgents,
-  Message,
-  parseMessages,
   parsePrompt,
   supabase,
-} from "../core";
+} from "../services";
+
 import { generateText, streamText, tool } from "ai";
 import { openai } from "@ai-sdk/openai";
 import z from "zod";

@@ -3,7 +3,7 @@ import type {
   BigFivePersonalityModel,
   ExtendedBigFivePersonalityModel,
   Simulation,
-} from "../../../../core/types";
+} from "../../../core/types";
 import { parseEnviroment } from "./environment";
 import { parseObjectives } from "./objectives";
 import {
