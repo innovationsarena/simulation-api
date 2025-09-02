@@ -22,7 +22,7 @@ You are to complete the Big Five Inventory-2 (BFI-2) personality test, which con
 Return your answers as a single array of 60 strings (each value between 1 and 5), corresponding to your responses for each statement in order.
 
 Example output:
-[3, 4, 2, 5, 1, ..., 4] (with 60 values in total)
+["3", "4", "2", "5", "1", ..., "4"] (with 60 values in total)
 
 Do not include any explanations or extra text—just the array of responses.
 
@@ -140,7 +140,7 @@ const questions = [
   const { object } = await generateObject({
     model: openai(process.env.DEFAULT_LLM_MODEL as string),
     system: await parsePrompt(agent),
-    schema: z.object({ results: z.array(z.string()) }),
+    schema: z.array(z.string()),
     prompt,
   });
 
@@ -148,3 +148,51 @@ const questions = [
 
   return "kajsjkasdfjk";
 };
+
+function itemSimilarity(a: string, b: string): number {
+  const A = parseInt(a);
+  const B = parseInt(b);
+  // Similarity decreases as difference increases (range 0 to 1)
+  const max = Math.max(Math.abs(A), Math.abs(B), 1); // Prevent division by zero
+  return 1 - Math.abs(A - B) / max;
+}
+
+// Levenshtein distance implementation
+function levenshtein(a: string, b: string): number {
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j] + 1 // deletion
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+export function arraySimilarity(
+  arr1: string[],
+  arr2: string[]
+): { percent: number } {
+  const minLength = Math.min(arr1.length, arr2.length);
+  if (minLength === 0) return { percent: 0 };
+
+  const similarities: number[] = [];
+  for (let i = 0; i < minLength; i++) {
+    similarities.push(itemSimilarity(arr1[i], arr2[i]));
+  }
+  const percent = (similarities.reduce((a, b) => a + b, 0) / minLength) * 100;
+  return { percent };
+}
