@@ -6,14 +6,27 @@ export type Agent = {
   state: "idle" | "waiting" | "active";
   inActivityId: null | string;
   demographics?: Demographics;
+  organization?: Organization;
   personality:
     | string
     | BigFivePersonalityModel<string>
     | ExtendedBigFivePersonalityModel<string>;
-  objectives: string[]; // [Agent Name/Type] aims to [verb] [target/resource] to achieve [desired state/outcome] 15% FORM
+  objectives: string[]; // [Agent Name/Type] aims to [verb] [target/resource] to achieve [desired state/outcome]
   dynamicProps?: Record<string, any>[];
   llmSettings: LLMSettings;
+  evaluation?: Evaluation;
   stats?: Stats;
+};
+
+export type Evaluation = {
+  bigFiveSimilarity?: number; // Percent
+  questionsSimilarity?: number; // Percent
+};
+
+export type Organization = {
+  role?: string; // Role description?
+  hierarchyWeight?: number; // Higher = more important
+  subGroups?: string[]; // Departments
 };
 
 export type LLMSettings = {
@@ -27,7 +40,6 @@ export type Demographics = {
   age: number;
   sex: "male" | "female"; // ? mer skala?
   educationLevel?: string;
-  role?: string; // Role description? 15% FORM
   ethnicity?: string; // Relevant?
 };
 
@@ -53,6 +65,7 @@ export type Simulation = {
   state: "primed" | "running" | "ended" | "stopped";
   type: "discussion" | "conversation" | "survey";
   name: string;
+  organizational?: boolean;
   description?: string;
   environment?: Environment;
   topic: string;
@@ -157,6 +170,7 @@ export type Conversation = {
   simulationId: string; // simulation id
   topic: string;
   active: boolean;
+  activeSpeakerId: string | null; // Id of active speaker
   participants: string[]; // Agent Ids
   messages: Message[];
   stats?: Stats;

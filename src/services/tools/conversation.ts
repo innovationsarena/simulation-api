@@ -8,7 +8,7 @@ export const findConversationPartner: Tool = {
     senderId: z.string(),
     simulationId: z.string(),
   }),
-  execute: async (args: any) => {
+  execute: async (args: { senderId: string; simulationId: string }) => {
     console.log("Finding a free conversation partner...");
     // Return free agent Id.
     const { data, error } = await supabase

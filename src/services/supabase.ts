@@ -3,8 +3,15 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import { Agent, Conversation, Discussion, Message, Simulation } from "../types";
+import {
+  Agent,
+  Conversation,
+  Discussion,
+  Message,
+  Simulation,
+} from "../core/types";
 import { FastifyReply } from "fastify";
+import { handleControllerError, id } from "../core/utils";
 
 export const supabase = createClient(
   process.env.SUPABASE_URL as string,
@@ -187,3 +194,69 @@ export const createMessage = async (message: Message, reply: FastifyReply) => {
 
   return data;
 };
+
+export const createConversation = async (
+  simulation: Simulation,
+  sender: Agent,
+  reciever: Agent,
+  reply: FastifyReply
+): Promise<Conversation> => {
+  const conversationId = id(12);
+
+  const conversation: Omit<Conversation, "messages"> = {
+    id: conversationId,
+    simulationId: simulation.id,
+    active: true,
+    activeSpeakerId: null,
+    topic: simulation.topic,
+    participants: [sender.id, reciever.id],
+  };
+
+  const { data: createConversation, error: createConversationError } =
+    await supabase
+      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+      .insert(conversation)
+      .select();
+
+  if (createConversationError)
+    handleControllerError(createConversationError, reply);
+
+  return { ...conversation, messages: [] };
+};
+
+export const updateConversation = async (
+  conversationId: string,
+  speakerId: string
+) => {
+  await supabase
+    .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+    .update({ activeSpeaker: speakerId })
+    .eq("id", conversationId)
+    .select();
+};
+
+supabase
+  .channel("conversations-changes")
+  .on(
+    "postgres_changes",
+    {
+      event: "UPDATE",
+      schema: "public",
+      table: "conversations",
+    },
+    async (payload) => {
+      const { id, activeSpeakerId } = payload.new;
+      try {
+        console.log(payload);
+        const resp = await fetch(`${process.env.API_URL}/conversations/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ senderId: activeSpeakerId }),
+        });
+
+        console.log(resp);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  )
+  .subscribe();

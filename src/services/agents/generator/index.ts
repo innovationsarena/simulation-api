@@ -227,3 +227,29 @@ export const generateRandomAgent = async (
     personality: getSimplePersonality(),
   } as Agent;
 };
+
+export const generateRandomAgents = async (
+  agentCount: number = 5,
+  version: number,
+  simulationId: string
+): Promise<Agent[]> => {
+  const agents = [];
+
+  for (let i = 0; i < agentCount; i++) {
+    agents.push(await generateRandomAgent(version, simulationId));
+  }
+  return agents;
+};
+
+export const generateAgents = async (
+  agentCount: number = 5,
+  version: number,
+  simulationId: string
+): Promise<Agent[]> => {
+  const agents = [];
+
+  for (let i = 0; i < agentCount; i++) {
+    agents.push(await generateAgent(version, simulationId));
+  }
+  return agents;
+};

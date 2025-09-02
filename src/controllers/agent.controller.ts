@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Agent, id, asyncHandler } from "../core";
-import { generateAgent, generateRandomAgent } from "../core/services";
+import { generateAgent, generateRandomAgent, supabase } from "../services";
 
 type CreateAgentRequest = FastifyRequest<{
   Body: {
@@ -57,3 +57,15 @@ export const createRandomAgent = asyncHandler(
     return reply.status(201).send(response);
   }
 );
+
+export const agentSubscribe = async (agent: Agent) => {
+  const channel = supabase.channel(agent.inActivityId as string);
+  channel.subscribe((msg) => {
+    console.log(msg);
+  });
+};
+
+export const agentUnsubscribe = async (agent: Agent) => {
+  const channel = supabase.channel(agent.inActivityId as string);
+  channel.unsubscribe();
+};

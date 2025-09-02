@@ -11,20 +11,6 @@ export const conversationRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/conversations",
     {
-      schema: {
-        description: "Create a new conversation.",
-        tags: ["conversations"],
-        body: {
-          type: "object",
-          properties: {
-            senderId: { type: "string" },
-            recieverId: { type: "string" },
-            simulationId: { type: "string" },
-          },
-          required: ["senderId", "recieverId", "simulationId"],
-          additionalProperties: false,
-        },
-      },
       preValidation: [],
       preHandler: [validateKey],
     },
