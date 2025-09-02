@@ -1,5 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Agent, id, asyncHandler } from "../core";
+import {
+  Agent,
+  id,
+  asyncHandler,
+  BigFivePersonalityModel,
+  handleControllerError,
+} from "../core";
 import { generateAgent, generateRandomAgent, supabase } from "../services";
 
 type CreateAgentRequest = FastifyRequest<{
@@ -14,7 +20,7 @@ type AgentResponse = {
   agents: Agent[];
 };
 
-export const createAgent = asyncHandler(
+export const generateAgentController = asyncHandler(
   async (
     request: CreateAgentRequest,
     reply: FastifyReply
@@ -35,7 +41,7 @@ export const createAgent = asyncHandler(
   }
 );
 
-export const createRandomAgent = asyncHandler(
+export const generateRandomAgentController = asyncHandler(
   async (
     request: CreateAgentRequest,
     reply: FastifyReply
@@ -55,6 +61,63 @@ export const createRandomAgent = asyncHandler(
 
     const response: AgentResponse = { agents };
     return reply.status(201).send(response);
+  }
+);
+
+export const createAgentController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: {
+        id: string;
+        personality: BigFivePersonalityModel;
+        name: string;
+        age: number;
+        sex: "male" | "female";
+        objectives: string[];
+        simulationId: string;
+      };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const {
+      id: agentId,
+      personality,
+      name,
+      sex,
+      age,
+      simulationId,
+      objectives,
+    } = request.body;
+
+    const agent: Agent = {
+      id: agentId || id(),
+      version: 2,
+      name,
+      simulationId,
+      state: "idle",
+      inActivityId: null,
+      objectives,
+      demographics: {
+        age,
+        sex,
+      },
+      personality,
+      llmSettings: {
+        provider: "openai",
+        model: "gpt-5-mini",
+        temperature: 0.5,
+        messageToken: 500,
+      },
+    };
+
+    const { data, error } = await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .insert(agent)
+      .select();
+
+    if (error) handleControllerError(error, reply);
+
+    return reply.status(201).send(agent);
   }
 );
 

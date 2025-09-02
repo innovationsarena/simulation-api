@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { asyncHandler } from "../core";
+import { evaluateBigfive } from "../services";
 
 type CreateAgentEvaluationRequest = FastifyRequest<{
   Body: {
@@ -9,7 +10,11 @@ type CreateAgentEvaluationRequest = FastifyRequest<{
 
 export const createBigFiveEvaluation = asyncHandler(
   async (request: CreateAgentEvaluationRequest, reply: FastifyReply) => {
-    reply.status(200).send({ message: "OK" });
+    const { agentId } = request.body;
+
+    const resp = await evaluateBigfive(agentId, reply);
+
+    reply.status(200).send({ message: resp });
   }
 );
 
