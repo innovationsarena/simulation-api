@@ -249,6 +249,7 @@ supabase
       try {
         console.log(payload);
         const resp = await fetch(`${process.env.API_URL}/conversations/${id}`, {
+          headers: { authorization: `Bearer ${process.env.API_KEY}` },
           method: "PATCH",
           body: JSON.stringify({ senderId: activeSpeakerId }),
         });
