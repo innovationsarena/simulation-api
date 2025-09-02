@@ -1,5 +1,5 @@
 import { FastifyReply } from "fastify";
-import { getAgentById } from "../supabase";
+import { getAgentById, supabase } from "../supabase";
 import { generateObject, generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { parsePrompt } from "../agents";
@@ -137,16 +137,23 @@ const questions = [
 
 `;
 
+  console.log(parsePrompt(agent));
   const { object } = await generateObject({
     model: openai(process.env.DEFAULT_LLM_MODEL as string),
     system: await parsePrompt(agent),
-    schema: z.array(z.string()),
+    schema: z.object({ results: z.array(z.string()) }),
     prompt,
   });
 
-  console.log(object);
+  const { data } = await supabase
+    .from(process.env.BFI_TABLE_NAME as string)
+    .select("*")
+    .eq("email", agentId)
+    .single();
 
-  return "kajsjkasdfjk";
+  const results = arraySimilarity(object.results, data?.answers as string[]);
+
+  return results.percent;
 };
 
 function itemSimilarity(a: string, b: string): number {
@@ -154,32 +161,9 @@ function itemSimilarity(a: string, b: string): number {
   const B = parseInt(b);
   // Similarity decreases as difference increases (range 0 to 1)
   const max = Math.max(Math.abs(A), Math.abs(B), 1); // Prevent division by zero
-  return 1 - Math.abs(A - B) / max;
-}
+  const result = 1 - Math.abs(A - B) / max;
 
-// Levenshtein distance implementation
-function levenshtein(a: string, b: string): number {
-  const matrix = [];
-  for (let i = 0; i <= b.length; i++) {
-    matrix[i] = [i];
-  }
-  for (let j = 0; j <= a.length; j++) {
-    matrix[0][j] = j;
-  }
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1, // insertion
-          matrix[i - 1][j] + 1 // deletion
-        );
-      }
-    }
-  }
-  return matrix[b.length][a.length];
+  return result;
 }
 
 export function arraySimilarity(

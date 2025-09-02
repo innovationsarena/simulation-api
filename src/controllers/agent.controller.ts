@@ -5,6 +5,7 @@ import {
   asyncHandler,
   BigFivePersonalityModel,
   handleControllerError,
+  Demographics,
 } from "../core";
 import { generateAgent, generateRandomAgent, supabase } from "../services";
 
@@ -68,13 +69,12 @@ export const createAgentController = asyncHandler(
   async (
     request: FastifyRequest<{
       Body: {
+        simulationId: string;
         id: string;
         personality: BigFivePersonalityModel;
         name: string;
-        age: number;
-        sex: "male" | "female";
+        demographics: Demographics;
         objectives: string[];
-        simulationId: string;
       };
     }>,
     reply: FastifyReply
@@ -82,9 +82,8 @@ export const createAgentController = asyncHandler(
     const {
       id: agentId,
       personality,
+      demographics,
       name,
-      sex,
-      age,
       simulationId,
       objectives,
     } = request.body;
@@ -97,10 +96,7 @@ export const createAgentController = asyncHandler(
       state: "idle",
       inActivityId: null,
       objectives,
-      demographics: {
-        age,
-        sex,
-      },
+      demographics,
       personality,
       llmSettings: {
         provider: "openai",
@@ -110,11 +106,14 @@ export const createAgentController = asyncHandler(
       },
     };
 
+    console.log(agent);
+
     const { data, error } = await supabase
       .from(process.env.AGENTS_TABLE_NAME as string)
       .insert(agent)
       .select();
-
+    console.log(error);
+    console.log(data);
     if (error) handleControllerError(error, reply);
 
     return reply.status(201).send(agent);

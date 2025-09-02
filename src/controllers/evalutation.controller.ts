@@ -14,7 +14,7 @@ export const createBigFiveEvaluation = asyncHandler(
 
     const resp = await evaluateBigfive(agentId, reply);
 
-    reply.status(200).send({ message: resp });
+    reply.status(200).send({ percent: resp });
   }
 );
 

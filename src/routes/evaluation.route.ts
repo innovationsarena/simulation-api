@@ -1,10 +1,8 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
 import {
-  createAgent,
   createBigFiveEvaluation,
   createQuestionnaireEvaluation,
-  createRandomAgent,
 } from "../controllers";
 
 export const evaluationsRouter = (fastify: FastifyInstance) => {

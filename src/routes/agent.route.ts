@@ -8,7 +8,7 @@ import {
 
 export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
-    "/agents/new",
+    "/agents/custom",
 
     {
       schema: {
@@ -17,12 +17,14 @@ export const agentRouter = (fastify: FastifyInstance) => {
         body: {
           type: "object",
           properties: {
+            id: { type: "string" },
             simulationId: { type: "string" },
             name: { type: "string" },
-            age: { type: "integer" },
+            objectives: { type: "array" },
             personality: { type: "object" },
+            demographics: { type: "object" },
           },
-          required: ["count", "version", "simulationId"],
+          required: ["version", "simulationId"],
           additionalProperties: false,
         },
       },
