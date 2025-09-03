@@ -1,4 +1,4 @@
-import { Environment } from "../../../types";
+import { Environment } from "../../../core/types";
 
 export const parseEnviroment = (environment: Environment) => {
   let result = "## Enviroment\n";

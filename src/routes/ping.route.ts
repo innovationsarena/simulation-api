@@ -7,6 +7,8 @@ export const pingRouter = (fastify: FastifyInstance) => {
     "/ping",
     {
       schema: {
+        description: "Ping test.",
+        tags: ["ping"],
         body: {
           type: "object",
           properties: {
@@ -15,9 +17,6 @@ export const pingRouter = (fastify: FastifyInstance) => {
           required: ["message"],
           additionalProperties: false,
         },
-      },
-      config: {
-        description: "Ping test.",
       },
       preValidation: [],
       preHandler: [validateKey],

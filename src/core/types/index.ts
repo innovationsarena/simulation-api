@@ -2,18 +2,31 @@ export type Agent = {
   id: string;
   version: number; // Agent version
   name: string; // Random swe name based on sex
-  simulationId?: string; // Is the Agent belonging to certain simulation?
-  state: "idle" | "waiting" | "occupied";
-  inCoversationId: null | string;
+  simulationId: string; // Is the Agent belonging to certain simulation?
+  state: "idle" | "waiting" | "active";
+  inActivityId: null | string;
   demographics?: Demographics;
+  organization?: Organization;
   personality:
     | string
     | BigFivePersonalityModel<string>
     | ExtendedBigFivePersonalityModel<string>;
-  objectives: string[]; // [Agent Name/Type] aims to [verb] [target/resource] to achieve [desired state/outcome] 15% FORM
+  objectives: string[]; // [Agent Name/Type] aims to [verb] [target/resource] to achieve [desired state/outcome]
   dynamicProps?: Record<string, any>[];
   llmSettings: LLMSettings;
+  evaluation?: Evaluation;
   stats?: Stats;
+};
+
+export type Evaluation = {
+  bigFiveSimilarity?: number; // Percent
+  questionsSimilarity?: number; // Percent
+};
+
+export type Organization = {
+  role?: string; // Role description?
+  hierarchyWeight?: number; // Higher = more important
+  subGroups?: string[]; // Departments
 };
 
 export type LLMSettings = {
@@ -27,7 +40,6 @@ export type Demographics = {
   age: number;
   sex: "male" | "female"; // ? mer skala?
   educationLevel?: string;
-  role?: string; // Role description? 15% FORM
   ethnicity?: string; // Relevant?
 };
 
@@ -51,8 +63,9 @@ export type Simulation = {
   id: string;
   agentCount: number;
   state: "primed" | "running" | "ended" | "stopped";
-  type: "discussion" | "attitude";
+  type: "discussion" | "conversation" | "survey";
   name: string;
+  organizational?: boolean;
   description?: string;
   environment?: Environment;
   topic: string;
@@ -69,6 +82,7 @@ export type Environment = {
 
 export type CreateSimulationInput = {
   name: string;
+  type: string;
   description?: string;
   agentCount: number;
 };
@@ -144,7 +158,7 @@ export type DataItem = {
 };
 
 export type Message = {
-  conversationId: string; // Conversation id
+  parentId: string; // Conversation/Discussion id
   senderId: string; // Agent Id
   content: string; // Says what
   simulationId: string;
@@ -152,11 +166,23 @@ export type Message = {
 };
 
 export type Conversation = {
-  id: string; // hashed(agent-id + agent-id)
+  id: string;
   simulationId: string; // simulation id
   topic: string;
   active: boolean;
-  dialogists: string[]; // Agent Ids
+  activeSpeakerId: string | null; // Id of active speaker
+  participants: string[]; // Agent Ids
   messages: Message[];
+  stats?: Stats;
+};
+
+export type Discussion = {
+  id: string;
+  simulationId: string; // simulation id
+  topic: string;
+  active: boolean;
+  participants: string[]; // Agent Ids
+  messages: Message[];
+  minRounds?: number;
   stats?: Stats;
 };

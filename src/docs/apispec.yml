@@ -185,6 +185,60 @@ paths:
         "500":
           description: Server error
 
+  /simulations/{simulationId}/start:
+    patch:
+      summary: Start a simulation
+      description: Changes the state of a simulation from 'primed' to 'running' and initiates conversations between agents
+      operationId: startSimulation
+      parameters:
+        - name: simulationId
+          in: path
+          required: true
+          description: ID of the simulation to start
+          schema:
+            type: string
+            example: "iLVieMGDrI6GTBLq"
+      responses:
+        "200":
+          description: Simulation started successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Simulation"
+        "400":
+          description: Missing simulation ID or invalid input
+        "404":
+          description: Simulation not found
+        "500":
+          description: Server error
+
+  /simulations/{simulationId}/stop:
+    patch:
+      summary: Stop a simulation
+      description: Changes the state of a simulation from 'running' to 'stopped'
+      operationId: stopSimulation
+      parameters:
+        - name: simulationId
+          in: path
+          required: true
+          description: ID of the simulation to stop
+          schema:
+            type: string
+            example: "iLVieMGDrI6GTBLq"
+      responses:
+        "200":
+          description: Simulation stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Simulation"
+        "400":
+          description: Missing simulation ID or invalid input
+        "404":
+          description: Simulation not found
+        "500":
+          description: Server error
+
   /conversations:
     post:
       summary: Create a new conversation
@@ -311,6 +365,73 @@ paths:
         "500":
           description: Server error
 
+  /discussions:
+    post:
+      summary: Create a new discussion
+      description: Creates a new discussion with multiple agents in a simulation, facilitated by a moderator
+      operationId: createDiscussion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - simulationId
+              properties:
+                simulationId:
+                  type: string
+                  description: ID of the simulation this discussion belongs to
+                  example: "iLVieMGDrI6GTBLq"
+                minRounds:
+                  type: number
+                  description: Minimum number of rounds each agent should participate (defaults to 3)
+                  example: 5
+                agents:
+                  type: array
+                  description: Optional array of specific agents to include in the discussion (if not provided, uses all simulation agents)
+                  items:
+                    $ref: "#/components/schemas/Agent"
+      responses:
+        "201":
+          description: Discussion created and started successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Streaming response from the discussion moderator
+        "400":
+          description: Invalid input
+        "404":
+          description: Simulation not found
+        "500":
+          description: Server error
+
+  /discussions/{discussionId}:
+    get:
+      summary: Get a discussion
+      description: Retrieves a specific discussion by its ID
+      operationId: getDiscussion
+      parameters:
+        - name: discussionId
+          in: path
+          required: true
+          description: ID of the discussion to retrieve
+          schema:
+            type: string
+            example: "disc123456"
+      responses:
+        "200":
+          description: Discussion retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Discussion"
+        "404":
+          description: Discussion not found
+        "500":
+          description: Server error
+
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -326,7 +447,7 @@ components:
         - version
         - name
         - state
-        - inCoversationId
+        - inActivityId
         - personality
         - objectives
         - llmSettings
@@ -334,7 +455,7 @@ components:
         id:
           type: string
           example: uC3BVPe3
-        inCoversationId:
+        inActivityId:
           type: string
           nullable: true
           description: ID of the conversation the agent is currently in
@@ -836,7 +957,7 @@ components:
         - simulationId
         - topic
         - active
-        - dialogists
+        - participants
         - messages
       properties:
         id:
@@ -855,7 +976,7 @@ components:
           type: boolean
           description: Whether the conversation is currently active
           example: true
-        dialogists:
+        participants:
           type: array
           description: IDs of agents participating in the conversation
           items:
@@ -872,13 +993,13 @@ components:
     Message:
       type: object
       required:
-        - conversationId
+        - parentId
         - senderId
         - content
         - simulationId
         - tokens
       properties:
-        conversationId:
+        parentId:
           type: string
           description: ID of the conversation this message belongs to
           example: "conv123456"
@@ -896,3 +1017,46 @@ components:
           example: "iLVieMGDrI6GTBLq"
         tokens:
           $ref: "#/components/schemas/Tokens"
+
+    Discussion:
+      type: object
+      required:
+        - id
+        - simulationId
+        - topic
+        - active
+        - minRounds
+        - participants
+        - messages
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the discussion
+          example: "disc123456"
+        simulationId:
+          type: string
+          description: ID of the simulation this discussion belongs to
+          example: "iLVieMGDrI6GTBLq"
+        topic:
+          type: string
+          description: Topic of the discussion
+          example: "Climate Change"
+        active:
+          type: boolean
+          description: Whether the discussion is currently active
+          example: true
+        minRounds:
+          type: number
+          description: Minimum number of rounds each agent should participate
+          example: 3
+        participants:
+          type: array
+          description: IDs of agents participating in the discussion
+          items:
+            type: string
+            example: "uC3BVPe3"
+        messages:
+          type: array
+          description: Messages in the discussion
+          items:
+            $ref: "#/components/schemas/Message"

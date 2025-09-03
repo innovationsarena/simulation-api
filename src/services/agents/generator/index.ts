@@ -1,6 +1,6 @@
-import { getRandomNumber, id } from "../../../utils";
+import { getRandomNumber, id } from "../../../core/utils";
 import { generateName } from "./names";
-import type { Agent } from "../../../types";
+import type { Agent } from "../../../core/types";
 import {
   getBigFivePersonality,
   getExtendedBigFivePersonality,
@@ -24,7 +24,7 @@ export const generateAgent = async (
     id: id(),
     state: "idle" as const,
     simulationId,
-    inCoversationId: null,
+    inActivityId: null,
     demographics: {
       age: age,
       sex: sex,
@@ -90,7 +90,7 @@ export const generateRandomAgent = async (
     id: id(),
     state: "idle" as const,
     simulationId,
-    inCoversationId: null,
+    inActivityId: null,
     demographics: {
       age: age,
       sex: sex,
@@ -226,4 +226,30 @@ export const generateRandomAgent = async (
     dynamicProps: [],
     personality: getSimplePersonality(),
   } as Agent;
+};
+
+export const generateRandomAgents = async (
+  agentCount: number = 5,
+  version: number,
+  simulationId: string
+): Promise<Agent[]> => {
+  const agents = [];
+
+  for (let i = 0; i < agentCount; i++) {
+    agents.push(await generateRandomAgent(version, simulationId));
+  }
+  return agents;
+};
+
+export const generateAgents = async (
+  agentCount: number = 5,
+  version: number,
+  simulationId: string
+): Promise<Agent[]> => {
+  const agents = [];
+
+  for (let i = 0; i < agentCount; i++) {
+    agents.push(await generateAgent(version, simulationId));
+  }
+  return agents;
 };

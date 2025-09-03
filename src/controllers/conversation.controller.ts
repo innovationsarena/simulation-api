@@ -1,18 +1,17 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import {
-  Conversation,
-  getAgent,
-  getConversation,
-  getSimulation,
-  handleControllerError,
-  id,
-  Message,
-  parseMessages,
-  parsePrompt,
-  supabase,
-} from "../core";
+import { handleControllerError, Message, parseMessages } from "../core";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import {
+  createConversation,
+  createMessage,
+  getAgentById,
+  getConversation,
+  getSimulation,
+  parsePrompt,
+  supabase,
+  updateConversation,
+} from "../services";
 
 export const createConversationController = async (
   request: FastifyRequest<{
@@ -21,37 +20,68 @@ export const createConversationController = async (
   reply: FastifyReply
 ) => {
   try {
+    console.log("Creating conversation...");
+
     const { senderId, recieverId, simulationId } = request.body;
 
-    const { topic } = await getSimulation(simulationId, reply);
+    const simulation = await getSimulation(simulationId, reply);
+    const sender = await getAgentById(senderId, reply);
+    const reciever = await getAgentById(recieverId, reply);
 
-    // CREATE CONVERSATION
-    const conversationId = id(12);
+    // Create conversation
+    const conversation = await createConversation(
+      simulation,
+      sender,
+      reciever,
+      reply
+    );
 
-    const conversation: Omit<Conversation, "messages"> = {
-      id: conversationId,
+    // Update agents states
+    const { data: senderData, error: senderError } = await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .update({ state: "active", inActivityId: conversation.id })
+      .eq("id", senderId)
+      .select();
+
+    if (senderError) handleControllerError(senderError, reply);
+
+    const { data: recieverData, error: recieverError } = await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .update({ state: "active", inActivityId: conversation.id })
+      .eq("id", recieverId)
+      .select();
+
+    if (recieverError) handleControllerError(recieverError, reply);
+
+    // Create channel?
+
+    // Send first message
+    const { text, usage } = await generateText({
+      model: openai(process.env.DEFAULT_LLM_MODEL as string),
+      system: await parsePrompt(sender, simulation),
+      prompt: `Formulera en fördjupande och tydlig fråga kring följande topic: ${simulation.topic}`,
+    });
+
+    const initMessage: Message = {
+      parentId: conversation.id,
+      content: text,
+      senderId,
       simulationId,
-      active: true,
-      topic: topic,
-      dialogists: [senderId, recieverId],
+      tokens: usage,
     };
 
-    const { data: createConversation, error: createConversationError } =
-      await supabase
-        .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-        .insert(conversation)
-        .select();
+    await createMessage(initMessage, reply);
 
-    if (!createConversation && createConversationError)
-      return reply
-        .status(createConversationError.code as unknown as number)
-        .send(createConversationError.message);
-
-    // First message? Incl topic framing?
+    // Update conversation state and updated_at = onChange
+    await supabase
+      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+      .update({ active: true })
+      .eq("id", conversation.id)
+      .select();
 
     await reply.status(201).send({
       ...conversation,
-      messages: [],
+      messages: [initMessage],
     });
   } catch (error) {
     handleControllerError(error, reply);
@@ -87,18 +117,16 @@ export const makeConversationController = async (
     const { senderId } = request.body;
 
     // get Agent
-    const agent = await getAgent(senderId, reply);
+    const agent = await getAgentById(senderId, reply);
+
     // Get Conversation
-    const { simulationId, topic, messages } = await getConversation(
-      conversationId,
-      reply
-    );
+    const { simulationId, messages, activeSpeakerId, id } =
+      await getConversation(conversationId, reply);
 
     const simulation = await getSimulation(simulationId, reply);
 
-    if (agent.inCoversationId !== conversationId) {
-      // you turn to talk --->
-
+    // Check if its your turn to talk
+    if (agent.inActivityId === conversationId && agent.id !== activeSpeakerId) {
       // Parse system prompt
       const system = await parsePrompt(agent, simulation);
 
@@ -106,7 +134,7 @@ export const makeConversationController = async (
       const parsedMessages = parseMessages(messages, senderId);
 
       // Call LLM
-      const { text } = await generateText({
+      const { text, usage } = await generateText({
         model: openai(agent.llmSettings.model),
         temperature: agent.llmSettings.temperature,
         maxTokens: agent.llmSettings.messageToken,
@@ -117,28 +145,76 @@ export const makeConversationController = async (
       // Create message
       const Msg: Message = {
         senderId,
-        conversationId,
+        parentId: conversationId,
         simulationId,
         content: text,
-        tokens: {
-          promptTokens: 0,
-          completionTokens: 0,
-        },
+        tokens: usage,
       };
-      await supabase
-        .from(process.env.MESSAGES_TABLE_NAME as string)
-        .insert([Msg])
-        .select()
-        .single();
+
+      await createMessage(Msg, reply);
 
       // Update conversation
-
-      // Update agents inConversation
-    } else {
-      // Your turn to wait
+      await updateConversation(conversationId, senderId);
     }
 
     reply.status(200).send();
+  } catch (error) {
+    handleControllerError(error, reply);
+  }
+};
+
+export const startConversationController = async (
+  request: FastifyRequest<{
+    Params: { conversation: string };
+    Body: { senderId: string };
+  }>,
+  reply: FastifyReply
+) => {
+  try {
+    const { conversation: conversationId } = request.params;
+    const { topic, simulationId, participants } = await getConversation(
+      conversationId,
+      reply
+    );
+
+    const { senderId } = request.body;
+
+    const recieverId = participants.find((p) => p !== senderId);
+
+    if (!recieverId) throw new Error("Reciever Id in conversation not found.");
+
+    // get Agent
+    const sender = await getAgentById(senderId, reply);
+    const reciever = await getAgentById(recieverId as string, reply);
+    const simulation = await getSimulation(simulationId, reply);
+
+    // Send first message
+    const { text, usage } = await generateText({
+      model: openai(process.env.DEFAULT_LLM_MODEL as string),
+      system: await parsePrompt(sender, simulation),
+      prompt: `Formulera en fördjupande och tydlig fråga kring följande topic: ${topic}`,
+    });
+
+    const initMessage: Message = {
+      parentId: conversationId,
+      content: text,
+      senderId,
+      simulationId,
+      tokens: usage,
+    };
+
+    await createMessage(initMessage, reply);
+
+    // Update conversation state and updated_at = onChange
+    await supabase
+      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+      .update({ active: true })
+      .eq("id", conversationId)
+      .select();
+
+    await reply.status(200).send({
+      message: `Conversation ${conversationId} between ${sender.name} and ${reciever.name} has started.`,
+    });
   } catch (error) {
     handleControllerError(error, reply);
   }
@@ -151,11 +227,24 @@ export const endConversationController = async (
   reply: FastifyReply
 ) => {
   try {
-    const { conversation } = request.params;
+    const { conversation: conversationId } = request.params;
+
+    await supabase
+      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+      .update({ active: false })
+      .eq("id", conversationId)
+      .select();
+
     await reply
       .status(200)
-      .send({ message: `Conversation ${conversation} ended.` });
+      .send({ message: `Conversation ${conversationId} ended.` });
   } catch (error) {
     handleControllerError(error, reply);
   }
 };
+
+export async function makeConversation(
+  conversationId: string,
+  senderId: string,
+  reply: FastifyReply
+) {}
