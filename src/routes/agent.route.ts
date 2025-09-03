@@ -1,5 +1,5 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
-import { validateKey } from "../core";
+import { validateKey } from "../middlewares";
 import {
   generateAgentController,
   generateRandomAgentController,

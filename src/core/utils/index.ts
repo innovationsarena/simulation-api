@@ -1,33 +1,5 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { Message } from "../types";
-import { CoreMessage } from "ai";
-
-export const validateKey = async (
-  request: FastifyRequest,
-  reply: FastifyReply
-) => {
-  if (!request.headers["authorization"]) {
-    throw new Error("API key not found.");
-  }
-
-  const API_KEY = request.headers["authorization"].split(" ")[1];
-
-  if (!API_KEY) {
-    throw new Error("API key not found.");
-  }
-
-  const valid = process.env.API_KEY === API_KEY;
-
-  if (valid) {
-    return;
-  } else throw new Error("API key not valid.");
-};
-
-export function getRandomNumber(min: number, max: number) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import type { Message } from "../types";
+import type { CoreMessage } from "ai";
 
 export const toLocalISO = (date: Date) => {
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
