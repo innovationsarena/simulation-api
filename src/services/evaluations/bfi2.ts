@@ -2,6 +2,7 @@ import { FastifyReply } from "fastify";
 import { getAgentById, supabase } from "../supabase";
 import { generateObject, generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { parsePrompt } from "../agents";
 import z from "zod";
 
@@ -137,9 +138,9 @@ const questions = [
 
 `;
 
-  console.log(parsePrompt(agent));
   const { object } = await generateObject({
-    model: openai(process.env.DEFAULT_LLM_MODEL as string),
+    model: openai(agent.llmSettings.model as string),
+    temperature: agent.llmSettings.temperature,
     system: await parsePrompt(agent),
     schema: z.object({ results: z.array(z.string()) }),
     prompt,
@@ -150,6 +151,8 @@ const questions = [
     .select("*")
     .eq("email", agentId)
     .single();
+
+  console.log(data);
 
   const results = arraySimilarity(object.results, data?.answers as string[]);
 
