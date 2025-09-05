@@ -2,8 +2,8 @@ import {
   BigFivePersonalityModel,
   ExtendedBigFivePersonalityModel,
   DataItem,
-} from "../../../core/types";
-import { personalities } from "../parser/personality.models.sv";
+} from "../../../core";
+import { personalities } from "../parser/personality.models.en";
 import { items } from "./bigfivedata";
 
 // Simple
@@ -23,7 +23,7 @@ export const getBigFivePersonality = (
   const len = filteredItems.length;
 
   if (!len)
-    throw new Error("No matching item (age, sex) data in bigfivedata file.");
+    throw new Error("No matching (age, sex) data in big five data file.");
 
   const rand = Math.floor(Math.random() * len);
 

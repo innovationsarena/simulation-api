@@ -1,11 +1,13 @@
 import { createHash } from "crypto";
 
 export const createConversationId = (
-  agentAid: string,
-  agentBid: string
+  senderId: string,
+  recieverId: string
 ): string => {
+  const sortedIds = [senderId, recieverId].sort();
+
   return createHash("shake256", { outputLength: 8 })
-    .update([agentAid, agentBid].sort().join(""))
+    .update(sortedIds.sort().join(""))
     .digest("hex");
 };
 

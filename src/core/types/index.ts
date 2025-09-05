@@ -14,11 +14,11 @@ export type Agent = {
   objectives: string[]; // [Agent Name/Type] aims to [verb] [target/resource] to achieve [desired state/outcome]
   dynamicProps?: Record<string, any>[];
   llmSettings: LLMSettings;
-  evaluation?: Evaluation;
+  evaluations?: Evaluations;
   stats?: Stats;
 };
 
-export type Evaluation = {
+export type Evaluations = {
   bigFiveSimilarity?: number; // Percent
   questionsSimilarity?: number; // Percent
 };

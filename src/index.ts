@@ -13,8 +13,6 @@ import {
   evaluationsRouter,
 } from "./routes";
 
-import "./consumers";
-
 const PORT = Number(process.env.PORT) || 3000;
 
 const server = fastify({

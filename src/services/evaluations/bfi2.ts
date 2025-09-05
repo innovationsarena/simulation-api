@@ -1,7 +1,6 @@
 import { getAgentById, supabase } from "../supabase";
-import { generateObject, generateText } from "ai";
+import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { anthropic } from "@ai-sdk/anthropic";
 import { parsePrompt } from "../agents";
 import z from "zod";
 
