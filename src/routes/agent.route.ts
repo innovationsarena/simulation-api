@@ -1,82 +1,57 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
 import {
-  generateAgentController,
-  generateRandomAgentController,
-  createAgentController,
+  generateRandomAgents,
+  createCustomAgent,
+  generateAgents,
 } from "../controllers";
+import z from "zod";
+
+const createAgentSchema = z
+  .object({
+    id: z.string(),
+    simulationId: z.string(),
+    version: z.string(),
+    name: z.string(),
+    objectives: z.array(z.unknown()),
+    personality: z.object({}).passthrough(),
+    demographics: z.object({}).passthrough(),
+  })
+  .strict();
+
+const generateAgentsSchema = z
+  .object({
+    simulationId: z.string(),
+    version: z.string(),
+    count: z.number(),
+  })
+  .strict();
 
 export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agents/custom",
-
     {
-      schema: {
-        description: "Creates one Agent from input.",
-        tags: ["agents"],
-        body: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            simulationId: { type: "string" },
-            name: { type: "string" },
-            objectives: { type: "array" },
-            personality: { type: "object" },
-            demographics: { type: "object" },
-          },
-          required: ["version", "simulationId"],
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      schema: createAgentSchema,
+      preValidation: [validateKey],
     },
-    createAgentController as unknown as RouteHandlerMethod
+    createCustomAgent
   );
+
   fastify.post(
     "/agents",
-
     {
-      schema: {
-        description: "Creates one or more Agent.",
-        tags: ["agents"],
-        body: {
-          type: "object",
-          properties: {
-            version: { type: "integer" },
-            count: { type: "integer" },
-            simulationId: { type: "string" },
-          },
-          required: ["count", "version", "simulationId"],
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      schema: generateAgentsSchema,
+      preValidation: [validateKey],
     },
-    generateAgentController as unknown as RouteHandlerMethod
+    generateAgents
   );
+
   fastify.post(
     "/agents/random",
     {
-      schema: {
-        description:
-          "Creates one or more Agent by randomly generate values in personality values.",
-        tags: ["agents"],
-        body: {
-          type: "object",
-          properties: {
-            version: { type: "integer" },
-            count: { type: "integer" },
-            simulationId: { type: "string" },
-          },
-          required: ["count", "version", "simulationId"],
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      schema: generateAgentsSchema,
+      preValidation: [validateKey],
     },
-    generateRandomAgentController as unknown as RouteHandlerMethod
+    generateRandomAgents
   );
 };

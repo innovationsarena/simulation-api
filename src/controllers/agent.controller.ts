@@ -4,68 +4,11 @@ import {
   id,
   asyncHandler,
   BigFivePersonalityModel,
-  handleControllerError,
   Demographics,
 } from "../core";
-import { generateAgent, generateRandomAgent, supabase } from "../services";
+import { createAgent, generateAgent, generateRandomAgent } from "../services";
 
-type CreateAgentRequest = FastifyRequest<{
-  Body: {
-    version: number;
-    count?: number;
-    simulationId?: string;
-  };
-}>;
-
-type AgentResponse = {
-  agents: Agent[];
-};
-
-export const generateAgentController = asyncHandler(
-  async (
-    request: CreateAgentRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply> => {
-    const count: number = request.body.count ?? 1;
-    const simulationId: string = request.body.simulationId
-      ? request.body.simulationId
-      : id(16);
-
-    const agents: Agent[] = [];
-
-    for (let i = 0; i < count; i++) {
-      agents.push(await generateAgent(request.body.version, simulationId));
-    }
-
-    const response: AgentResponse = { agents };
-    return reply.status(201).send(response);
-  }
-);
-
-export const generateRandomAgentController = asyncHandler(
-  async (
-    request: CreateAgentRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply> => {
-    const count: number = request.body.count ?? 1;
-    const simulationId: string = request.body.simulationId
-      ? request.body.simulationId
-      : id(16);
-
-    const agents: Agent[] = [];
-
-    for (let i = 0; i < count; i++) {
-      agents.push(
-        await generateRandomAgent(request.body.version, simulationId)
-      );
-    }
-
-    const response: AgentResponse = { agents };
-    return reply.status(201).send(response);
-  }
-);
-
-export const createAgentController = asyncHandler(
+export const createCustomAgent = asyncHandler(
   async (
     request: FastifyRequest<{
       Body: {
@@ -99,35 +42,70 @@ export const createAgentController = asyncHandler(
       demographics,
       personality,
       llmSettings: {
-        provider: "openai",
-        model: "gpt-5-mini",
+        provider: process.env.DEFAULT_LLM_PROVIDER as string,
+        model: process.env.DEFAULT_LLM_MODEL as string,
         temperature: 0.5,
         messageToken: 500,
       },
     };
 
-    console.log(agent);
-
-    const { data, error } = await supabase
-      .from(process.env.AGENTS_TABLE_NAME as string)
-      .insert(agent)
-      .select();
-    console.log(error);
-    console.log(data);
-    if (error) handleControllerError(error, reply);
+    await createAgent(agent);
 
     return reply.status(201).send(agent);
   }
 );
 
-export const agentSubscribe = async (agent: Agent) => {
-  const channel = supabase.channel(agent.inActivityId as string);
-  channel.subscribe((msg) => {
-    console.log(msg);
-  });
+export const generateAgents = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: {
+        simulationId: string;
+        version: string;
+        count: number;
+      };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const count: number = request.body.count ?? 1;
+
+    const agents: Agent[] = [];
+
+    for (let i = 0; i < count; i++) {
+      agents.push(
+        await generateAgent(
+          parseInt(request.body.version),
+          request.body.simulationId
+        )
+      );
+    }
+
+    return reply.status(201).send({ agents });
+  }
+);
+
+type GenerateAgent = {
+  Body: {
+    simulationId: string;
+    version: string;
+    count: number;
+  };
 };
 
-export const agentUnsubscribe = async (agent: Agent) => {
-  const channel = supabase.channel(agent.inActivityId as string);
-  channel.unsubscribe();
-};
+export const generateRandomAgents = asyncHandler(
+  async (request: FastifyRequest<GenerateAgent>, reply: FastifyReply) => {
+    const count: number = request.body.count ?? 1;
+
+    const agents: Agent[] = [];
+
+    for (let i = 0; i < count; i++) {
+      agents.push(
+        await generateRandomAgent(
+          parseInt(request.body.version),
+          request.body.simulationId
+        )
+      );
+    }
+
+    return reply.status(201).send({ agents });
+  }
+);

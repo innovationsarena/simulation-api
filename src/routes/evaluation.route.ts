@@ -1,9 +1,6 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
-import {
-  createBigFiveEvaluation,
-  createQuestionnaireEvaluation,
-} from "../controllers";
+import { createBigFiveEvaluation } from "../controllers";
 
 export const evaluationsRouter = (fastify: FastifyInstance) => {
   fastify.post(
@@ -16,34 +13,14 @@ export const evaluationsRouter = (fastify: FastifyInstance) => {
           type: "object",
           properties: {
             agentId: { type: "string" },
+            sample: { type: "number" },
           },
           required: ["agentId"],
           additionalProperties: false,
         },
       },
-      preValidation: [],
-      preHandler: [validateKey],
+      preValidation: [validateKey],
     },
-    createBigFiveEvaluation as unknown as RouteHandlerMethod
-  );
-  fastify.post(
-    "/evaluations/questions",
-    {
-      schema: {
-        description: "Creates Agent questionnare evaluations.",
-        tags: ["evaluations"],
-        body: {
-          type: "object",
-          properties: {
-            agentId: { type: "string" },
-          },
-          required: ["agentId"],
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
-    },
-    createQuestionnaireEvaluation as unknown as RouteHandlerMethod
+    createBigFiveEvaluation as RouteHandlerMethod
   );
 };

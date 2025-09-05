@@ -1,18 +1,19 @@
 import "dotenv/config";
 import fastify from "fastify";
-import formbody from "@fastify/formbody";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import formbody from "@fastify/formbody";
 
 import {
-  pingRouter,
-  simulatorRouter,
+  simulationRouter,
   agentRouter,
   docsRouter,
   conversationRouter,
   discussionRouter,
   evaluationsRouter,
 } from "./routes";
+
+import "./consumers";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -37,8 +38,7 @@ server.setErrorHandler((error, _request, reply) => {
 
 // Routes
 server.register(docsRouter);
-server.register(pingRouter);
-server.register(simulatorRouter);
+server.register(simulationRouter);
 server.register(conversationRouter);
 server.register(discussionRouter);
 server.register(agentRouter);

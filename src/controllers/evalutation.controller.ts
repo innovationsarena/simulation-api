@@ -1,25 +1,24 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { asyncHandler } from "../core";
-import { evaluateBigfive } from "../services";
 
-type CreateAgentEvaluationRequest = FastifyRequest<{
-  Body: {
-    agentId: string;
-  };
-}>;
+import { eventBus } from "../services";
 
 export const createBigFiveEvaluation = asyncHandler(
-  async (request: CreateAgentEvaluationRequest, reply: FastifyReply) => {
-    const { agentId } = request.body;
+  async (
+    request: FastifyRequest<{
+      Body: {
+        agentId: string;
+        sample?: number;
+      };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { agentId, sample } = request.body;
 
-    const resp = await evaluateBigfive(agentId, reply);
+    eventBus.emit("agent.evalute.bigfive", { agentId, sample });
 
-    reply.status(200).send({ percent: resp });
-  }
-);
-
-export const createQuestionnaireEvaluation = asyncHandler(
-  async (request: CreateAgentEvaluationRequest, reply: FastifyReply) => {
-    reply.status(200).send({ message: "OK" });
+    return reply.status(200).send({
+      message: "Evaluation started.",
+    });
   }
 );

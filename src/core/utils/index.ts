@@ -23,12 +23,6 @@ export const validateKey = async (
   } else throw new Error("API key not valid.");
 };
 
-export function getRandomNumber(min: number, max: number) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 export const toLocalISO = (date: Date) => {
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
   const msLocal = date.getTime() - offsetMs;

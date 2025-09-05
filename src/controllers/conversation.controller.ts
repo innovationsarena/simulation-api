@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { handleControllerError, Message, parseMessages } from "../core";
+import { asyncHandler, Message, parseMessages } from "../core";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import {
@@ -13,27 +13,26 @@ import {
   updateConversation,
 } from "../services";
 
-export const createConversationController = async (
-  request: FastifyRequest<{
-    Body: { senderId: string; recieverId: string; simulationId: string };
-  }>,
-  reply: FastifyReply
-) => {
-  try {
+export const createConversationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: { senderId: string; recieverId: string; simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
     console.log("Creating conversation...");
 
     const { senderId, recieverId, simulationId } = request.body;
 
-    const simulation = await getSimulation(simulationId, reply);
-    const sender = await getAgentById(senderId, reply);
-    const reciever = await getAgentById(recieverId, reply);
+    const simulation = await getSimulation(simulationId);
+    const sender = await getAgentById(senderId);
+    const reciever = await getAgentById(recieverId);
 
     // Create conversation
     const conversation = await createConversation(
       simulation,
       sender,
-      reciever,
-      reply
+      reciever
     );
 
     // Update agents states
@@ -43,7 +42,7 @@ export const createConversationController = async (
       .eq("id", senderId)
       .select();
 
-    if (senderError) handleControllerError(senderError, reply);
+    if (senderError) throw new Error(senderError.message);
 
     const { data: recieverData, error: recieverError } = await supabase
       .from(process.env.AGENTS_TABLE_NAME as string)
@@ -51,9 +50,7 @@ export const createConversationController = async (
       .eq("id", recieverId)
       .select();
 
-    if (recieverError) handleControllerError(recieverError, reply);
-
-    // Create channel?
+    if (recieverError) throw new Error(recieverError.message);
 
     // Send first message
     const { text, usage } = await generateText({
@@ -70,7 +67,7 @@ export const createConversationController = async (
       tokens: usage,
     };
 
-    await createMessage(initMessage, reply);
+    await createMessage(initMessage);
 
     // Update conversation state and updated_at = onChange
     await supabase
@@ -79,51 +76,47 @@ export const createConversationController = async (
       .eq("id", conversation.id)
       .select();
 
-    await reply.status(201).send({
+    return reply.status(201).send({
       ...conversation,
       messages: [initMessage],
     });
-  } catch (error) {
-    handleControllerError(error, reply);
   }
-};
+);
 
-export const getConversationController = async (
-  request: FastifyRequest<{
-    Params: { conversation: string };
-  }>,
-  reply: FastifyReply
-) => {
-  try {
+export const getConversationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { conversation: string };
+    }>,
+    reply: FastifyReply
+  ) => {
     const { conversation: conversationId } = request.params;
 
-    const conversation = await getConversation(conversationId, reply);
+    const conversation = await getConversation(conversationId);
 
-    reply.status(200).send(conversation);
-  } catch (error) {
-    handleControllerError(error, reply);
+    return reply.status(200).send(conversation);
   }
-};
+);
 
-export const makeConversationController = async (
-  request: FastifyRequest<{
-    Params: { conversation: string };
-    Body: { senderId: string };
-  }>,
-  reply: FastifyReply
-) => {
-  try {
+export const makeConversationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { conversation: string };
+      Body: { senderId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
     const { conversation: conversationId } = request.params;
     const { senderId } = request.body;
 
     // get Agent
-    const agent = await getAgentById(senderId, reply);
+    const agent = await getAgentById(senderId);
 
     // Get Conversation
     const { simulationId, messages, activeSpeakerId, id } =
-      await getConversation(conversationId, reply);
+      await getConversation(conversationId);
 
-    const simulation = await getSimulation(simulationId, reply);
+    const simulation = await getSimulation(simulationId);
 
     // Check if its your turn to talk
     if (agent.inActivityId === conversationId && agent.id !== activeSpeakerId) {
@@ -151,30 +144,27 @@ export const makeConversationController = async (
         tokens: usage,
       };
 
-      await createMessage(Msg, reply);
+      await createMessage(Msg);
 
       // Update conversation
       await updateConversation(conversationId, senderId);
     }
 
-    reply.status(200).send();
-  } catch (error) {
-    handleControllerError(error, reply);
+    return reply.status(200).send();
   }
-};
+);
 
-export const startConversationController = async (
-  request: FastifyRequest<{
-    Params: { conversation: string };
-    Body: { senderId: string };
-  }>,
-  reply: FastifyReply
-) => {
-  try {
+export const startConversationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { conversation: string };
+      Body: { senderId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
     const { conversation: conversationId } = request.params;
     const { topic, simulationId, participants } = await getConversation(
-      conversationId,
-      reply
+      conversationId
     );
 
     const { senderId } = request.body;
@@ -184,9 +174,9 @@ export const startConversationController = async (
     if (!recieverId) throw new Error("Reciever Id in conversation not found.");
 
     // get Agent
-    const sender = await getAgentById(senderId, reply);
-    const reciever = await getAgentById(recieverId as string, reply);
-    const simulation = await getSimulation(simulationId, reply);
+    const sender = await getAgentById(senderId);
+    const reciever = await getAgentById(recieverId as string);
+    const simulation = await getSimulation(simulationId);
 
     // Send first message
     const { text, usage } = await generateText({
@@ -203,7 +193,7 @@ export const startConversationController = async (
       tokens: usage,
     };
 
-    await createMessage(initMessage, reply);
+    await createMessage(initMessage);
 
     // Update conversation state and updated_at = onChange
     await supabase
@@ -212,21 +202,19 @@ export const startConversationController = async (
       .eq("id", conversationId)
       .select();
 
-    await reply.status(200).send({
+    return reply.status(200).send({
       message: `Conversation ${conversationId} between ${sender.name} and ${reciever.name} has started.`,
     });
-  } catch (error) {
-    handleControllerError(error, reply);
   }
-};
+);
 
-export const endConversationController = async (
-  request: FastifyRequest<{
-    Params: { conversation: string };
-  }>,
-  reply: FastifyReply
-) => {
-  try {
+export const endConversationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { conversation: string };
+    }>,
+    reply: FastifyReply
+  ) => {
     const { conversation: conversationId } = request.params;
 
     await supabase
@@ -235,16 +223,13 @@ export const endConversationController = async (
       .eq("id", conversationId)
       .select();
 
-    await reply
+    return reply
       .status(200)
       .send({ message: `Conversation ${conversationId} ended.` });
-  } catch (error) {
-    handleControllerError(error, reply);
   }
-};
+);
 
 export async function makeConversation(
   conversationId: string,
-  senderId: string,
-  reply: FastifyReply
+  senderId: string
 ) {}

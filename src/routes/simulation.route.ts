@@ -6,7 +6,7 @@ import {
   stopSimulation,
 } from "../controllers";
 
-export const simulatorRouter = (fastify: FastifyInstance) => {
+export const simulationRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/simulations",
     {

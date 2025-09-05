@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import {
   Agent,
   Discussion,
-  handleControllerError,
+  asyncHandler,
   id,
   Message,
   parseMessages,
@@ -22,16 +22,16 @@ import { generateText, streamText, tool } from "ai";
 import { openai } from "@ai-sdk/openai";
 import z from "zod";
 
-export const createDiscussionController = async (
-  request: FastifyRequest<{
-    Body: { simulationId: string; minRounds?: number; agents?: Agent[] };
-  }>,
-  reply: FastifyReply
-) => {
-  try {
+export const createDiscussionController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: { simulationId: string; minRounds?: number; agents?: Agent[] };
+    }>,
+    reply: FastifyReply
+  ) => {
     const { simulationId, agents, minRounds = 3 } = request.body;
-    const { topic } = await getSimulation(simulationId, reply);
-    const simAgents = await listAgents(simulationId, reply);
+    const { topic } = await getSimulation(simulationId);
+    const simAgents = await listAgents(simulationId);
 
     // If agents are given in body
     let participants: Agent[] =
@@ -54,7 +54,7 @@ export const createDiscussionController = async (
       .insert(discussion);
 
     if (createDiscussionError)
-      handleControllerError(createDiscussionError, reply);
+      throw new Error(createDiscussionError.message);
     const systemPrompt = `You are a moderator in a discussion forum. 
     
     ## Instructions
@@ -79,10 +79,10 @@ export const createDiscussionController = async (
 
           execute: async (args) => {
             // Execute agent
-            const agent = await getAgentByName(args.agentName, reply);
+            const agent = await getAgentByName(args.agentName);
 
             // Get messages
-            const { messages } = await getDiscussion(discussionId, reply);
+            const { messages } = await getDiscussion(discussionId);
 
             const m = messages.length
               ? messages
@@ -110,7 +110,7 @@ export const createDiscussionController = async (
               tokens: usage,
             };
 
-            await createMessage(replyMessage, reply);
+            await createMessage(replyMessage);
           },
         }),
       },
@@ -121,24 +121,20 @@ export const createDiscussionController = async (
     console.log(resp);
 
     return resp;
-  } catch (error) {
-    handleControllerError(error, reply);
   }
-};
+);
 
-export const getDiscussionController = async (
-  request: FastifyRequest<{
-    Params: { discussionId: string };
-  }>,
-  reply: FastifyReply
-) => {
-  try {
+export const getDiscussionController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { discussionId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
     const { discussionId } = request.params;
 
-    const conversation = await getDiscussion(discussionId, reply);
+    const conversation = await getDiscussion(discussionId);
 
-    reply.status(200).send(conversation);
-  } catch (error) {
-    handleControllerError(error, reply);
+    return reply.status(200).send(conversation);
   }
-};
+);

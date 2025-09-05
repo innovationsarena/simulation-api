@@ -3,15 +3,16 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import {
+
+import type {
   Agent,
   Conversation,
   Discussion,
   Message,
   Simulation,
-} from "../core/types";
-import { FastifyReply } from "fastify";
-import { handleControllerError, id } from "../core/utils";
+} from "../core";
+
+import { id } from "../core";
 
 export const supabase = createClient(
   process.env.SUPABASE_URL as string,
@@ -19,8 +20,7 @@ export const supabase = createClient(
 );
 
 export const getSimulation = async (
-  simulationId: string,
-  reply: FastifyReply
+  simulationId: string
 ): Promise<Simulation> => {
   const {
     data: simulation,
@@ -32,16 +32,13 @@ export const getSimulation = async (
     .single();
 
   if (getSimulationError)
-    return reply
-      .status(getSimulationError.code as unknown as number)
-      .send(getSimulationError.message);
+    throw new Error(getSimulationError.message);
 
   return simulation;
 };
 
 export const getConversation = async (
-  conversationId: string,
-  reply: FastifyReply
+  conversationId: string
 ): Promise<Conversation> => {
   const {
     data: conversation,
@@ -53,9 +50,7 @@ export const getConversation = async (
     .single();
 
   if (getConversationError)
-    return reply
-      .status(getConversationError.code as unknown as number)
-      .send(getConversationError.message);
+    throw new Error(getConversationError.message);
 
   const {
     data: messages,
@@ -66,16 +61,13 @@ export const getConversation = async (
     .eq("conversationId", conversationId);
 
   if (getMessagesError)
-    return reply
-      .status(getMessagesError.code as unknown as number)
-      .send(getMessagesError.message);
+    throw new Error(getMessagesError.message);
 
   return { ...conversation, messages };
 };
 
 export const listAgents = async (
-  simulationId: string,
-  reply: FastifyReply
+  simulationId: string
 ): Promise<Agent[]> => {
   const { data, error } = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
@@ -83,13 +75,12 @@ export const listAgents = async (
     .eq("simulationId", simulationId);
 
   if (error)
-    return reply.status(error.code as unknown as number).send(error.message);
+    throw new Error(error.message);
   return data as Agent[];
 };
 
 export const getDiscussion = async (
-  discussionId: string,
-  reply: FastifyReply
+  discussionId: string
 ) => {
   const {
     data: discussion,
@@ -101,9 +92,7 @@ export const getDiscussion = async (
     .single();
 
   if (getDiscussionError)
-    return reply
-      .status(getDiscussionError.code as unknown as number)
-      .send(getDiscussionError.message);
+    throw new Error(getDiscussionError.message);
 
   const {
     data: messages,
@@ -114,38 +103,26 @@ export const getDiscussion = async (
     .eq("parentId", discussionId);
 
   if (getMessagesError) {
-    console.log("NO adkskjdaj");
-
-    return reply
-      .status(getMessagesError.code as unknown as number)
-      .send(getMessagesError.message);
+    throw new Error(getMessagesError.message);
   }
 
   return { ...discussion, messages } as Discussion;
 };
 
-export const getAgentById = async (
-  agentId: string,
-  reply: FastifyReply
-): Promise<Agent> => {
-  const { data: agent, error: getAgentError }: PostgrestSingleResponse<Agent> =
-    await supabase
-      .from(process.env.AGENTS_TABLE_NAME as string)
-      .select("*")
-      .eq("id", agentId)
-      .single();
+export const getAgentById = async (agentId: string): Promise<Agent> => {
+  const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
+    .from(process.env.AGENTS_TABLE_NAME as string)
+    .select("*")
+    .eq("id", agentId)
+    .single();
 
-  if (getAgentError)
-    return reply
-      .status(getAgentError.code as unknown as number)
-      .send(getAgentError.message);
+  if (error) throw new Error(error.message);
 
   return agent;
 };
 
 export const getAgentByName = async (
-  name: string,
-  reply: FastifyReply
+  name: string
 ): Promise<Agent> => {
   const { data: agent, error: getAgentError }: PostgrestSingleResponse<Agent> =
     await supabase
@@ -155,15 +132,12 @@ export const getAgentByName = async (
       .single();
 
   if (getAgentError)
-    return reply
-      .status(getAgentError.code as unknown as number)
-      .send(getAgentError.message);
+    throw new Error(getAgentError.message);
   return agent;
 };
 
 export const getIdleAgent = async (
-  agentId: string,
-  reply: FastifyReply
+  agentId: string
 ): Promise<Agent> => {
   const {
     data: idleAgent,
@@ -176,21 +150,19 @@ export const getIdleAgent = async (
     .single();
 
   if (getIdleAgentError)
-    return reply
-      .status(getIdleAgentError.code as unknown as number)
-      .send(getIdleAgentError.message);
+    throw new Error(getIdleAgentError.message);
 
   return idleAgent;
 };
 
-export const createMessage = async (message: Message, reply: FastifyReply) => {
+export const createMessage = async (message: Message) => {
   const { data, error } = await supabase
     .from(process.env.MESSAGES_TABLE_NAME as string)
     .insert(message)
     .select();
 
   if (error)
-    return reply.status(error.code as unknown as number).send(error.message);
+    throw new Error(error.message);
 
   return data;
 };
@@ -198,8 +170,7 @@ export const createMessage = async (message: Message, reply: FastifyReply) => {
 export const createConversation = async (
   simulation: Simulation,
   sender: Agent,
-  reciever: Agent,
-  reply: FastifyReply
+  reciever: Agent
 ): Promise<Conversation> => {
   const conversationId = id(12);
 
@@ -219,9 +190,20 @@ export const createConversation = async (
       .select();
 
   if (createConversationError)
-    handleControllerError(createConversationError, reply);
+    throw new Error(createConversationError.message);
 
   return { ...conversation, messages: [] };
+};
+
+export const createAgent = async (agent: Agent) => {
+  const { data, error } = await supabase
+    .from(process.env.AGENTS_TABLE_NAME as string)
+    .insert(agent)
+    .select();
+
+  if (error) throw new Error(error.message);
+
+  return data;
 };
 
 export const updateConversation = async (

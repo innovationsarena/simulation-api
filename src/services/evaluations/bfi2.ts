@@ -1,4 +1,3 @@
-import { FastifyReply } from "fastify";
 import { getAgentById, supabase } from "../supabase";
 import { generateObject, generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
@@ -6,8 +5,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { parsePrompt } from "../agents";
 import z from "zod";
 
-export const evaluateBigfive = async (agentId: string, reply: FastifyReply) => {
-  const agent = await getAgentById(agentId, reply);
+export const evaluateBigfive = async (agentId: string) => {
+  const agent = await getAgentById(agentId);
 
   const prompt = `
   Prompt:
