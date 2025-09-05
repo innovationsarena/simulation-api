@@ -59,11 +59,13 @@ export type Facet = {
   value: string | number;
 };
 
+type SimulationType = "discussion" | "conversation" | "survey";
+
 export type Simulation = {
   id: string;
   agentCount: number;
   state: "primed" | "running" | "ended" | "stopped";
-  type: "discussion" | "conversation" | "survey";
+  type: SimulationType;
   name: string;
   organizational?: boolean;
   description?: string;
@@ -159,6 +161,7 @@ export type DataItem = {
 
 export type Message = {
   parentId: string; // Conversation/Discussion id
+  parentType: SimulationType;
   senderId: string; // Agent Id
   content: string; // Says what
   simulationId: string;

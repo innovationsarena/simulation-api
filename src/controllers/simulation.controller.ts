@@ -12,7 +12,6 @@ import {
 import {
   createConversation,
   createMessage,
-  generateRandomAgents,
   getSimulation,
   listAgents,
   parsePrompt,
@@ -24,6 +23,7 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
+
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
@@ -44,7 +44,7 @@ export const createSimulation = asyncHandler(
   async (request: CreateSimulationRequest, reply: FastifyReply) => {
     const simulationId = id(12);
 
-    const simulation: Simulation = {
+    const newSimulation: Simulation = {
       ...request.body,
       id: simulationId,
       name: request.body.name.length ? request.body.name : generateSimName(),
@@ -53,45 +53,16 @@ export const createSimulation = asyncHandler(
     };
 
     // Write simulation to db
-    const {
-      data: simulationData,
-      error: createSimulationError,
-    }: PostgrestSingleResponse<Simulation> = await supabase
-      .from(process.env.SIMULATIONS_TABLE_NAME as string)
-      .insert(simulation)
-      .select()
-      .single();
+    const { data: simulation, error }: PostgrestSingleResponse<Simulation> =
+      await supabase
+        .from(process.env.SIMULATIONS_TABLE_NAME as string)
+        .insert(newSimulation)
+        .select()
+        .single();
 
-    if (!simulationData && createSimulationError)
-      throw new Error(createSimulationError.message);
+    if (error) throw new Error(error.message);
 
-    // Generate agents
-    console.log("Generating random agents...");
-    const agents = await generateRandomAgents(
-      simulation.agentCount,
-      2,
-      simulation.id
-    );
-
-    // Writes agents to db
-    const {
-      data: agentsData,
-      error: createAgentsError,
-    }: PostgrestResponse<Agent> = await supabase
-      .from(process.env.AGENTS_TABLE_NAME as string)
-      .insert([...agents])
-      .select();
-
-    if (!agentsData && createAgentsError)
-      throw new Error(createAgentsError.message);
-
-    // Return simulation object
-    const response: { simulation: Simulation; agents: Agent[] } = {
-      simulation,
-      agents,
-    };
-
-    return reply.status(201).send(response);
+    return reply.status(201).send(simulation);
   }
 );
 
@@ -102,10 +73,7 @@ export const startSimulation = asyncHandler(
     }>,
     reply: FastifyReply
   ) => {
-    const simulationId = request.params.simulationId;
-
-    if (!simulationId)
-      throw new Error("Missing simulationId in URL - /simulations/:simulationId/start");
+    const { simulationId } = request.params;
 
     const simulation = await getSimulation(simulationId);
 
@@ -171,9 +139,6 @@ export const stopSimulation = asyncHandler(
     }>,
     reply: FastifyReply
   ) => {
-    if (!request.params.simulationId)
-      throw new Error("Missing simulationId in URL - /simulations/:simulationId/stop");
-
     const simulation = await getSimulation(request.params.simulationId);
 
     supabase

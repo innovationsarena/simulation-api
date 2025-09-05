@@ -1,4 +1,4 @@
-import { getAgentById, supabase } from "../supabase";
+import { getAgentById, supabase } from "../../core/supabase";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { parsePrompt } from "../agents";

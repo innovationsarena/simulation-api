@@ -3,7 +3,7 @@ import {
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
 import { Agent } from "../../../core";
-import { supabase } from "../../supabase";
+import { supabase } from "../../../core/supabase";
 
 export const listAgents = async (simulationId: string): Promise<Agent[]> => {
   const { data: agents, error }: PostgrestResponse<Agent> = await supabase

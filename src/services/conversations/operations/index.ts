@@ -2,7 +2,7 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import { supabase } from "../../supabase";
+import { supabase } from "../../../core/supabase";
 import {
   Agent,
   Conversation,

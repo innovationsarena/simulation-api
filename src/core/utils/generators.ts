@@ -35,7 +35,7 @@ export const generateSimName = () => {
 
   return `${pre[Math.floor(Math.random() * pre.length)]} ${
     post[Math.floor(Math.random() * post.length)]
-  }`;
+  } simulation`;
 };
 
 export function getRandomNumber(min: number, max: number) {
