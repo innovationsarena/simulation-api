@@ -137,3 +137,6 @@ dist
 
 # OSX
 /**/.DS_*
+
+# Claude
+.claude
