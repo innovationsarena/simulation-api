@@ -83,7 +83,7 @@ export const updateConversation = async (
 
   return conversation;
 };
-
+/*
 supabase
   .channel("conversations-changes")
   .on(
@@ -102,3 +102,5 @@ supabase
     }
   )
   .subscribe();
+
+*/

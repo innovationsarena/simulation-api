@@ -1,7 +1,7 @@
 import { Queue } from "bullmq";
 import { Message } from "../../core";
 
-export const create = async (id: string) => {
+export const createConversationQueue = async (id: string) => {
   return new Queue(id, {
     connection: {
       host: process.env.REDIS_INTERNAL_URL,
@@ -10,7 +10,10 @@ export const create = async (id: string) => {
   });
 };
 
-export const add = async (queue: Queue, message: Message): Promise<void> => {
+export const addConversationToQueue = async (
+  queue: Queue,
+  message: Message
+): Promise<void> => {
   await queue.add("conversation.message", message, {
     removeOnComplete: true,
     removeOnFail: true,
