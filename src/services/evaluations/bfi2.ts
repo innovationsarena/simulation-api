@@ -1,7 +1,7 @@
-import { getAgentById, supabase } from "../../core/supabase";
+import { supabase } from "../../core";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { parsePrompt } from "../agents";
+import { getAgentById, parsePrompt } from "../agents";
 import z from "zod";
 
 export const evaluateBigfive = async (agentId: string) => {

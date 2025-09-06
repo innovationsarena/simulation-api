@@ -112,6 +112,7 @@ export const startSimulation = asyncHandler(
 
             const initMessage: Message = {
               parentId: conversation.id,
+              parentType: "conversation",
               content: text,
               senderId: sender.id,
               simulationId,

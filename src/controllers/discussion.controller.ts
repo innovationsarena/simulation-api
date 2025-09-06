@@ -53,8 +53,7 @@ export const createDiscussionController = asyncHandler(
       .from(process.env.DISCUSSIONS_TABLE_NAME as string)
       .insert(discussion);
 
-    if (createDiscussionError)
-      throw new Error(createDiscussionError.message);
+    if (createDiscussionError) throw new Error(createDiscussionError.message);
     const systemPrompt = `You are a moderator in a discussion forum. 
     
     ## Instructions
@@ -79,7 +78,7 @@ export const createDiscussionController = asyncHandler(
 
           execute: async (args) => {
             // Execute agent
-            const agent = await getAgentByName(args.agentName);
+            const agent = await getAgentByName(simulationId, args.agentName);
 
             // Get messages
             const { messages } = await getDiscussion(discussionId);
@@ -105,6 +104,7 @@ export const createDiscussionController = asyncHandler(
             const replyMessage: Message = {
               senderId: agent.id,
               parentId: discussionId,
+              parentType: "discussion",
               content: text,
               simulationId,
               tokens: usage,

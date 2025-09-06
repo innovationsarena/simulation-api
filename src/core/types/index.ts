@@ -59,7 +59,7 @@ export type Facet = {
   value: string | number;
 };
 
-type SimulationType = "discussion" | "conversation" | "survey";
+export type SimulationType = "discussion" | "conversation" | "survey";
 
 export type Simulation = {
   id: string;

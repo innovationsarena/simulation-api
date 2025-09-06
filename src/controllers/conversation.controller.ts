@@ -29,11 +29,7 @@ export const createConversationController = asyncHandler(
     const reciever = await getAgentById(recieverId);
 
     // Create conversation
-    const conversation = await createConversation(
-      simulation,
-      sender,
-      reciever
-    );
+    const conversation = await createConversation(simulation, sender, reciever);
 
     // Update agents states
     const { data: senderData, error: senderError } = await supabase
@@ -61,6 +57,7 @@ export const createConversationController = asyncHandler(
 
     const initMessage: Message = {
       parentId: conversation.id,
+      parentType: "conversation",
       content: text,
       senderId,
       simulationId,
@@ -139,6 +136,7 @@ export const makeConversationController = asyncHandler(
       const Msg: Message = {
         senderId,
         parentId: conversationId,
+        parentType: "conversation",
         simulationId,
         content: text,
         tokens: usage,
@@ -187,6 +185,7 @@ export const startConversationController = asyncHandler(
 
     const initMessage: Message = {
       parentId: conversationId,
+      parentType: "conversation",
       content: text,
       senderId,
       simulationId,
@@ -228,8 +227,3 @@ export const endConversationController = asyncHandler(
       .send({ message: `Conversation ${conversationId} ended.` });
   }
 );
-
-export async function makeConversation(
-  conversationId: string,
-  senderId: string
-) {}
