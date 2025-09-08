@@ -1,12 +1,10 @@
-import { supabase } from "../../core";
+import { Agent, supabase } from "../../core";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { getAgentById, parsePrompt } from "../agents";
 import z from "zod";
 
-export const evaluateBigfive = async (agentId: string) => {
-  const agent = await getAgentById(agentId);
-
+export const evaluateBigfive = async (agent: Agent) => {
   const prompt = `
   Prompt:
 
@@ -133,7 +131,6 @@ const questions = [
     "I am someone who has little interest in speculating about things", // R
     "I am someone who is intellectually curious"
   ];
-
 `;
 
   const { object } = await generateObject({
@@ -147,10 +144,8 @@ const questions = [
   const { data } = await supabase
     .from(process.env.BFI_TABLE_NAME as string)
     .select("*")
-    .eq("email", agentId)
+    .eq("email", agent.id)
     .single();
-
-  console.log(data);
 
   const results = arraySimilarity(object.results, data?.answers as string[]);
 

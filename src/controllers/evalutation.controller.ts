@@ -12,10 +12,10 @@ export const createBigFiveEvaluation = asyncHandler(
     }>,
     reply: FastifyReply
   ) => {
-    const { agentId, sample } = request.body;
+    const { agentId, sample = 5 } = request.body;
 
     await evaluationsQueue.add(
-      "",
+      "evaluation.bigfive",
       { agentId, sample },
       { removeOnComplete: true, removeOnFail: true }
     );

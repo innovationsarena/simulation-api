@@ -19,8 +19,24 @@ export type Agent = {
 };
 
 export type Evaluations = {
-  bigFiveSimilarity?: number; // Percent
-  questionsSimilarity?: number; // Percent
+  bigFive: BigFiveEvaluation;
+  questionnaire?: QuestionnaireEvaluation;
+};
+
+export type BigFiveEvaluation = {
+  samples: number;
+  results: {
+    min: number; // Percent
+    max: number; // Percent
+    avg: number; // Percent
+  };
+};
+
+export type QuestionnaireEvaluation = {
+  version: number;
+  results: {
+    avg: number; // Percent
+  };
 };
 
 export type Organization = {

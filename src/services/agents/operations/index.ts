@@ -2,7 +2,7 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import { Agent } from "../../../core";
+import { Agent, BigFiveEvaluation, Evaluations } from "../../../core";
 import { supabase } from "../../../core/supabase";
 
 export const listAgents = async (simulationId: string): Promise<Agent[]> => {
@@ -72,13 +72,28 @@ export const assignActivityToAgent = async (
   return agent;
 };
 
-export const resignActivityFromAgent = async (
-  agentId: string,
-  activityId: string
+export const removeActivityFromAgent = async (
+  agentId: string
 ): Promise<Agent> => {
   const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
-    .update({ state: "idle", inActivityId: null })
+    .update({ evaluate: "idle", inActivityId: null })
+    .eq("id", agentId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return agent;
+};
+
+export const createBigFiveEvaluation = async (
+  agentId: string,
+  evaluation: BigFiveEvaluation
+): Promise<Agent> => {
+  const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
+    .from(process.env.AGENTS_TABLE_NAME as string)
+    .update({ evaluations: { bigFive: evaluation } })
     .eq("id", agentId)
     .select()
     .single();
