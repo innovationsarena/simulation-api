@@ -9,7 +9,6 @@ import {
 } from "../core";
 
 import {
-  createMessage,
   getAgentByName,
   getDiscussion,
   getSimulation,
@@ -109,8 +108,6 @@ export const createDiscussionController = asyncHandler(
               simulationId,
               tokens: usage,
             };
-
-            await createMessage(replyMessage);
           },
         }),
       },

@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { asyncHandler } from "../core";
 import { evaluationsQueue } from "../services";
 
-export const createBigFiveEvaluation = asyncHandler(
+export const createBigFiveEvaluationController = asyncHandler(
   async (
     request: FastifyRequest<{
       Body: {

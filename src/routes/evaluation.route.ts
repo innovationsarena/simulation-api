@@ -1,6 +1,6 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
-import { createBigFiveEvaluation } from "../controllers";
+import { createBigFiveEvaluationController } from "../controllers";
 
 export const evaluationsRouter = (fastify: FastifyInstance) => {
   fastify.post(
@@ -21,6 +21,6 @@ export const evaluationsRouter = (fastify: FastifyInstance) => {
       },
       preValidation: [validateKey],
     },
-    createBigFiveEvaluation as RouteHandlerMethod
+    createBigFiveEvaluationController
   );
 };

@@ -1,28 +1,23 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
-import { createDiscussionController } from "../controllers/discussion.controller";
+import z from "zod";
+import { createDiscussionController } from "../controllers";
+
+const createDiscussionSchema = z
+  .object({
+    agents: z.array(z.any()).optional(),
+    minRounds: z.number().optional(),
+    simulationId: z.string(),
+  })
+  .strict();
 
 export const discussionRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/discussions",
     {
-      schema: {
-        description: "Create a new discussion.",
-        tags: ["discussions"],
-        body: {
-          type: "object",
-          properties: {
-            agents: { type: "array" },
-            minRounds: { type: "number" },
-            simulationId: { type: "string" },
-          },
-          required: ["simulationId"],
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      schema: createDiscussionSchema,
+      preValidation: [validateKey],
     },
-    createDiscussionController as unknown as RouteHandlerMethod
+    createDiscussionController
   );
 };

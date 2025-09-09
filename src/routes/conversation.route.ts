@@ -3,8 +3,6 @@ import { validateKey } from "../core";
 import {
   createConversationController,
   getConversationController,
-  makeConversationController,
-  endConversationController,
 } from "../controllers/conversation.controller";
 
 export const conversationRouter = (fastify: FastifyInstance) => {
@@ -28,37 +26,5 @@ export const conversationRouter = (fastify: FastifyInstance) => {
       preHandler: [validateKey],
     },
     getConversationController as unknown as RouteHandlerMethod
-  );
-  fastify.patch(
-    "/conversations/:conversation",
-    {
-      schema: {
-        description: "Conversate.",
-        tags: ["conversations"],
-        body: {
-          type: "object",
-          properties: {
-            senderId: { type: "string" },
-          },
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
-    },
-    makeConversationController as unknown as RouteHandlerMethod
-  );
-  fastify.delete(
-    "/conversations/:conversation",
-    {
-      schema: {
-        description: "End conversation.",
-        tags: ["conversations"],
-        body: {},
-      },
-      preValidation: [],
-      preHandler: [validateKey],
-    },
-    endConversationController as unknown as RouteHandlerMethod
   );
 };

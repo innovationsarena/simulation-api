@@ -7,7 +7,6 @@ import {
   Agent,
   Conversation,
   createConversationId,
-  id,
   Message,
   Simulation,
 } from "../../../core";
@@ -67,7 +66,7 @@ export const createConversation = async (
   return { ...conversation, messages: [] };
 };
 
-export const updateConversation = async (
+export const updateActiveSpeaker = async (
   conversationId: string,
   speakerId: string
 ): Promise<Conversation> => {

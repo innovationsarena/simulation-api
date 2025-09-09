@@ -1,9 +1,9 @@
-import { FastifyInstance, RouteHandlerMethod } from "fastify";
+import { FastifyInstance } from "fastify";
 import { validateKey } from "../core";
 import {
   generateRandomAgents,
-  createCustomAgent,
-  generateAgents,
+  generateAgentsController,
+  createCustomAgentController,
 } from "../controllers";
 import z from "zod";
 
@@ -29,21 +29,21 @@ const generateAgentsSchema = z
 
 export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
-    "/agents/custom",
-    {
-      schema: createAgentSchema,
-      preValidation: [validateKey],
-    },
-    createCustomAgent
-  );
-
-  fastify.post(
     "/agents",
     {
       schema: generateAgentsSchema,
       preValidation: [validateKey],
     },
-    generateAgents
+    generateAgentsController
+  );
+
+  fastify.post(
+    "/agents/custom",
+    {
+      schema: createAgentSchema,
+      preValidation: [validateKey],
+    },
+    createCustomAgentController
   );
 
   fastify.post(

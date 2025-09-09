@@ -8,7 +8,7 @@ import {
 } from "../core";
 import { createAgent, generateAgent, generateRandomAgent } from "../services";
 
-export const createCustomAgent = asyncHandler(
+export const createCustomAgentController = asyncHandler(
   async (
     request: FastifyRequest<{
       Body: {
@@ -55,7 +55,7 @@ export const createCustomAgent = asyncHandler(
   }
 );
 
-export const generateAgents = asyncHandler(
+export const generateAgentsController = asyncHandler(
   async (
     request: FastifyRequest<{
       Body: {
