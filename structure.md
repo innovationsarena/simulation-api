@@ -119,38 +119,37 @@ agents/          ████████████████ (Complex)
 ├── operations/  ✓
 ├── generator/   ✓
 ├── parser/      ✓
-└── actions/     ✓
+└── tools/       ✓  [UPDATED: renamed from actions]
 
-conversations/   ████████ (Standard)
+conversations/   ████████ (Standard)  
 ├── operations/  ✓
-└── workers/     ✓
+└── workers/     ✓  [ACTIVE: conversationQueue implemented]
 
 discussions/     ████ (Simple)
 └── operations/  ✓
 
 evaluations/     ██████ (Specialized)
-├── bfi2.ts      ✓
-└── workers/     ✓
+├── bfi2.ts      ✓  
+└── workers/     ✓  [ACTIVE: evaluationsQueue with 50 concurrency]
 
-messages/        ████ (Simple)
-└── operations/  ✓
-
-simulations/     ████ (Simple)
-└── operations/  ✓
+simulations/     ████ (Standard)
+└── operations/  ✓  [ENHANCED: now includes conversation orchestration]
 ```
 
-### ✅ **Consistent Patterns**
+### ✅ **Consistent Patterns** [UPDATED]
 
 - All services export through `index.ts`
 - Operations layer always present
-- Workers used for async processing
+- Workers implemented for async processing (conversations, evaluations)
 - Error handling follows `asyncHandler` pattern
+- Queue system standardized with BullMQ + Redis
 
-### ⚠️ **Inconsistencies Found**
+### ⚠️ **Remaining Inconsistencies**
 
-- **Agent service**: 4 sub-modules vs others with 1-2
-- **File naming**: Some use plural, others singular
-- **Worker patterns**: Only conversations and evaluations use workers
+- **Agent service**: Still has 4 sub-modules vs others with 1-2
+- **Worker implementation**: Conversation worker partially implemented (placeholder logic)
+- **Queue naming**: "CUEUE_NAME" typo in conversation worker
+- **Service exports**: Some services removed from main export (messages, queuesystem)
 
 ## Data Flow Diagrams
 
@@ -308,20 +307,20 @@ simulations/     ████ (Simple)
 │  │     Queues      │    │     Queue       │    │   Storage   │  │
 │  │                 │    │                 │    │             │  │
 │  │ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────┐ │  │
-│  │ │Dynamic Queue│ │    │ │Static Queue │ │    │ │Job Data │ │  │
-│  │ │per Convo ID │ │    │ │"evaluations"│ │    │ │Results  │ │  │
+│  │ │Single Queue │ │    │ │Static Queue │ │    │ │Job Data │ │  │
+│  │ │"conversationQueue"│ │ │"evaluationsQueue"│ │ │Results  │ │  │
 │  │ └─────────────┘ │    │ └─────────────┘ │    │ │Config   │ │  │
-│  │                 │    │                 │    │ └─────────┘ │  │
-│  └─────────────────┘    └─────────────────┘    └─────────────┘  │
-│           │                       │                     │       │
+│  │ [UPDATED]       │    │ [ACTIVE: 50    │    │ └─────────┘ │  │
+│  └─────────────────┘    │  concurrency]  │    └─────────────┘  │
+│           │              └─────────────────┘            │       │
 │           ▼                       ▼                     ▼       │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────┐  │
-│  │  Conversation   │    │   Evaluation    │    │   Health    │  │
-│  │    Workers      │    │    Workers      │    │  Monitoring │  │
+│  │  Conversation   │    │   Evaluation    │    │   Redis     │  │
+│  │    Workers      │    │    Workers      │    │ Connection  │  │
 │  │                 │    │                 │    │             │  │
-│  │ • Auto-scale    │    │ • BFI-2 Tests   │    │ • Job Stats │  │
-│  │ • Message Gen   │    │ • Score Calc    │    │ • Failed    │  │
-│  │ • State Update  │    │ • Agent Update  │    │ • Retries   │  │
+│  │ • [TODO] Logic  │    │ • BFI-2 Tests   │    │ • localhost │  │
+│  │ • Placeholder   │    │ • Score Calc    │    │ • Port 6379 │  │
+│  │ • In Progress   │    │ • Agent Update  │    │ • Health    │  │
 │  └─────────────────┘    └─────────────────┘    └─────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -452,20 +451,58 @@ core/
 - Redis-based state management
 - Database connection pooling
 
+## Recent Architecture Improvements [UPDATED]
+
+### ✅ **Completed Updates**
+
+1. **Queue System Implementation**
+   - `evaluationsQueue`: Fully operational with 50 worker concurrency
+   - `conversationQueue`: Infrastructure setup complete
+   - Redis connection standardized across workers
+
+2. **Service Organization**
+   - Agent service: `actions/` renamed to `tools/` for consistency
+   - Simulation service: Enhanced with conversation orchestration logic
+   - Service exports streamlined in main index
+
+3. **Error Handling Standardization**
+   - All controllers now use `asyncHandler` wrapper
+   - Consistent error throwing instead of direct reply handling
+   - Centralized error response formatting
+
+### 🔄 **In Progress**
+
+1. **Conversation Worker Logic**
+   - Queue infrastructure complete
+   - Worker logic placeholder implemented
+   - Needs conversation processing implementation
+
+2. **Service Export Cleanup**
+   - Messages and queuesystem services removed from exports
+   - Core functionality consolidated into main services
+
+### 🐛 **Technical Debt Identified**
+
+- **Queue naming typo**: "CUEUE_NAME" in conversation worker
+- **Conversation worker**: Incomplete implementation with TODO comments
+- **Service consistency**: Agent service still more complex than others
+
 ---
 
-**Architecture Score: B+ (Good with room for improvement)**
+**Architecture Score: B+ → A- (Improving with recent updates)**
 
-**Strengths:**
+**Updated Strengths:**
 
 - Clear layer separation
-- Effective async processing
-- Comprehensive AI integration
+- **[NEW]** Fully operational queue system for evaluations
+- **[ENHANCED]** Comprehensive AI integration with better error handling
+- **[IMPROVED]** Standardized async processing patterns
 - Strong type safety
 
-**Areas for Improvement:**
+**Remaining Areas for Improvement:**
 
-- Service structure standardization
+- Complete conversation worker implementation
+- Service structure final standardization  
 - Repository pattern implementation
 - Event-driven capabilities
 - Testing infrastructure
