@@ -5,5 +5,3 @@ export * from "./discussions";
 export * from "./simulations";
 export * from "./evaluations";
 export * from "./agents";
-
-export * from "./queuesystem";

@@ -2,7 +2,6 @@ import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { supabase, Simulation } from "../../../core";
 import { listAgents } from "../../agents";
 import { createConversation } from "../../conversations";
-import { createConversationQueue } from "../../queuesystem";
 
 export const getSimulation = async (
   simulationId: string
@@ -79,7 +78,7 @@ export const startSimulation = async (simulationId: string) => {
             sender,
             reciever
           );
-          await createConversationQueue(conversation.id);
+          console.log(conversation);
         }
       }
     }
