@@ -45,15 +45,15 @@ export const getAgentByName = async (
   return agent;
 };
 
-export const createAgent = async (agent: Agent) => {
-  const { data: agents, error }: PostgrestResponse<Agent> = await supabase
+export const createAgents = async (agents: Agent[]) => {
+  const { data, error }: PostgrestResponse<Agent> = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
-    .insert(agent)
+    .insert([...agents])
     .select();
 
   if (error) throw new Error(error.message);
 
-  return agents;
+  return data;
 };
 
 export const assignActivityToAgent = async (

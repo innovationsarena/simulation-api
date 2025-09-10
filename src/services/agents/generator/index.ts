@@ -35,8 +35,6 @@ export const generateAgent = async (
 
   // Basic big five
   if (version === 2) {
-    console.log("Basic big five.");
-
     return {
       ...base,
       version: 2,
@@ -48,7 +46,6 @@ export const generateAgent = async (
 
   // Extended  big five
   if (version === 3) {
-    console.log("Extended big five.");
     return {
       ...base,
       version: 3,
@@ -59,7 +56,7 @@ export const generateAgent = async (
   }
 
   // Simple random
-  console.log("Simple big five.");
+
   return {
     ...base,
     version: 1,
@@ -77,7 +74,7 @@ export const generateRandomAgent = async (
   const age = getRandomNumber(18, 60);
 
   const MIN_BIGFIVE_VALUE = 1;
-  const MAX_BIGFIVE_VALUE = 10;
+  const MAX_BIGFIVE_VALUE = 6;
 
   const defaultLLMsettings = {
     provider: process.env.DEFAULT_LLM_PROVIDER,
@@ -101,7 +98,7 @@ export const generateRandomAgent = async (
 
   // Basic big five
   if (version === 2) {
-    console.log("Generating basic random big five personality.");
+    console.log("Generating Agent with basic random big five personality.");
 
     return {
       ...base,
@@ -126,7 +123,7 @@ export const generateRandomAgent = async (
 
   // Extended  big five
   if (version === 3) {
-    console.log("Generating random extended big five personality.");
+    console.log("Generating Agent with random extended big five personality.");
 
     return {
       ...base,
@@ -229,7 +226,7 @@ export const generateRandomAgent = async (
 };
 
 export const generateRandomAgents = async (
-  agentCount: number = 5,
+  agentCount: number = 6,
   version: number,
   simulationId: string
 ): Promise<Agent[]> => {
@@ -242,7 +239,7 @@ export const generateRandomAgents = async (
 };
 
 export const generateAgents = async (
-  agentCount: number = 5,
+  agentCount: number = 6,
   version: number,
   simulationId: string
 ): Promise<Agent[]> => {

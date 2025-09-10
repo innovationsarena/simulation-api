@@ -15,7 +15,7 @@ export const handleBigfiveEvaluation = async (job: Job) => {
   const agent = await getAgentById(agentId);
 
   for (let i = 0; i < sample * 1; i++) {
-    console.log(`Evaluating sample ${i + 1} in job ${job.name}`);
+    console.log(`Evaluating sample ${i + 1} in job ${job.id}...`);
     const percent = await evaluateBigfive(agent);
     resultsArr.push(percent);
   }

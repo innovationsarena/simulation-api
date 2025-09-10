@@ -1,7 +1,7 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { createConversation } from "../../conversations";
 import { supabase, Simulation } from "../../../core";
 import { listAgents } from "../../agents";
-import { createConversation } from "../../conversations";
 
 export const getSimulation = async (
   simulationId: string
@@ -49,24 +49,25 @@ export const updateSimulationState = async (
   return simulation;
 };
 
-export const startSimulation = async (simulationId: string) => {
-  const simulation = await getSimulation(simulationId);
+export const startSimulation = async (simulation: Simulation) => {
+  console.log(`Starting simulation ${simulation.id}...`);
 
   const { data, error } = await supabase
     .from(process.env.SIMULATIONS_TABLE_NAME as string)
     .update({ state: "running" })
-    .eq("id", simulationId)
-    .select();
+    .eq("id", simulation.id)
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
 
-  const agents = await listAgents(simulationId);
+  const agents = await listAgents(simulation.id);
 
   // Start conversations by split in half and start conversate.
   const halfAgentCount = Math.ceil(agents.length / 2);
   const senders = agents.slice(0, halfAgentCount);
   const recievers = agents.slice(halfAgentCount);
-
+  console.log(agents);
   for await (const sender of senders) {
     if (recievers.length) {
       const reciever = recievers.pop();
@@ -83,4 +84,6 @@ export const startSimulation = async (simulationId: string) => {
       }
     }
   }
+
+  console.log(`Simulation ${simulation.id} started.`);
 };

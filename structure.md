@@ -123,13 +123,13 @@ agents/          ████████████████ (Complex)
 
 conversations/   ████████ (Standard)  
 ├── operations/  ✓
-└── workers/     ✓  [ACTIVE: conversationQueue implemented]
+└── workers/     ✓  [ACTIVE: conversationQueue + 50 concurrency]
 
 discussions/     ████ (Simple)
 └── operations/  ✓
 
 evaluations/     ██████ (Specialized)
-├── bfi2.ts      ✓  
+├── operations/  ✓  [NEW: structured like other services]
 └── workers/     ✓  [ACTIVE: evaluationsQueue with 50 concurrency]
 
 simulations/     ████ (Standard)
@@ -146,10 +146,15 @@ simulations/     ████ (Standard)
 
 ### ⚠️ **Remaining Inconsistencies**
 
-- **Agent service**: Still has 4 sub-modules vs others with 1-2
-- **Worker implementation**: Conversation worker partially implemented (placeholder logic)
-- **Queue naming**: "CUEUE_NAME" typo in conversation worker
+- **Agent service**: Still has 4 sub-modules vs others with 2
+- **Worker implementation**: Conversation worker has placeholder logic (TODO comments)
 - **Service exports**: Some services removed from main export (messages, queuesystem)
+
+### ✅ **Recently Fixed**
+
+- **Queue naming**: Fixed "CUEUE_NAME" → "QUEUE_NAME" typo
+- **Service structure**: Evaluations now follows standard operations + workers pattern
+- **Worker concurrency**: Both queues now use 50 concurrent workers
 
 ## Data Flow Diagrams
 
@@ -310,8 +315,9 @@ simulations/     ████ (Standard)
 │  │ │Single Queue │ │    │ │Static Queue │ │    │ │Job Data │ │  │
 │  │ │"conversationQueue"│ │ │"evaluationsQueue"│ │ │Results  │ │  │
 │  │ └─────────────┘ │    │ └─────────────┘ │    │ │Config   │ │  │
-│  │ [UPDATED]       │    │ [ACTIVE: 50    │    │ └─────────┘ │  │
-│  └─────────────────┘    │  concurrency]  │    └─────────────┘  │
+│  │ [ACTIVE: 50     │    │ [ACTIVE: 50    │    │ └─────────┘ │  │
+│  │  concurrency]   │    │  concurrency]  │    └─────────────┘  │
+│  └─────────────────┘    └─────────────────┘                    │
 │           │              └─────────────────┘            │       │
 │           ▼                       ▼                     ▼       │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────┐  │
@@ -320,7 +326,7 @@ simulations/     ████ (Standard)
 │  │                 │    │                 │    │             │  │
 │  │ • [TODO] Logic  │    │ • BFI-2 Tests   │    │ • localhost │  │
 │  │ • Placeholder   │    │ • Score Calc    │    │ • Port 6379 │  │
-│  │ • In Progress   │    │ • Agent Update  │    │ • Health    │  │
+│  │ • 50 Workers    │    │ • Agent Update  │    │ • Health    │  │
 │  └─────────────────┘    └─────────────────┘    └─────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -457,12 +463,13 @@ core/
 
 1. **Queue System Implementation**
    - `evaluationsQueue`: Fully operational with 50 worker concurrency
-   - `conversationQueue`: Infrastructure setup complete
+   - `conversationQueue`: Infrastructure complete with 50 worker concurrency
    - Redis connection standardized across workers
 
 2. **Service Organization**
    - Agent service: `actions/` renamed to `tools/` for consistency
-   - Simulation service: Enhanced with conversation orchestration logic
+   - Evaluations service: Restructured with `operations/` + `workers/` pattern
+   - Conversations service: Now follows standard `operations/` + `workers/` structure
    - Service exports streamlined in main index
 
 3. **Error Handling Standardization**
@@ -483,9 +490,9 @@ core/
 
 ### 🐛 **Technical Debt Identified**
 
-- **Queue naming typo**: "CUEUE_NAME" in conversation worker
 - **Conversation worker**: Incomplete implementation with TODO comments
 - **Service consistency**: Agent service still more complex than others
+- **Empty operations**: Some operations directories may be empty placeholders
 
 ---
 

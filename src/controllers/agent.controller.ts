@@ -6,7 +6,7 @@ import {
   BigFivePersonalityModel,
   Demographics,
 } from "../core";
-import { createAgent, generateAgent, generateRandomAgent } from "../services";
+import { createAgents, generateAgent, generateRandomAgent } from "../services";
 
 export const createCustomAgentController = asyncHandler(
   async (
@@ -49,7 +49,7 @@ export const createCustomAgentController = asyncHandler(
       },
     };
 
-    await createAgent(agent);
+    await createAgents([agent]);
 
     return reply.status(201).send(agent);
   }
@@ -79,6 +79,8 @@ export const generateAgentsController = asyncHandler(
       );
     }
 
+    await createAgents(agents);
+
     return reply.status(201).send({ agents });
   }
 );
@@ -105,6 +107,8 @@ export const generateRandomAgents = asyncHandler(
         )
       );
     }
+
+    await createAgents(agents);
 
     return reply.status(201).send({ agents });
   }

@@ -45,6 +45,8 @@ export const createConversation = async (
 ): Promise<Conversation> => {
   const conversationId = createConversationId(sender.id, reciever.id);
 
+  console.log(`Creating conversation ${conversationId}.`);
+
   const newConversation: Omit<Conversation, "messages"> = {
     id: conversationId,
     simulationId: simulation.id,
@@ -54,12 +56,16 @@ export const createConversation = async (
     participants: [sender.id, reciever.id],
   };
 
+  console.log(newConversation);
+
   const { data: conversation, error }: PostgrestSingleResponse<Conversation> =
     await supabase
       .from(process.env.CONVERSATIONS_TABLE_NAME as string)
       .insert(newConversation)
       .select()
       .single();
+
+  console.log(conversation);
 
   if (error) throw new Error(error.message);
 

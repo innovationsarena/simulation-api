@@ -6,6 +6,7 @@ import {
   getSimulation,
   supabase,
 } from "../services";
+import { simulationQueue } from "../services/simulations/workers";
 
 export const createSimulation = asyncHandler(
   async (
@@ -45,6 +46,14 @@ export const startSimulation = asyncHandler(
     }>,
     reply: FastifyReply
   ) => {
+    const simulation = await getSimulation(request.params.simulationId);
+    if (!simulation)
+      reply
+        .status(404)
+        .send({ message: "Simulation with given ID not found." });
+
+    await simulationQueue.add("simulation.start", simulation);
+
     reply
       .status(200)
       .send({ message: `Simulation ${request.params.simulationId} started.` });
