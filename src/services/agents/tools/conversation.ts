@@ -1,5 +1,5 @@
 import { Tool } from "ai";
-import { supabase } from "../../core/supabase";
+import { supabase } from "../../../core/supabase";
 import z from "zod";
 
 export const findConversationPartner: Tool = {

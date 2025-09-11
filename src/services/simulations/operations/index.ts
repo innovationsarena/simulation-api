@@ -1,5 +1,5 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { createConversation } from "../../conversations";
+import { conversationQueue, createConversation } from "../../conversations";
 import { supabase, Simulation } from "../../../core";
 import { listAgents } from "../../agents";
 
@@ -67,7 +67,7 @@ export const startSimulation = async (simulation: Simulation) => {
   const halfAgentCount = Math.ceil(agents.length / 2);
   const senders = agents.slice(0, halfAgentCount);
   const recievers = agents.slice(halfAgentCount);
-  console.log(agents);
+
   for await (const sender of senders) {
     if (recievers.length) {
       const reciever = recievers.pop();
@@ -79,7 +79,9 @@ export const startSimulation = async (simulation: Simulation) => {
             sender,
             reciever
           );
-          console.log(conversation);
+          // Send to Conversation Queue
+          await conversationQueue.add("conversation.start", conversation);
+          return;
         }
       }
     }

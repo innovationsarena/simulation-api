@@ -7,7 +7,9 @@ import {
   getConversation,
   getAgentById,
   assignActivityToAgent,
+  conversationQueue,
 } from "../services";
+import { conversationRouter } from "../routes";
 
 export const createConversationController = asyncHandler(
   async (
@@ -62,13 +64,11 @@ export const startConversationController = asyncHandler(
     reply: FastifyReply
   ) => {
     const { conversation: conversationId } = request.params;
-    const { simulationId, participants } = await getConversation(
-      conversationId
-    );
+    const conversation = await getConversation(conversationId);
 
     const { senderId } = request.body;
 
-    const recieverId = participants.find((p) => p !== senderId);
+    const recieverId = conversation.participants.find((p) => p !== senderId);
     if (!recieverId) throw new Error("Reciever Id in conversation not found.");
 
     // get Agents
@@ -76,6 +76,7 @@ export const startConversationController = asyncHandler(
     const reciever = await getAgentById(recieverId as string);
 
     // Send to Conversation Queue
+    await conversationQueue.add("conversation.start", conversation);
 
     return reply.status(200).send({
       message: `Conversation ${conversationId} between ${sender.name} and ${reciever.name} has started.`,

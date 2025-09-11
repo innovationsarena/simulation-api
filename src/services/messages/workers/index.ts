@@ -6,6 +6,9 @@ export const messageQueue = new Queue(QUEUE_NAME);
 
 // WORKERS
 new Worker(QUEUE_NAME, async (job) => {}, {
-  connection: { port: 6379, host: "127.0.0.1" },
+  connection: {
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT as string),
+  },
   concurrency: 50,
 });

@@ -12,5 +12,11 @@ new Worker(
     // find out whos turn it is
     // Parse messages
   },
-  { connection: { port: 6379, host: "127.0.0.1" }, concurrency: 50 }
+  {
+    connection: {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT as string),
+    },
+    concurrency: 50,
+  }
 );
