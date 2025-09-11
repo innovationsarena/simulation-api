@@ -1,5 +1,10 @@
 import { Queue, Worker } from "bullmq";
-import { startConversationOperation } from "../operations";
+import { getConversation, startConversationOperation } from "../operations";
+import { getAgentById, parsePrompt } from "../../agents";
+import { Message, parseMessages } from "../../../core";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { createMessage } from "../../messages";
 
 // QUEUE
 const QUEUE_NAME = "conversationQueue";
@@ -15,7 +20,36 @@ new Worker(
     }
 
     if (job.name === "conversation.converse") {
-      console.log(job);
+      const { conversationId } = job.data;
+
+      const conversation = await getConversation(conversationId);
+
+      const { activeSpeakerId, participants, simulationId, messages } =
+        conversation;
+      const senderId = participants.find((agent) => agent !== activeSpeakerId);
+      const sender = await getAgentById(senderId || "");
+
+      const { text, usage } = await generateText({
+        model: openai(sender.llmSettings.model),
+        system: await parsePrompt(sender),
+        messages: parseMessages(messages, sender.id),
+      });
+
+      // Save message to db
+      const message: Message = {
+        senderId: sender.id,
+        parentId: conversationId,
+        parentType: "discussion",
+        content: text,
+        simulationId,
+        tokens: usage,
+      };
+
+      await createMessage(message);
+
+      await conversationQueue.add("conversation.converse", {
+        conversationId: conversation.id,
+      });
     }
   },
   {

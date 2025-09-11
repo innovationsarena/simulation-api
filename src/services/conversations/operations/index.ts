@@ -33,7 +33,7 @@ export const getConversation = async (
   }: PostgrestResponse<Message> = await supabase
     .from(process.env.MESSAGES_TABLE_NAME as string)
     .select("*")
-    .eq("conversationId", conversationId);
+    .eq("parentId", conversationId);
 
   if (getMessagesError) throw new Error(getMessagesError.message);
 
