@@ -80,8 +80,12 @@ export const startSimulation = async (simulation: Simulation) => {
             reciever
           );
           // Send to Conversation Queue
-          await conversationQueue.add("conversation.start", conversation);
-          return;
+          await conversationQueue.add("conversation.start", {
+            simulation,
+            conversation,
+            sender,
+            reciever,
+          });
         }
       }
     }

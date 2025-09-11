@@ -1,4 +1,5 @@
 import { Queue, Worker } from "bullmq";
+import { startConversationOperation } from "../operations";
 
 // QUEUE
 const QUEUE_NAME = "conversationQueue";
@@ -8,11 +9,14 @@ export const conversationQueue = new Queue(QUEUE_NAME);
 new Worker(
   QUEUE_NAME,
   async (job) => {
-    console.log("Conversation worker started.");
-    console.log(job);
-    // Get conversation
-    // find out whos turn it is
-    // Parse messages
+    if (job.name === "conversation.start") {
+      const { simulation, conversation, sender } = job.data;
+      await startConversationOperation(simulation, conversation, sender);
+    }
+
+    if (job.name === "conversation.converse") {
+      console.log(job);
+    }
   },
   {
     connection: {

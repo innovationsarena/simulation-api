@@ -10,6 +10,8 @@ import {
   Message,
   Simulation,
 } from "../../../core";
+import { createInitConversationMessage } from "../../messages";
+import { conversationQueue } from "../workers";
 
 export const getConversation = async (
   conversationId: string
@@ -61,7 +63,7 @@ export const createConversation = async (
   const { data: conversation, error }: PostgrestSingleResponse<Conversation> =
     await supabase
       .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-      .insert(newConversation)
+      .upsert(newConversation)
       .select()
       .single();
 
@@ -77,14 +79,33 @@ export const updateActiveSpeaker = async (
   const { data: conversation, error }: PostgrestSingleResponse<Conversation> =
     await supabase
       .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-      .update({ activeSpeaker: speakerId })
+      .update({ activeSpeakerId: speakerId })
       .eq("id", conversationId)
       .select()
       .single();
 
+  console.log(
+    `Active spekar in conversation ${conversationId} set to Agent with id ${speakerId}.`
+  );
+
   if (error) throw new Error(error.message);
 
   return conversation;
+};
+
+export const startConversationOperation = async (
+  simulation: Simulation,
+  conversation: Conversation,
+  sender: Agent
+): Promise<void> => {
+  console.log(`Starting conversation ${conversation.id}.`);
+
+  await updateActiveSpeaker(conversation.id, sender.id);
+  await createInitConversationMessage(simulation, conversation, sender);
+
+  await conversationQueue.add("conversation.converse", {
+    conversationId: conversation.id,
+  });
 };
 /*
 supabase

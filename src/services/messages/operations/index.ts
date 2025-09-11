@@ -17,6 +17,8 @@ export const createMessage = async (message: Message): Promise<Message> => {
     .select()
     .single();
 
+  console.error(error?.message);
+
   if (error) throw new Error(error.message);
 
   return data;
@@ -27,6 +29,8 @@ export const createInitConversationMessage = async (
   conversation: Conversation,
   sender: Agent
 ): Promise<string> => {
+  console.log(`Creating first message in conversation ${conversation.id}...`);
+
   const { text, usage } = await generateText({
     model: openai(process.env.DEFAULT_LLM_MODEL as string),
     system: await parsePrompt(sender, simulation),
@@ -42,7 +46,11 @@ export const createInitConversationMessage = async (
     tokens: usage,
   };
 
+  console.log(initMessage);
+
   await createMessage(initMessage);
+
+  console.log(`First message in conversation ${conversation.id} created.`);
 
   return text;
 };
