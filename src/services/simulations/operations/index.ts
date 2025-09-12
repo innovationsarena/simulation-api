@@ -32,23 +32,6 @@ export const createSimulation = async (
   return data;
 };
 
-export const updateSimulationState = async (
-  simulationId: string,
-  state: "primed" | "running" | "ended" | "stopped"
-): Promise<Simulation> => {
-  const { data: simulation, error }: PostgrestSingleResponse<Simulation> =
-    await supabase
-      .from(process.env.SIMULATIONS_TABLE_NAME as string)
-      .update({ state })
-      .eq("id", simulationId)
-      .select()
-      .single();
-
-  if (error) throw new Error(error.message);
-
-  return simulation;
-};
-
 export const startSimulation = async (simulation: Simulation) => {
   console.log(`Starting simulation ${simulation.id}...`);
 
@@ -98,12 +81,33 @@ export const stopSimulation = async (
   simulation: Simulation
 ): Promise<boolean> => {
   console.log(`Stopping simulation ${simulation.id}}...`);
+
   // Update simulation state
   await updateSimulationState(simulation.id, "stopped");
+
   // End all activities
+
   // Clear queues?
+  await conversationQueue.drain();
   // Update all Agent states
 
   console.log(`Simulation ${simulation.id} stopped.`);
   return true;
+};
+
+export const updateSimulationState = async (
+  simulationId: string,
+  state: "primed" | "running" | "ended" | "stopped"
+): Promise<Simulation> => {
+  const { data: simulation, error }: PostgrestSingleResponse<Simulation> =
+    await supabase
+      .from(process.env.SIMULATIONS_TABLE_NAME as string)
+      .update({ state })
+      .eq("id", simulationId)
+      .select()
+      .single();
+
+  if (error) throw new Error(error.message);
+
+  return simulation;
 };

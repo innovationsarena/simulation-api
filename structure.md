@@ -74,7 +74,7 @@ simulator-api/
 │   │   │   ├── operations/
 │   │   │   ├── generator/
 │   │   │   ├── parser/
-│   │   │   └── actions/
+│   │   │   └── tools/         # [UPDATED: AI conversation tools]
 │   │   │
 │   │   ├── conversations/     # 💬 Conversation Handling
 │   │   │   ├── index.ts
@@ -82,19 +82,20 @@ simulator-api/
 │   │   │   └── workers/
 │   │   │
 │   │   ├── discussions/       # 🗣️  Group Discussions
-│   │   │   └── operations/
+│   │   │   ├── operations/
+│   │   │   └── workers/
 │   │   │
 │   │   ├── evaluations/       # 📊 Personality Testing
-│   │   │   ├── bfi2.ts
+│   │   │   ├── operations/
 │   │   │   └── workers/
 │   │   │
 │   │   ├── messages/          # 📝 Message Operations
-│   │   │   └── operations/
+│   │   │   ├── operations/
+│   │   │   └── workers/
 │   │   │
-│   │   ├── simulations/       # 🎯 Simulation Orchestration
-│   │   │   └── operations/
-│   │   │
-│   │   └── tools/             # 🔧 AI-Powered Tools
+│   │   └── simulations/       # 🎯 Simulation Orchestration
+│   │   │   ├── operations/
+│   │   │   └── workers/
 │   │
 │   ├── core/                  # 🏛️  Shared Infrastructure
 │   │   ├── types/             # 📋 Type Definitions
@@ -119,21 +120,27 @@ agents/          ████████████████ (Complex)
 ├── operations/  ✓
 ├── generator/   ✓
 ├── parser/      ✓
-└── tools/       ✓  [UPDATED: renamed from actions]
+└── tools/       ✓  [UPDATED: AI conversation tools with 4 main functions]
 
 conversations/   ████████ (Standard)  
 ├── operations/  ✓
 └── workers/     ✓  [ACTIVE: conversationQueue + 50 concurrency]
 
 discussions/     ████ (Simple)
-└── operations/  ✓
+├── operations/  ✓
+└── workers/     ✓  [PLACEHOLDER: basic structure]
 
 evaluations/     ██████ (Specialized)
-├── operations/  ✓  [NEW: structured like other services]
+├── operations/  ✓
 └── workers/     ✓  [ACTIVE: evaluationsQueue with 50 concurrency]
 
+messages/        ████ (Support)
+├── operations/  ✓
+└── workers/     ✓  [PLACEHOLDER: basic structure]
+
 simulations/     ████ (Standard)
-└── operations/  ✓  [ENHANCED: now includes conversation orchestration]
+├── operations/  ✓
+└── workers/     ✓  [NEW: added worker support]
 ```
 
 ### ✅ **Consistent Patterns** [UPDATED]
@@ -146,15 +153,19 @@ simulations/     ████ (Standard)
 
 ### ⚠️ **Remaining Inconsistencies**
 
-- **Agent service**: Still has 4 sub-modules vs others with 2
-- **Worker implementation**: Conversation worker has placeholder logic (TODO comments)
-- **Service exports**: Some services removed from main export (messages, queuesystem)
+- **Agent service**: Still has 4 sub-modules vs others with 2-3
+- **Worker implementation**: Some workers have placeholder/basic logic 
+- **Service structure**: All services now follow operations + workers pattern
 
 ### ✅ **Recently Fixed**
 
-- **Queue naming**: Fixed "CUEUE_NAME" → "QUEUE_NAME" typo
-- **Service structure**: Evaluations now follows standard operations + workers pattern
-- **Worker concurrency**: Both queues now use 50 concurrent workers
+- **AI Tools Enhancement**: Agent tools now include 4 conversation functions:
+  - `findConversationPartnerTool`: Find available conversation partners
+  - `startConversationTool`: Initialize new conversations
+  - `conversateTool`: Continue ongoing conversations
+  - `endConversationTool`: Terminate conversations
+- **Service structure**: All services now standardized with operations + workers pattern
+- **Worker infrastructure**: All services have workers directory (some placeholder)
 
 ## Data Flow Diagrams
 
@@ -479,37 +490,39 @@ core/
 
 ### 🔄 **In Progress**
 
-1. **Conversation Worker Logic**
-   - Queue infrastructure complete
-   - Worker logic placeholder implemented
-   - Needs conversation processing implementation
+1. **AI Tool Integration**
+   - Agent tools fully implemented with conversation capabilities
+   - Tools integrate with queue system for async processing
+   - Enhanced agent-to-agent communication workflow
 
-2. **Service Export Cleanup**
-   - Messages and queuesystem services removed from exports
-   - Core functionality consolidated into main services
+2. **Worker Implementation**
+   - All services now have worker infrastructure
+   - Some workers have basic/placeholder implementations
+   - Queue system operational for conversations and evaluations
 
 ### 🐛 **Technical Debt Identified**
 
-- **Conversation worker**: Incomplete implementation with TODO comments
-- **Service consistency**: Agent service still more complex than others
-- **Empty operations**: Some operations directories may be empty placeholders
+- **Worker logic**: Some services have placeholder worker implementations
+- **Service consistency**: Agent service architecture more complex than others
+- **Tool naming**: Tool functions renamed with "Tool" suffix for clarity
 
 ---
 
-**Architecture Score: B+ → A- (Improving with recent updates)**
+**Architecture Score: A- → A (Significant improvements with AI tools and standardization)**
 
-**Updated Strengths:**
+**Current Strengths:**
 
-- Clear layer separation
-- **[NEW]** Fully operational queue system for evaluations
-- **[ENHANCED]** Comprehensive AI integration with better error handling
-- **[IMPROVED]** Standardized async processing patterns
-- Strong type safety
+- **[ENHANCED]** Complete AI tool integration with 4 conversation functions
+- **[NEW]** All services follow standardized operations + workers pattern  
+- **[IMPROVED]** Queue system operational for async processing
+- **[ENHANCED]** Agent-to-agent communication capabilities
+- Strong type safety and error handling
+- Clear layer separation and service organization
 
 **Remaining Areas for Improvement:**
 
-- Complete conversation worker implementation
-- Service structure final standardization  
-- Repository pattern implementation
-- Event-driven capabilities
-- Testing infrastructure
+- Implement placeholder worker logic in discussions, messages, simulations
+- Complete repository pattern implementation
+- Add event-driven capabilities  
+- Comprehensive testing infrastructure
+- Performance monitoring and metrics

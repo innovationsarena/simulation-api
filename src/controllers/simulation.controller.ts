@@ -4,7 +4,8 @@ import { asyncHandler, generateSimName, id, Simulation } from "../core";
 import {
   createSimulation as createSimulationOperation,
   getSimulation,
-  supabase,
+  stopSimulation as stopSimulationOperation,
+  updateSimulationState,
 } from "../services";
 import { simulationQueue } from "../services/simulations/workers";
 
@@ -78,7 +79,7 @@ export const stopSimulation = asyncHandler(
         .status(404)
         .send({ message: "Simulation with given ID not found." });
 
-    await simulationQueue.add("simulation.stop", simulation);
+    await stopSimulationOperation(simulation);
 
     return reply.status(200).send({
       ...simulation,

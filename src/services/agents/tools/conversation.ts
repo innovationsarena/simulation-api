@@ -12,7 +12,6 @@ export const findConversationPartnerTool: Tool<any, { recieverId: string }> = {
   execute: async (args: { senderId: string; simulationId: string }) => {
     console.log("Tool: Finding a free conversation partner triggered.");
 
-    // Return free agent Id.
     const { id } = await getIdleAgent(args.simulationId, args.senderId);
 
     return { recieverId: id };
@@ -27,7 +26,6 @@ export const startConversationTool: Tool<any, void> = {
   }),
   execute: async (args: { senderId: string; receiverId: string }) => {
     console.log("Tool: Starting conversation triggered.");
-
     await conversationQueue.add("conversation.start", {
       senderId: args.senderId,
       receiverId: args.receiverId,

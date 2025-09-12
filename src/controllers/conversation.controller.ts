@@ -9,7 +9,6 @@ import {
   assignActivityToAgent,
   conversationQueue,
 } from "../services";
-import { conversationRouter } from "../routes";
 
 export const createConversationController = asyncHandler(
   async (

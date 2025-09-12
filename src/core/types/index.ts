@@ -192,7 +192,7 @@ export type Conversation = {
   active: boolean;
   activeSpeakerId: string | null; // Id of active speaker
   participants: string[]; // Agent Ids
-  messages: Message[];
+  messages?: Message[];
   stats?: Stats;
   activityStopMode?: "dynamic" | number;
 };

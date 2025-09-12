@@ -45,6 +45,7 @@ export const getConversation = async (
   }: PostgrestResponse<Message> = await supabase
     .from(process.env.MESSAGES_TABLE_NAME as string)
     .select("*")
+    .order("created_at", { ascending: true })
     .eq("parentId", conversationId);
 
   if (getMessagesError) throw new Error(getMessagesError.message);
@@ -60,7 +61,7 @@ export const createConversation = async (
   const conversationId = createConversationId(sender.id, reciever.id);
 
   console.log(
-    `Creating conversation between ${sender.name} and ${reciever.name} with id ${conversationId}.`
+    `Creating conversation between ${sender.name} (${sender.id}) and ${reciever.name} (${reciever.id}) with id ${conversationId}.`
   );
 
   const newConversation: Omit<Conversation, "messages"> = {
@@ -75,7 +76,7 @@ export const createConversation = async (
   const { data: conversation, error }: PostgrestSingleResponse<Conversation> =
     await supabase
       .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-      .insert(newConversation) // upsert?
+      .upsert(newConversation) // insert?
       .select()
       .single();
 
@@ -87,6 +88,10 @@ export const createConversation = async (
 export const updateConversation = async (
   conversation: Conversation
 ): Promise<Conversation> => {
+  if (conversation.messages) {
+    delete conversation.messages;
+  }
+
   const { data, error } = await supabase
     .from(process.env.CONVERSATIONS_TABLE_NAME as string)
     .update(conversation)
@@ -116,8 +121,7 @@ export const startConversation = async (
 
 export const conversate = async (conversationId: string) => {
   const conversation = await getConversation(conversationId);
-
-  const { activeSpeakerId, participants, simulationId, messages } =
+  const { id, activeSpeakerId, participants, simulationId, messages } =
     conversation;
 
   const senderId = participants.find((agent) => agent !== activeSpeakerId);
@@ -126,7 +130,7 @@ export const conversate = async (conversationId: string) => {
   const { text, usage } = await generateText({
     model: openai(sender.llmSettings.model),
     system: await parsePrompt(sender),
-    messages: parseMessages(messages, sender.id),
+    messages: parseMessages(messages || [], sender.id),
     tools: {
       findConversationPartnerTool,
       startConversationTool,
@@ -137,16 +141,17 @@ export const conversate = async (conversationId: string) => {
 
   await createMessage({
     senderId: sender.id,
-    parentId: conversationId,
-    parentType: "discussion",
+    parentId: id,
+    parentType: "conversation",
     content: text,
     simulationId,
     tokens: usage,
   });
 
-  // Keep going?
-  await conversationQueue.add("conversation.converse", {
-    conversationId: conversation.id,
+  // Switch active speaker
+  await updateConversation({
+    ...conversation,
+    activeSpeakerId: senderId as string,
   });
 };
 
