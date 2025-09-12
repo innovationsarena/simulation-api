@@ -1,15 +1,13 @@
-import { FastifyInstance, RouteHandlerMethod } from "fastify";
+import { createDiscussionController } from "../controllers";
+import { FastifyInstance } from "fastify";
 import { validateKey } from "../core";
 import z from "zod";
-import { createDiscussionController } from "../controllers";
 
-const createDiscussionSchema = z
-  .object({
-    agents: z.array(z.any()).optional(),
-    minRounds: z.number().optional(),
-    simulationId: z.string(),
-  })
-  .strict();
+const createDiscussionSchema = z.strictObject({
+  agents: z.array(z.any()).optional(),
+  minRounds: z.number().optional(),
+  simulationId: z.string(),
+});
 
 export const discussionRouter = (fastify: FastifyInstance) => {
   fastify.post(

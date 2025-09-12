@@ -20,6 +20,7 @@ export const createSimulation = asyncHandler(
         | "agentCount"
         | "topic"
         | "environment"
+        | "activityStopMode"
       >;
     }>,
     reply: FastifyReply
@@ -28,6 +29,9 @@ export const createSimulation = asyncHandler(
 
     const newSimulation: Simulation = {
       ...request.body,
+      activityStopMode: request.body.activityStopMode
+        ? request.body.activityStopMode
+        : "dynamic",
       id: simulationId,
       name: request.body.name.length ? request.body.name : generateSimName(),
       state: "primed",

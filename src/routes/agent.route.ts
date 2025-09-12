@@ -7,25 +7,21 @@ import {
 } from "../controllers";
 import z from "zod";
 
-const createAgentSchema = z
-  .object({
-    id: z.string(),
-    simulationId: z.string(),
-    version: z.string(),
-    name: z.string(),
-    objectives: z.array(z.unknown()),
-    personality: z.object({}).passthrough(),
-    demographics: z.object({}).passthrough(),
-  })
-  .strict();
+const createAgentSchema = z.strictObject({
+  id: z.string(),
+  simulationId: z.string(),
+  version: z.string(),
+  name: z.string(),
+  objectives: z.array(z.unknown()),
+  personality: z.object({}).passthrough(),
+  demographics: z.object({}).passthrough(),
+});
 
-const generateAgentsSchema = z
-  .object({
-    simulationId: z.string(),
-    version: z.string(),
-    count: z.number(),
-  })
-  .strict();
+const generateAgentsSchema = z.strictObject({
+  simulationId: z.string(),
+  version: z.string(),
+  count: z.number(),
+});
 
 export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(

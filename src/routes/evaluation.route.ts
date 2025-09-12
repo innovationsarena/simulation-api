@@ -1,24 +1,18 @@
-import { FastifyInstance, RouteHandlerMethod } from "fastify";
-import { validateKey } from "../core";
 import { createBigFiveEvaluationController } from "../controllers";
+import { FastifyInstance } from "fastify";
+import { validateKey } from "../core";
+import z from "zod";
+
+const createEvaluationSchema = z.strictObject({
+  agentId: z.string(),
+  sample: z.string().optional(),
+});
 
 export const evaluationsRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/evaluations/bigfive",
     {
-      schema: {
-        description: "Creates Agent big five (BFI-2) evaluations.",
-        tags: ["evaluations"],
-        body: {
-          type: "object",
-          properties: {
-            agentId: { type: "string" },
-            sample: { type: "number" },
-          },
-          required: ["agentId"],
-          additionalProperties: false,
-        },
-      },
+      schema: createEvaluationSchema,
       preValidation: [validateKey],
     },
     createBigFiveEvaluationController

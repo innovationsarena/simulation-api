@@ -5,70 +5,40 @@ import {
   startSimulation,
   stopSimulation,
 } from "../controllers";
+import z from "zod";
+
+const createSimulationSchema = z.strictObject({
+  agentCount: z.number().optional(),
+  name: z.string().optional(),
+  description: z.string().optional(),
+  topic: z.string(),
+  type: z.enum(["conversation", "discussion", "survey"]),
+});
 
 export const simulationRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/simulations",
     {
-      schema: {
-        description: "Creates a simulation.",
-        tags: ["simulations"],
-        body: {
-          type: "object",
-          properties: {
-            agentCount: { type: "integer" },
-            name: { type: "string" },
-            description: { type: "string" },
-            topic: { type: "string" },
-            type: { type: "string" },
-          },
-          required: ["agentCount", "type", "name", "topic"],
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      schema: createSimulationSchema,
+      preValidation: [validateKey],
     },
-    createSimulation as unknown as RouteHandlerMethod
+    createSimulation
   );
 
   fastify.patch(
     "/simulations/:simulationId/start",
     {
-      schema: {
-        description: "Starts a simulation.",
-        tags: ["simulations"],
-        params: {
-          type: "object",
-          properties: {
-            simulationId: { type: "string" },
-          },
-          required: ["simulationId"],
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      preValidation: [validateKey],
+      preHandler: [],
     },
-    startSimulation as unknown as RouteHandlerMethod
+    startSimulation
   );
 
   fastify.patch(
     "/simulations/:simulationId/stop",
     {
-      schema: {
-        description: "Stops a simulation.",
-        tags: ["simulations"],
-        params: {
-          type: "object",
-          properties: {
-            simulationId: { type: "string" },
-          },
-          required: ["simulationId"],
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      preValidation: [validateKey],
     },
-    stopSimulation as unknown as RouteHandlerMethod
+    stopSimulation
   );
 };

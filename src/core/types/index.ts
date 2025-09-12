@@ -87,6 +87,7 @@ export type Simulation = {
   description?: string;
   environment?: Environment;
   topic: string;
+  activityStopMode: "dynamic" | number;
   stats?: Stats;
 };
 
@@ -193,6 +194,7 @@ export type Conversation = {
   participants: string[]; // Agent Ids
   messages: Message[];
   stats?: Stats;
+  activityStopMode?: "dynamic" | number;
 };
 
 export type Discussion = {
@@ -204,4 +206,5 @@ export type Discussion = {
   messages: Message[];
   minRounds?: number;
   stats?: Stats;
+  activityStopMode?: "dynamic" | number;
 };
