@@ -45,6 +45,24 @@ export const getAgentByName = async (
   return agent;
 };
 
+export const getIdleAgent = async (
+  simulationId: string,
+  senderId: string
+): Promise<Agent> => {
+  const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
+    .from(process.env.AGENTS_TABLE_NAME as string)
+    .select("*")
+    .eq("simulationId", simulationId)
+    .eq("inActivityId", null)
+    .eq("state", "idle")
+    .neq("id", senderId)
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return agent;
+};
+
 export const createAgents = async (agents: Agent[]) => {
   const { data, error }: PostgrestResponse<Agent> = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)

@@ -17,8 +17,6 @@ export const createMessage = async (message: Message): Promise<Message> => {
     .select()
     .single();
 
-  console.error(error?.message);
-
   if (error) throw new Error(error.message);
 
   return data;

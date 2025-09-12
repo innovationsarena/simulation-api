@@ -63,7 +63,7 @@ export const createConversation = async (
   const { data: conversation, error }: PostgrestSingleResponse<Conversation> =
     await supabase
       .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-      .upsert(newConversation)
+      .insert(newConversation) // upsert?
       .select()
       .single();
 
@@ -107,24 +107,3 @@ export const startConversationOperation = async (
     conversationId: conversation.id,
   });
 };
-/*
-supabase
-  .channel("conversations-changes")
-  .on(
-    "postgres_changes",
-    {
-      event: "UPDATE",
-      schema: "public",
-      table: "conversations",
-    },
-    async (payload: any) => {
-      try {
-        console.log(payload);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  )
-  .subscribe();
-
-*/
