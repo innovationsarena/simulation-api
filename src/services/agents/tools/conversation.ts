@@ -1,65 +1,51 @@
-import { Tool } from "ai";
-import { supabase } from "../../../core/supabase";
 import z from "zod";
+import { Tool } from "ai";
+import { getIdleAgent } from "../operations";
+import { conversationQueue } from "../../conversations";
 
-export const findConversationPartner: Tool = {
-  description: "Find a free partner to conversate in given simulation.",
+export const findConversationPartner: Tool<any, { recieverId: string }> = {
+  description: "Find a free partner to conversate.",
   parameters: z.object({
     senderId: z.string(),
     simulationId: z.string(),
   }),
   execute: async (args: { senderId: string; simulationId: string }) => {
-    console.log("Finding a free conversation partner...");
+    console.log("Tool: Finding a free conversation partner triggered.");
+
     // Return free agent Id.
-    const { data, error } = await supabase
-      .from(process.env.AGENTS_TABLE_NAME as string)
-      .select("*")
-      .eq("simulationId", args.simulationId)
-      .eq("inActivityId", null)
-      .eq("state", "idle")
-      .single();
+    const { id } = await getIdleAgent(args.simulationId, args.senderId);
 
-    if (error) throw new Error(error.message);
-
-    if (data === null) return null;
-    return String(data.id);
+    return { recieverId: id };
   },
 };
 
-export const startConversation: Tool = {
-  description: "Start conversation.",
+export const startConversation: Tool<any, void> = {
+  description: "Start a conversation between senderId and receiverId.",
   parameters: z.object({
     senderId: z.string(),
     receiverId: z.string(),
   }),
-  execute: async (args: any) => {
-    // Set agents state 'inConversation'.
-    return String(args.senderId + " " + args.receiverId);
+  execute: async (args: { senderId: string; receiverId: string }) => {
+    console.log("Tool: Starting conversation triggered.");
+
+    await conversationQueue.add("conversation.start", {
+      senderId: args.senderId,
+      receiverId: args.receiverId,
+    });
+    return;
   },
 };
 
 export const endConversation: Tool = {
-  description: "End conversation.",
+  description: "End conversation between senderId and receiverId.",
   parameters: z.object({
     conversationId: z.string(),
   }),
-  execute: async (args: any) => {
-    // Set agents state 'idle'.
-    // Set conversation state to 'done'.
-    return String(args.senderId + " " + args.receiverId);
-  },
-};
-
-export const conversate: Tool = {
-  description: "Make conversation.",
-  parameters: z.object({
-    senderId: z.string(),
-    conversationId: z.string(),
-  }),
-  execute: async (args: any) => {
-    // Set agents state 'inConversation'.
-    return String(
-      args.senderId + " " + args.receiverId + " " + args.conversationId
-    );
+  execute: async (args: { conversationId: string }) => {
+    console.log("Tool: Ending conversation triggered.");
+    await conversationQueue.add("conversation.end", {
+      conversationId: args.conversationId,
+    });
+    return;
   },
 };

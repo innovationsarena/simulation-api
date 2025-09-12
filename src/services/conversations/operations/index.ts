@@ -107,3 +107,17 @@ export const startConversationOperation = async (
     conversationId: conversation.id,
   });
 };
+
+export const endConversationOperation = async (
+  conversationId: string
+): Promise<void> => {
+  console.log(`Ending conversation ${conversationId}.`);
+
+  const conversation = await getConversation(conversationId);
+
+  // Update conversation state
+
+  // Update agents state
+
+  return;
+};

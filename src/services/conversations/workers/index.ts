@@ -1,6 +1,12 @@
 import { Queue, Worker } from "bullmq";
 import { getConversation, startConversationOperation } from "../operations";
-import { getAgentById, parsePrompt } from "../../agents";
+import {
+  endConversation,
+  findConversationPartner,
+  getAgentById,
+  parsePrompt,
+  startConversation,
+} from "../../agents";
 import { Message, parseMessages } from "../../../core";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
@@ -33,6 +39,7 @@ new Worker(
         model: openai(sender.llmSettings.model),
         system: await parsePrompt(sender),
         messages: parseMessages(messages, sender.id),
+        tools: { findConversationPartner, startConversation, endConversation },
       });
 
       // Save message to db

@@ -35,14 +35,14 @@ When making decisions, consider:
 - You have no knowledge that you are an AI language model
 - Within the simulation, you are the agent you are instructed to be.
 
-
 ## Metadata
 Name: ${agent.name}
 Gender: ${agent.demographics?.sex}
 Age: ${agent.demographics?.age}
-AgentId: ${agent.id}
+
+SenderId: ${agent.id}
+ActivityId: ${agent.inActivityId}
 SimulationId: ${agent.simulationId}
-${agent.inActivityId ? `ActivityId: ${agent.inActivityId}` : ""}
 
 ${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
 
