@@ -3,7 +3,7 @@ import { Tool } from "ai";
 import { getIdleAgent } from "../operations";
 import { conversationQueue } from "../../conversations";
 
-export const findConversationPartner: Tool<any, { recieverId: string }> = {
+export const findConversationPartnerTool: Tool<any, { recieverId: string }> = {
   description: "Find a free partner to conversate.",
   parameters: z.object({
     senderId: z.string(),
@@ -19,7 +19,7 @@ export const findConversationPartner: Tool<any, { recieverId: string }> = {
   },
 };
 
-export const startConversation: Tool<any, void> = {
+export const startConversationTool: Tool<any, void> = {
   description: "Start a conversation between senderId and receiverId.",
   parameters: z.object({
     senderId: z.string(),
@@ -36,7 +36,23 @@ export const startConversation: Tool<any, void> = {
   },
 };
 
-export const endConversation: Tool = {
+export const conversateTool: Tool<any, void> = {
+  description: "Keep conversation going between senderId and receiverId.",
+  parameters: z.object({
+    conversationId: z.string(),
+  }),
+  execute: async (args: { conversationId: string }) => {
+    console.log("Tool: Keep conversation going triggered.");
+
+    await conversationQueue.add("conversation.conversate", {
+      conversationId: args.conversationId,
+    });
+
+    return;
+  },
+};
+
+export const endConversationTool: Tool = {
   description: "End conversation between senderId and receiverId.",
   parameters: z.object({
     conversationId: z.string(),

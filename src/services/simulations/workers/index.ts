@@ -1,5 +1,5 @@
 import { Queue, Worker } from "bullmq";
-import { startSimulation } from "../operations";
+import { startSimulation, stopSimulation } from "../operations";
 
 // QUEUE
 const QUEUE_NAME = "simulationQueue";
@@ -11,6 +11,9 @@ new Worker(
   async (job) => {
     if (job.name === "simulation.start") {
       return await startSimulation(job.data);
+    }
+    if (job.name === "simulation.stop") {
+      return await stopSimulation(job.data);
     }
   },
   {

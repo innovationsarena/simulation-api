@@ -73,11 +73,12 @@ export const stopSimulation = asyncHandler(
   ) => {
     const simulation = await getSimulation(request.params.simulationId);
 
-    supabase
-      .from(process.env.SIMULATIONS_TABLE_NAME as string)
-      .update({ state: "stopped" })
-      .eq("id", request.params.simulationId)
-      .select();
+    if (!simulation)
+      reply
+        .status(404)
+        .send({ message: "Simulation with given ID not found." });
+
+    await simulationQueue.add("simulation.stop", simulation);
 
     return reply.status(200).send({
       ...simulation,

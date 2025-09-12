@@ -30,8 +30,9 @@ export const createConversationController = asyncHandler(
     const conversation = await createConversation(simulation, sender, reciever);
 
     // Update agent states
-    await assignActivityToAgent(sender.id, conversation.id);
-    await assignActivityToAgent(reciever.id, conversation.id);
+    for await (const agentId of conversation.participants) {
+      await assignActivityToAgent(agentId, conversation.id);
+    }
 
     return reply.status(201).send({
       ...conversation,

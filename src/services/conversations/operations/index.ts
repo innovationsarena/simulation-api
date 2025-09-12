@@ -8,10 +8,22 @@ import {
   Conversation,
   createConversationId,
   Message,
+  parseMessages,
   Simulation,
 } from "../../../core";
-import { createInitConversationMessage } from "../../messages";
+import { createInitConversationMessage, createMessage } from "../../messages";
 import { conversationQueue } from "../workers";
+import {
+  conversateTool,
+  endConversationTool,
+  findConversationPartnerTool,
+  getAgentById,
+  parsePrompt,
+  removeActivityFromAgent,
+  startConversationTool,
+} from "../../agents";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 export const getConversation = async (
   conversationId: string
@@ -72,35 +84,29 @@ export const createConversation = async (
   return { ...conversation, messages: [] };
 };
 
-export const updateActiveSpeaker = async (
-  conversationId: string,
-  speakerId: string
+export const updateConversation = async (
+  conversation: Conversation
 ): Promise<Conversation> => {
-  const { data: conversation, error }: PostgrestSingleResponse<Conversation> =
-    await supabase
-      .from(process.env.CONVERSATIONS_TABLE_NAME as string)
-      .update({ activeSpeakerId: speakerId })
-      .eq("id", conversationId)
-      .select()
-      .single();
-
-  console.log(
-    `Active spekar in conversation ${conversationId} set to Agent with id ${speakerId}.`
-  );
+  const { data, error } = await supabase
+    .from(process.env.CONVERSATIONS_TABLE_NAME as string)
+    .update(conversation)
+    .eq("id", conversation.id)
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
 
-  return conversation;
+  return data;
 };
 
-export const startConversationOperation = async (
+export const startConversation = async (
   simulation: Simulation,
   conversation: Conversation,
   sender: Agent
 ): Promise<void> => {
   console.log(`Starting conversation ${conversation.id}.`);
 
-  await updateActiveSpeaker(conversation.id, sender.id);
+  await updateConversation({ ...conversation, activeSpeakerId: sender.id });
   await createInitConversationMessage(simulation, conversation, sender);
 
   await conversationQueue.add("conversation.converse", {
@@ -108,16 +114,61 @@ export const startConversationOperation = async (
   });
 };
 
-export const endConversationOperation = async (
+export const conversate = async (conversationId: string) => {
+  const conversation = await getConversation(conversationId);
+
+  const { activeSpeakerId, participants, simulationId, messages } =
+    conversation;
+
+  const senderId = participants.find((agent) => agent !== activeSpeakerId);
+  const sender = await getAgentById(senderId || "");
+
+  const { text, usage } = await generateText({
+    model: openai(sender.llmSettings.model),
+    system: await parsePrompt(sender),
+    messages: parseMessages(messages, sender.id),
+    tools: {
+      findConversationPartnerTool,
+      startConversationTool,
+      conversateTool,
+      endConversationTool,
+    },
+  });
+
+  await createMessage({
+    senderId: sender.id,
+    parentId: conversationId,
+    parentType: "discussion",
+    content: text,
+    simulationId,
+    tokens: usage,
+  });
+
+  // Keep going?
+  await conversationQueue.add("conversation.converse", {
+    conversationId: conversation.id,
+  });
+};
+
+export const endConversation = async (
   conversationId: string
 ): Promise<void> => {
   console.log(`Ending conversation ${conversationId}.`);
 
   const conversation = await getConversation(conversationId);
 
-  // Update conversation state
+  // Update agents
+  for await (const agentId of conversation.participants) {
+    await removeActivityFromAgent(agentId);
+  }
 
-  // Update agents state
+  // Update conversation
+  await updateConversation({
+    ...conversation,
+    participants: [],
+    activeSpeakerId: null,
+    active: false,
+  });
 
   return;
 };
