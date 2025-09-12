@@ -56,7 +56,6 @@ When making decisions, consider:
   }
 
 
-${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
 
 ${
   agent.version === 2
@@ -70,6 +69,8 @@ ${
       )
     : ""
 }
+
+${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
 
 ${
   simulation && simulation.environment
