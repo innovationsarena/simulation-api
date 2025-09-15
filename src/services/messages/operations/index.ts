@@ -44,8 +44,6 @@ export const createInitConversationMessage = async (
     tokens: usage,
   };
 
-  console.log(initMessage);
-
   await createMessage(initMessage);
 
   console.log(`First message in conversation ${conversation.id} created.`);
