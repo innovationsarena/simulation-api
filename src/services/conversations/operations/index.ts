@@ -127,7 +127,7 @@ export const conversate = async (conversationId: string) => {
   const senderId = participants.find((agent) => agent !== activeSpeakerId);
   const sender = await getAgentById(senderId || "");
 
-  const { text, usage } = await generateText({
+  const { text, usage, toolCalls } = await generateText({
     model: openai(sender.llmSettings.model),
     system: await parsePrompt(sender),
     messages: parseMessages(messages || [], sender.id),
@@ -139,14 +139,26 @@ export const conversate = async (conversationId: string) => {
     },
   });
 
-  await createMessage({
-    senderId: sender.id,
-    parentId: id,
-    parentType: "conversation",
-    content: text,
-    simulationId,
-    tokens: usage,
-  });
+  // Execute tool calls if any
+  if (toolCalls && toolCalls.length > 0) {
+    console.log(`Agent ${sender.id} made ${toolCalls.length} tool calls`);
+    for (const toolCall of toolCalls) {
+      console.log(`Executing tool: ${toolCall.toolName} with args:`, toolCall.args);
+      // Tool execution happens automatically in the generateText call
+    }
+  }
+
+  // Only create message if there's text content
+  if (text && text.trim()) {
+    await createMessage({
+      senderId: sender.id,
+      parentId: id,
+      parentType: "conversation",
+      content: text,
+      simulationId,
+      tokens: usage,
+    });
+  }
 
   // Switch active speaker
   await updateConversation({

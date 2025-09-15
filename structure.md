@@ -169,7 +169,106 @@ simulations/     ████ (Standard)
 
 ## Data Flow Diagrams
 
-### 🔄 **Conversation Processing Flow**
+### 🤖 **Async Conversation Flow with Agent Tools**
+
+```mermaid
+flowchart TD
+    A[Agent A wants to start conversation] --> B{findConversationPartnerTool}
+    B --> C[Find idle Agent B]
+    C --> D{startConversationTool}
+    D --> E[Create Conversation Record]
+    E --> F[Queue: conversation.start]
+    
+    F --> G[Conversation Worker]
+    G --> H[Create Initial Message]
+    H --> I[Set Agent A as activeSpeaker]
+    I --> J[Queue: conversation.converse]
+    
+    J --> K[Conversation Worker]
+    K --> L[Get Non-Active Agent B]
+    L --> M[Generate AI Response with Tools]
+    
+    M --> N{AI Decision}
+    N -->|Continue Chat| O[conversateTool called]
+    N -->|End Chat| P[endConversationTool called] 
+    N -->|Just Respond| Q[Create Message Only]
+    
+    O --> R[Queue: conversation.converse]
+    Q --> S[Create Message]
+    S --> T[Switch activeSpeaker to Agent A]
+    T --> U[Auto-queue next turn?]
+    U -->|Yes| R
+    U -->|No| V[Wait for tool call]
+    
+    R --> K
+    
+    P --> W[End Conversation]
+    W --> X[Update conversation.active = false]
+    X --> Y[Remove agent activities]
+    Y --> Z[Conversation Complete]
+    
+    classDef toolClass fill:#e1f5fe
+    classDef queueClass fill:#f3e5f5
+    classDef workerClass fill:#e8f5e8
+    classDef decisionClass fill:#fff3e0
+    
+    class B,D,O,P toolClass
+    class F,J,R queueClass
+    class G,K workerClass
+    class N,U decisionClass
+```
+
+### 🔄 **Agent Tool Interaction Sequence**
+
+```mermaid
+sequenceDiagram
+    participant A as Agent A
+    participant AT as AI Tools
+    participant CQ as Conversation Queue
+    participant CW as Conversation Worker
+    participant DB as Database
+    participant B as Agent B
+
+    A->>AT: findConversationPartnerTool(simulationId)
+    AT->>DB: getIdleAgent()
+    DB-->>AT: Agent B
+    AT-->>A: receiverId: Agent B
+
+    A->>AT: startConversationTool(A, B, simulationId)
+    AT->>DB: createConversation()
+    AT->>CQ: queue("conversation.start")
+    
+    CQ->>CW: Process conversation.start
+    CW->>DB: createInitialMessage(Agent A)
+    CW->>DB: setActiveSpeaker(Agent A)
+    CW->>CQ: queue("conversation.converse")
+    
+    loop Conversation Loop
+        CQ->>CW: Process conversation.converse
+        CW->>DB: getNonActiveSpeaker() 
+        Note over CW: Agent B's turn
+        CW->>B: generateText() with tools
+        
+        alt Agent continues conversation
+            B->>AT: conversateTool(conversationId)
+            AT->>CQ: queue("conversation.converse")
+            CW->>DB: createMessage(Agent B)
+            CW->>DB: switchActiveSpeaker(Agent A)
+        else Agent ends conversation  
+            B->>AT: endConversationTool(conversationId)
+            AT->>CW: endConversation()
+            CW->>DB: setConversation.active = false
+            Note over CW: Conversation Complete
+        else Agent just responds
+            Note over B: No tool called
+            CW->>DB: createMessage(Agent B)
+            CW->>DB: switchActiveSpeaker(Agent A)
+            Note over CW: Wait for next trigger
+        end
+    end
+```
+
+### 🔄 **Traditional HTTP-based Conversation Flow**
 
 ```
 ┌─────────────┐    HTTP POST     ┌──────────────────┐

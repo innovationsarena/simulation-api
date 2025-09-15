@@ -55,7 +55,7 @@ export const conversateTool: Tool<any, void> = {
   execute: async (args: { conversationId: string }) => {
     console.log("Tool: Keep conversation going triggered.");
 
-    await conversationQueue.add("conversation.conversate", {
+    await conversationQueue.add("conversation.converse", {
       conversationId: args.conversationId,
     });
 
