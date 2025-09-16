@@ -27,26 +27,29 @@ export const createInitConversationMessage = async (
   conversation: Conversation,
   sender: Agent
 ): Promise<string> => {
-  console.log(`Creating first message in conversation ${conversation.id}...`);
+  try {
+    const { text, usage } = await generateText({
+      model: openai(sender.llmSettings.model as string),
+      system: await parsePrompt(sender, simulation),
+      prompt: `Formulera endast EN genomtänkt och tydlig fråga kring följande topic: ${simulation.topic}. Du skall endast ställa frågor. Inget resonemang. 1-2st mening.`,
+    });
 
-  const { text, usage } = await generateText({
-    model: openai(process.env.DEFAULT_LLM_MODEL as string),
-    system: await parsePrompt(sender, simulation),
-    prompt: `Formulera endast EN genomtänkt och tydlig fråga kring följande topic: ${simulation.topic}. Du skall endast ställa frågor. Inget resonemang. 1-2st mening.`,
-  });
+    const initMessage: Message = {
+      parentId: conversation.id,
+      parentType: "conversation",
+      content: text,
+      senderId: sender.id,
+      simulationId: simulation.id,
+      tokens: usage,
+    };
 
-  const initMessage: Message = {
-    parentId: conversation.id,
-    parentType: "conversation",
-    content: text,
-    senderId: sender.id,
-    simulationId: simulation.id,
-    tokens: usage,
-  };
+    await createMessage(initMessage);
 
-  await createMessage(initMessage);
+    console.log(`First message in conversation ${conversation.id} created.`);
 
-  console.log(`First message in conversation ${conversation.id} created.`);
-
-  return text;
+    return text;
+  } catch (error) {
+    console.error(error);
+    return "Error in creating init Message.";
+  }
 };

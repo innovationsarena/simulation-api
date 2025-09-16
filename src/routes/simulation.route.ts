@@ -1,14 +1,14 @@
 import { FastifyInstance, RouteHandlerMethod } from "fastify";
 import { validateKey } from "../core";
 import {
-  createSimulation,
-  startSimulation,
-  stopSimulation,
+  createSimulationController,
+  startSimulationController,
+  stopSimulationController,
+  getSimulationController,
 } from "../controllers";
 import z from "zod";
 
 const createSimulationSchema = z.strictObject({
-  agentCount: z.number().optional(),
   name: z.string().optional(),
   description: z.string().optional(),
   topic: z.string(),
@@ -16,13 +16,22 @@ const createSimulationSchema = z.strictObject({
 });
 
 export const simulationRouter = (fastify: FastifyInstance) => {
+  fastify.get(
+    "/simulations/:simulationId",
+    {
+      preValidation: [validateKey],
+      preHandler: [],
+    },
+    getSimulationController
+  );
+
   fastify.post(
     "/simulations",
     {
       schema: createSimulationSchema,
       preValidation: [validateKey],
     },
-    createSimulation
+    createSimulationController
   );
 
   fastify.patch(
@@ -31,7 +40,7 @@ export const simulationRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
       preHandler: [],
     },
-    startSimulation
+    startSimulationController
   );
 
   fastify.patch(
@@ -39,6 +48,6 @@ export const simulationRouter = (fastify: FastifyInstance) => {
     {
       preValidation: [validateKey],
     },
-    stopSimulation
+    stopSimulationController
   );
 };

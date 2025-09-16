@@ -15,7 +15,7 @@ export type Agent = {
   dynamicProps?: Record<string, any>[];
   llmSettings: LLMSettings;
   evaluations?: Evaluations;
-  stats?: Stats;
+  stats?: TokenStats;
 };
 
 export type Evaluations = {
@@ -59,15 +59,9 @@ export type Demographics = {
   ethnicity?: string; // Relevant?
 };
 
-export type Tokens = {
+export type TokenStats = {
   promptTokens: number;
   completionTokens: number;
-};
-
-export type Stats = {
-  messages?: number;
-  conversations?: number;
-  tokens?: Tokens;
 };
 
 export type Facet = {
@@ -79,7 +73,7 @@ export type SimulationType = "discussion" | "conversation" | "survey";
 
 export type Simulation = {
   id: string;
-  agentCount: number;
+  agentCount?: number;
   state: "primed" | "running" | "ended" | "stopped";
   type: SimulationType;
   name: string;
@@ -87,8 +81,14 @@ export type Simulation = {
   description?: string;
   environment?: Environment;
   topic: string;
-  activityStopMode: "dynamic" | number;
-  stats?: Stats;
+  stats: SimulationStats;
+};
+
+export type SimulationStats = {
+  agents?: number;
+  conversations?: number;
+  discussions?: number;
+  tokens?: TokenStats;
 };
 
 export type Environment = {
@@ -182,7 +182,7 @@ export type Message = {
   senderId: string; // Agent Id
   content: string; // Says what
   simulationId: string;
-  tokens: Tokens;
+  tokens: TokenStats;
 };
 
 export type Conversation = {
@@ -193,8 +193,7 @@ export type Conversation = {
   activeSpeakerId: string | null; // Id of active speaker
   participants: string[]; // Agent Ids
   messages?: Message[];
-  stats?: Stats;
-  activityStopMode?: "dynamic" | number;
+  stats?: TokenStats;
 };
 
 export type Discussion = {
@@ -205,6 +204,5 @@ export type Discussion = {
   participants: string[]; // Agent Ids
   messages: Message[];
   minRounds?: number;
-  stats?: Stats;
-  activityStopMode?: "dynamic" | number;
+  stats?: TokenStats;
 };

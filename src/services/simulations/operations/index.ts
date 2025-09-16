@@ -1,7 +1,8 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { conversationQueue, createConversation } from "../../conversations";
-import { supabase, Simulation } from "../../../core";
+import { supabase, Simulation, Agent } from "../../../core";
 import { listAgents } from "../../agents";
+import { discussionQueue } from "../../discussions";
 
 export const getSimulation = async (
   simulationId: string
@@ -35,41 +36,33 @@ export const createSimulation = async (
 export const startSimulation = async (simulation: Simulation) => {
   console.log(`Starting simulation ${simulation.id}...`);
 
-  const { data, error } = await supabase
-    .from(process.env.SIMULATIONS_TABLE_NAME as string)
-    .update({ state: "running" })
-    .eq("id", simulation.id)
-    .select()
-    .single();
-
-  if (error) throw new Error(error.message);
-
+  await updateSimulation({ ...simulation, state: "running" });
   const agents = await listAgents(simulation.id);
 
-  // Start conversations by split in half and start conversate.
-  const halfAgentCount = Math.ceil(agents.length / 2);
-  const senders = agents.slice(0, halfAgentCount);
-  const recievers = agents.slice(halfAgentCount);
+  if (simulation.type === "conversation") {
+    // Start conversations by split in half and start conversate.
+    const halfAgentCount = Math.ceil(agents.length / 2);
+    const senders = agents.slice(0, halfAgentCount);
+    const recievers = agents.slice(halfAgentCount);
 
-  for await (const sender of senders) {
-    if (recievers.length) {
-      const reciever = recievers.pop();
-      if (reciever) {
+    for await (const sender of senders) {
+      if (recievers.length) {
+        const reciever = recievers.pop() as Agent;
+
         // create conversation
-        if (simulation.type === "conversation") {
-          const conversation = await createConversation(
-            simulation,
-            sender,
-            reciever
-          );
-          // Send to Conversation Queue
-          await conversationQueue.add("conversation.start", {
-            simulation,
-            conversation,
-            sender,
-            reciever,
-          });
-        }
+        const conversation = await createConversation(
+          simulation,
+          sender,
+          reciever
+        );
+
+        // Send to Conversation Queue
+        await conversationQueue.add("conversation.start", {
+          simulation,
+          conversation,
+          sender,
+          reciever,
+        });
       }
     }
   }
@@ -80,34 +73,37 @@ export const startSimulation = async (simulation: Simulation) => {
 export const stopSimulation = async (
   simulation: Simulation
 ): Promise<boolean> => {
-  console.log(`Stopping simulation ${simulation.id}}...`);
-
   // Update simulation state
-  await updateSimulationState(simulation.id, "stopped");
-
+  await updateSimulation({
+    ...simulation,
+    state: "stopped",
+  });
   // End all activities
 
   // Clear queues?
   await conversationQueue.drain();
+  await discussionQueue.drain();
+
   // Update all Agent states
 
   console.log(`Simulation ${simulation.id} stopped.`);
   return true;
 };
 
-export const updateSimulationState = async (
-  simulationId: string,
-  state: "primed" | "running" | "ended" | "stopped"
+export const updateSimulation = async (
+  simulation: Simulation
 ): Promise<Simulation> => {
-  const { data: simulation, error }: PostgrestSingleResponse<Simulation> =
-    await supabase
-      .from(process.env.SIMULATIONS_TABLE_NAME as string)
-      .update({ state })
-      .eq("id", simulationId)
-      .select()
-      .single();
+  const {
+    data: updatedSimulation,
+    error,
+  }: PostgrestSingleResponse<Simulation> = await supabase
+    .from(process.env.SIMULATIONS_TABLE_NAME as string)
+    .update({ ...simulation })
+    .eq("id", simulation.id)
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
 
-  return simulation;
+  return updatedSimulation;
 };

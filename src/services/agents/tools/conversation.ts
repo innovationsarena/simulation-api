@@ -4,38 +4,17 @@ import { getAgentById, getIdleAgent } from "../operations";
 import { conversationQueue, createConversation } from "../../conversations";
 import { getSimulation } from "../../simulations";
 
-export const findConversationPartnerTool: Tool<any, { recieverId: string }> = {
-  description: "Find a free partner to conversate.",
+export const startConversationTool: Tool<any, string> = {
+  description: "Start a new conversation.",
   parameters: z.object({
     senderId: z.string(),
-    simulationId: z.string(),
   }),
   execute: async (args: { senderId: string; simulationId: string }) => {
-    console.log("Tool: Finding a free conversation partner triggered.");
-
-    const { id } = await getIdleAgent(args.simulationId, args.senderId);
-
-    return { recieverId: id };
-  },
-};
-
-export const startConversationTool: Tool<any, void> = {
-  description: "Start a conversation between senderId and receiverId.",
-  parameters: z.object({
-    senderId: z.string(),
-    receiverId: z.string(),
-    simulationId: z.string(),
-  }),
-  execute: async (args: {
-    senderId: string;
-    receiverId: string;
-    simulationId: string;
-  }) => {
     console.log("Tool: Starting conversation triggered.");
 
-    const simulation = await getSimulation(args.simulationId);
     const sender = await getAgentById(args.senderId);
-    const receiver = await getAgentById(args.receiverId);
+    const receiver = await getIdleAgent(args.simulationId, args.senderId);
+    const simulation = await getSimulation(args.simulationId);
     const conversation = await createConversation(simulation, sender, receiver);
 
     await conversationQueue.add("conversation.start", {
@@ -43,11 +22,12 @@ export const startConversationTool: Tool<any, void> = {
       conversation,
       sender,
     });
-    return;
+
+    return `Conversation started with conversationId: ${conversation.id}`;
   },
 };
 
-export const conversateTool: Tool<any, void> = {
+export const converseTool: Tool<any, string> = {
   description: "Keep conversation going between senderId and receiverId.",
   parameters: z.object({
     conversationId: z.string(),
@@ -59,11 +39,11 @@ export const conversateTool: Tool<any, void> = {
       conversationId: args.conversationId,
     });
 
-    return;
+    return `conversationId ${args.conversationId} is ongoing.`;
   },
 };
 
-export const endConversationTool: Tool = {
+export const endConversationTool: Tool<any, string> = {
   description: "End conversation between senderId and receiverId.",
   parameters: z.object({
     conversationId: z.string(),
@@ -73,6 +53,6 @@ export const endConversationTool: Tool = {
     await conversationQueue.add("conversation.end", {
       conversationId: args.conversationId,
     });
-    return;
+    return `conversationId ${args.conversationId} is ended.`;
   },
 };

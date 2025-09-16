@@ -46,16 +46,9 @@ When making decisions, consider:
 - Within the simulation, you are the agent you are instructed to be.
 
 ## Tools
-- findConversationPartnerTool: Use when starting new conversation with someone new. Returns a receiverId.
-- startConversationTool: Start a conversation between senderId and receiverId.
-- conversateTool: Keeps the conversation going. 
-- endConversationTool: ${
-    simulation?.activityStopMode === "dynamic"
-      ? "Use when the Agents feel that the conversation is done."
-      : `End the conversation when each Agent has speaken ${simulation?.activityStopMode} times.`
-  }
-
-
+- startConversationTool: Start a new conversation.
+- converseTool: Keeps the conversation going. 
+- endConversationTool: Use when the Agents feel that the conversation is done or max step is reached.}
 
 ${
   agent.version === 2

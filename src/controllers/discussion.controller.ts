@@ -115,8 +115,6 @@ export const createDiscussionController = asyncHandler(
       prompt: `We must discuss: ${topic}. `,
     });
 
-    console.log(resp);
-
     return resp;
   }
 );

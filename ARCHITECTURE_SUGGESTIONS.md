@@ -5,6 +5,7 @@
 The project is a FastAPI-based simulation engine for multi-agent interactions with the following structure:
 
 ### Strengths
+
 - ✅ Clear separation between routes, controllers, and services
 - ✅ TypeScript with strict typing enabled
 - ✅ Consistent error handling pattern
@@ -17,22 +18,24 @@ The project is a FastAPI-based simulation engine for multi-agent interactions wi
 ## 1. **Dependency Injection & Service Layer Architecture**
 
 ### Current Issues
+
 - Services are directly imported in controllers, creating tight coupling
 - Database operations mixed with business logic
 - No clear abstraction layer for data access
 
 ### Recommendations
+
 ```typescript
 // Create an interface-based service architecture
 interface IAgentRepository {
-  create(agent: Agent): Promise<Agent>
-  findById(id: string): Promise<Agent | null>
-  findBySimulation(simulationId: string): Promise<Agent[]>
+  create(agent: Agent): Promise<Agent>;
+  findById(id: string): Promise<Agent | null>;
+  findBySimulation(simulationId: string): Promise<Agent[]>;
 }
 
 interface ISimulationService {
-  createSimulation(input: CreateSimulationInput): Promise<Simulation>
-  startSimulation(id: string): Promise<void>
+  createSimulation(input: CreateSimulationInput): Promise<Simulation>;
+  startSimulation(id: string): Promise<void>;
 }
 ```
 
@@ -41,11 +44,13 @@ interface ISimulationService {
 ## 2. **Configuration Management**
 
 ### Current Issues
+
 - Environment variables scattered throughout codebase
 - No central configuration validation
 - Table names and API URLs hardcoded as env vars in multiple places
 
 ### Recommendations
+
 ```typescript
 // src/config/index.ts
 export const config = {
@@ -57,7 +62,7 @@ export const config = {
       agents: process.env.AGENTS_TABLE_NAME!,
       conversations: process.env.CONVERSATIONS_TABLE_NAME!,
       messages: process.env.MESSAGES_TABLE_NAME!,
-    }
+    },
   },
   llm: {
     defaultModel: process.env.DEFAULT_LLM_MODEL!,
@@ -66,18 +71,20 @@ export const config = {
     port: Number(process.env.PORT) || 3000,
     apiUrl: process.env.API_URL!,
     apiKey: process.env.API_KEY!,
-  }
-}
+  },
+};
 ```
 
 ## 3. **Domain-Driven Design Structure**
 
 ### Current Issues
+
 - Business logic scattered across controllers and services
 - No clear domain boundaries
 - Mixed concerns in single files
 
 ### Recommendations
+
 ```
 src/
 ├── domains/
@@ -101,19 +108,20 @@ src/
 ## 4. **Error Handling & Validation**
 
 ### Current Issues
+
 - Inconsistent error responses
 - No input validation layer
 - Database errors exposed to client
 
 ### Recommendations
+
 ```typescript
 // Use Zod for runtime validation
-import { z } from 'zod';
+import { z } from "zod";
 
 export const CreateSimulationSchema = z.object({
   name: z.string().min(1).max(255),
-  type: z.enum(['discussion', 'conversation', 'survey']),
-  agentCount: z.number().min(1).max(100),
+  type: z.enum(["discussion", "conversation", "survey"]),
   description: z.string().optional(),
 });
 
@@ -123,8 +131,8 @@ export const validateInput = <T>(schema: z.ZodSchema<T>) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
       reply.status(400).send({
-        error: 'Validation failed',
-        details: result.error.errors
+        error: "Validation failed",
+        details: result.error.errors,
       });
       return;
     }
@@ -136,23 +144,25 @@ export const validateInput = <T>(schema: z.ZodSchema<T>) => {
 ## 5. **Database Layer Abstraction**
 
 ### Current Issues
+
 - Supabase client used directly in services
 - No abstraction over database operations
 - Difficult to test and swap database implementations
 
 ### Recommendations
+
 ```typescript
 // Abstract repository pattern
 abstract class BaseRepository<T> {
   protected abstract tableName: string;
-  
+
   async create(entity: T): Promise<T> {
     const { data, error } = await supabase
       .from(this.tableName)
       .insert(entity)
       .select()
       .single();
-    
+
     if (error) throw new DatabaseError(error.message);
     return data;
   }
@@ -160,7 +170,7 @@ abstract class BaseRepository<T> {
 
 class AgentRepository extends BaseRepository<Agent> {
   protected tableName = config.database.tables.agents;
-  
+
   async findBySimulation(simulationId: string): Promise<Agent[]> {
     // Implementation
   }
@@ -170,6 +180,7 @@ class AgentRepository extends BaseRepository<Agent> {
 ## 6. **Event-Driven Architecture**
 
 ### Current Issues
+
 - Tight coupling between simulation state changes and conversations
 - Hardcoded webhook logic in service layer
 - No event sourcing or audit trail
@@ -177,6 +188,7 @@ class AgentRepository extends BaseRepository<Agent> {
 ### How to Implement Event-Driven System
 
 #### Step 1: Define Domain Events
+
 ```typescript
 // src/shared/events/types.ts
 export interface DomainEvent {
@@ -191,16 +203,16 @@ export interface DomainEvent {
 
 // Define specific event types
 export interface SimulationStartedEvent extends DomainEvent {
-  type: 'simulation.started';
+  type: "simulation.started";
   data: {
     simulationId: string;
     agentCount: number;
-    type: 'discussion' | 'conversation' | 'survey';
+    type: "discussion" | "conversation" | "survey";
   };
 }
 
 export interface MessageSentEvent extends DomainEvent {
-  type: 'message.sent';
+  type: "message.sent";
   data: {
     messageId: string;
     conversationId: string;
@@ -210,7 +222,7 @@ export interface MessageSentEvent extends DomainEvent {
 }
 
 export interface ConversationEndedEvent extends DomainEvent {
-  type: 'conversation.ended';
+  type: "conversation.ended";
   data: {
     conversationId: string;
     participantIds: string[];
@@ -220,6 +232,7 @@ export interface ConversationEndedEvent extends DomainEvent {
 ```
 
 #### Step 2: Create Event Bus Infrastructure
+
 ```typescript
 // src/shared/events/eventBus.ts
 export interface EventHandler<T extends DomainEvent = DomainEvent> {
@@ -237,18 +250,16 @@ export class EventBus {
   async publish(event: DomainEvent): Promise<void> {
     // Store event for audit trail
     await this.eventStore.save(event);
-    
+
     // Get handlers for this event type
     const handlers = this.handlers.get(event.type) || [];
-    
+
     // Execute handlers (consider parallel execution with error handling)
-    await Promise.allSettled(
-      handlers.map(handler => handler.handle(event))
-    );
+    await Promise.allSettled(handlers.map((handler) => handler.handle(event)));
   }
 
   subscribe<T extends DomainEvent>(
-    eventType: string, 
+    eventType: string,
     handler: EventHandler<T>
   ): void {
     if (!this.handlers.has(eventType)) {
@@ -265,6 +276,7 @@ export class EventBus {
 ```
 
 #### Step 3: Implement Event Store
+
 ```typescript
 // src/shared/events/eventStore.ts
 export interface EventStore {
@@ -277,27 +289,25 @@ export class SupabaseEventStore implements EventStore {
   constructor(private supabase: SupabaseClient) {}
 
   async save(event: DomainEvent): Promise<void> {
-    const { error } = await this.supabase
-      .from('domain_events')
-      .insert({
-        id: event.id,
-        type: event.type,
-        aggregate_id: event.aggregateId,
-        version: event.version,
-        data: event.data,
-        metadata: event.metadata,
-        timestamp: event.timestamp.toISOString(),
-      });
+    const { error } = await this.supabase.from("domain_events").insert({
+      id: event.id,
+      type: event.type,
+      aggregate_id: event.aggregateId,
+      version: event.version,
+      data: event.data,
+      metadata: event.metadata,
+      timestamp: event.timestamp.toISOString(),
+    });
 
     if (error) throw new Error(`Failed to store event: ${error.message}`);
   }
 
   async getEvents(aggregateId: string): Promise<DomainEvent[]> {
     const { data, error } = await this.supabase
-      .from('domain_events')
-      .select('*')
-      .eq('aggregate_id', aggregateId)
-      .order('version', { ascending: true });
+      .from("domain_events")
+      .select("*")
+      .eq("aggregate_id", aggregateId)
+      .order("version", { ascending: true });
 
     if (error) throw new Error(`Failed to get events: ${error.message}`);
     return data.map(this.mapToDomainEvent);
@@ -306,9 +316,12 @@ export class SupabaseEventStore implements EventStore {
 ```
 
 #### Step 4: Create Event Handlers
+
 ```typescript
 // src/domains/simulation/handlers/simulationStartedHandler.ts
-export class SimulationStartedHandler implements EventHandler<SimulationStartedEvent> {
+export class SimulationStartedHandler
+  implements EventHandler<SimulationStartedEvent>
+{
   constructor(
     private conversationService: ConversationService,
     private notificationService: NotificationService
@@ -316,13 +329,13 @@ export class SimulationStartedHandler implements EventHandler<SimulationStartedE
 
   async handle(event: SimulationStartedEvent): Promise<void> {
     const { simulationId, agentCount } = event.data;
-    
+
     // Start initial conversations
     await this.conversationService.initializeConversations(simulationId);
-    
+
     // Send notification
     await this.notificationService.sendSimulationStarted(simulationId);
-    
+
     // Log for monitoring
     console.log(`Simulation ${simulationId} started with ${agentCount} agents`);
   }
@@ -337,20 +350,24 @@ export class MessageSentHandler implements EventHandler<MessageSentEvent> {
 
   async handle(event: MessageSentEvent): Promise<void> {
     const { conversationId, senderId } = event.data;
-    
+
     // Generate response from other participant
     const conversation = await this.conversationService.getById(conversationId);
-    const otherAgent = conversation.participants.find(p => p !== senderId);
-    
+    const otherAgent = conversation.participants.find((p) => p !== senderId);
+
     if (otherAgent) {
       // This will generate another MessageSentEvent, creating the conversation flow
-      await this.conversationService.generateResponse(conversationId, otherAgent);
+      await this.conversationService.generateResponse(
+        conversationId,
+        otherAgent
+      );
     }
   }
 }
 ```
 
 #### Step 5: Update Services to Emit Events
+
 ```typescript
 // src/domains/simulation/services/simulationService.ts
 export class SimulationService {
@@ -361,51 +378,60 @@ export class SimulationService {
 
   async startSimulation(simulationId: string): Promise<void> {
     const simulation = await this.simulationRepo.findById(simulationId);
-    
+
     // Update simulation state
-    await this.simulationRepo.update(simulationId, { state: 'running' });
-    
+    await this.simulationRepo.update(simulationId, { state: "running" });
+
     // Emit event instead of directly calling other services
     await this.eventBus.publish({
       id: generateId(),
-      type: 'simulation.started',
+      type: "simulation.started",
       timestamp: new Date(),
       aggregateId: simulationId,
       version: 1,
       data: {
         simulationId,
         agentCount: simulation.agentCount,
-        type: simulation.type
-      }
+        type: simulation.type,
+      },
     });
   }
 }
 ```
 
 #### Step 6: Setup Event Bus in Main Application
+
 ```typescript
 // src/infrastructure/events/setup.ts
 export function setupEventHandlers(eventBus: EventBus): void {
   // Simulation events
-  eventBus.subscribe('simulation.started', new SimulationStartedHandler(
-    container.get(ConversationService),
-    container.get(NotificationService)
-  ));
+  eventBus.subscribe(
+    "simulation.started",
+    new SimulationStartedHandler(
+      container.get(ConversationService),
+      container.get(NotificationService)
+    )
+  );
 
-  eventBus.subscribe('simulation.ended', new SimulationEndedHandler(
-    container.get(ReportService)
-  ));
+  eventBus.subscribe(
+    "simulation.ended",
+    new SimulationEndedHandler(container.get(ReportService))
+  );
 
   // Message events
-  eventBus.subscribe('message.sent', new MessageSentHandler(
-    container.get(LLMService),
-    container.get(AgentService)
-  ));
+  eventBus.subscribe(
+    "message.sent",
+    new MessageSentHandler(
+      container.get(LLMService),
+      container.get(AgentService)
+    )
+  );
 
   // Conversation events
-  eventBus.subscribe('conversation.ended', new ConversationEndedHandler(
-    container.get(AnalyticsService)
-  ));
+  eventBus.subscribe(
+    "conversation.ended",
+    new ConversationEndedHandler(container.get(AnalyticsService))
+  );
 }
 
 // src/index.ts
@@ -415,10 +441,11 @@ const eventBus = new EventBus(eventStore);
 setupEventHandlers(eventBus);
 
 // Make eventBus available through dependency injection
-container.register('EventBus', eventBus);
+container.register("EventBus", eventBus);
 ```
 
 #### Step 7: Database Schema for Event Store
+
 ```sql
 -- Add to your Supabase migrations
 CREATE TABLE domain_events (
@@ -438,11 +465,12 @@ CREATE INDEX idx_domain_events_timestamp ON domain_events(timestamp);
 ```
 
 #### Step 8: Replace Current Coupling with Events
+
 ```typescript
 // BEFORE: Tight coupling in simulation controller
 export const startSimulation = async (req, reply) => {
   // ... update simulation state
-  
+
   // Direct service calls - TIGHT COUPLING
   const agents = await listAgents(simulationId);
   for (const sender of senders) {
@@ -455,18 +483,19 @@ export const startSimulation = async (req, reply) => {
 // AFTER: Event-driven approach
 export const startSimulation = async (req, reply) => {
   // ... update simulation state
-  
+
   // Emit event - LOOSE COUPLING
   await eventBus.publish({
-    type: 'simulation.started',
+    type: "simulation.started",
     // ... event data
   });
-  
+
   // Handlers will take care of the rest
 };
 ```
 
 #### Benefits of This Implementation:
+
 1. **Decoupling**: Services don't need to know about each other
 2. **Scalability**: Easy to add new event handlers without modifying existing code
 3. **Audit Trail**: All events are stored for debugging and analytics
@@ -475,6 +504,7 @@ export const startSimulation = async (req, reply) => {
 6. **Monitoring**: Can track event flow and processing times
 
 #### Advanced Features to Consider:
+
 - **Event Replay**: Rebuild system state from events
 - **Event Versioning**: Handle schema evolution
 - **Dead Letter Queue**: Handle failed events
@@ -484,11 +514,13 @@ export const startSimulation = async (req, reply) => {
 ## 7. **Testing Strategy**
 
 ### Current Issues
+
 - No visible test structure
 - Difficult to test due to tight coupling
 - No clear testing strategy
 
 ### Recommendations
+
 ```
 tests/
 ├── unit/
@@ -504,19 +536,21 @@ tests/
 ## 8. **Monitoring & Observability**
 
 ### Current Issues
+
 - Limited logging
 - No metrics or monitoring
 - Error tracking is basic
 
 ### Recommendations
+
 ```typescript
 // Structured logging
-import { logger } from './shared/logger';
+import { logger } from "./shared/logger";
 
-logger.info('Simulation started', {
+logger.info("Simulation started", {
   simulationId,
   agentCount,
-  type: simulation.type
+  type: simulation.type,
 });
 
 // Metrics
@@ -524,7 +558,7 @@ class MetricsService {
   incrementCounter(metric: string, tags: Record<string, string>) {
     // Implementation
   }
-  
+
   recordTiming(metric: string, duration: number) {
     // Implementation
   }
@@ -534,37 +568,39 @@ class MetricsService {
 ## 9. **API Versioning & Documentation**
 
 ### Current Issues
+
 - No API versioning strategy
 - Basic documentation setup
 
 ### Recommendations
+
 ```typescript
 // Version routes
-server.register(v1Routes, { prefix: '/v1' });
-server.register(v2Routes, { prefix: '/v2' });
+server.register(v1Routes, { prefix: "/v1" });
+server.register(v2Routes, { prefix: "/v2" });
 
 // Enhanced OpenAPI documentation
 const swaggerOptions = {
   swagger: {
     info: {
-      title: 'Human Blueprint Model API',
-      version: '1.0.0'
+      title: "Human Blueprint Model API",
+      version: "1.0.0",
     },
-    servers: [
-      { url: 'http://localhost:3000', description: 'Development' }
-    ]
-  }
+    servers: [{ url: "http://localhost:3000", description: "Development" }],
+  },
 };
 ```
 
 ## 10. **Performance & Scalability**
 
 ### Current Issues
+
 - No caching strategy
 - Potential N+1 queries
 - No rate limiting
 
 ### Recommendations
+
 ```typescript
 // Caching layer
 interface CacheService {
@@ -576,18 +612,20 @@ interface CacheService {
 // Rate limiting
 server.register(rateLimit, {
   max: 100,
-  timeWindow: '1 minute'
+  timeWindow: "1 minute",
 });
 
 // Database query optimization
 const getSimulationWithAgents = async (id: string) => {
   return supabase
-    .from('simulations')
-    .select(`
+    .from("simulations")
+    .select(
+      `
       *,
       agents(*)
-    `)
-    .eq('id', id)
+    `
+    )
+    .eq("id", id)
     .single();
 };
 ```
@@ -595,18 +633,21 @@ const getSimulationWithAgents = async (id: string) => {
 ## Implementation Priority
 
 ### High Priority (Immediate)
+
 1. Configuration management
 2. Input validation with Zod
 3. Repository pattern for database access
 4. Comprehensive error handling
 
 ### Medium Priority (Next Sprint)
+
 1. Domain-driven structure refactor
 2. Event-driven architecture
 3. Testing framework setup
 4. Enhanced logging
 
 ### Low Priority (Future)
+
 1. Advanced caching
 2. Performance monitoring
 3. API versioning

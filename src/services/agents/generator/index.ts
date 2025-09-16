@@ -74,7 +74,7 @@ export const generateRandomAgent = async (
   const age = getRandomNumber(18, 60);
 
   const MIN_BIGFIVE_VALUE = 1;
-  const MAX_BIGFIVE_VALUE = 6;
+  const MAX_BIGFIVE_VALUE = 5;
 
   const defaultLLMsettings = {
     provider: process.env.DEFAULT_LLM_PROVIDER,

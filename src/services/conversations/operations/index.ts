@@ -14,9 +14,9 @@ import {
 import { createInitConversationMessage, createMessage } from "../../messages";
 import { conversationQueue } from "../workers";
 import {
-  conversateTool,
+  assignActivityToAgent,
+  converseTool,
   endConversationTool,
-  findConversationPartnerTool,
   getAgentById,
   parsePrompt,
   removeActivityFromAgent,
@@ -60,10 +60,6 @@ export const createConversation = async (
 ): Promise<Conversation> => {
   const conversationId = createConversationId(sender.id, reciever.id);
 
-  console.log(
-    `Creating conversation between ${sender.name} (${sender.id}) and ${reciever.name} (${reciever.id}) with id ${conversationId}.`
-  );
-
   const newConversation: Omit<Conversation, "messages"> = {
     id: conversationId,
     simulationId: simulation.id,
@@ -81,6 +77,10 @@ export const createConversation = async (
       .single();
 
   if (error) throw new Error(error.message);
+
+  console.log(
+    `Conversation between ${sender.name} (${sender.id}) and ${reciever.name} (${reciever.id}) with id ${conversationId} created.`
+  );
 
   return { ...conversation, messages: [] };
 };
@@ -111,39 +111,58 @@ export const startConversation = async (
 ): Promise<void> => {
   console.log(`Starting conversation ${conversation.id}.`);
 
-  await updateConversation({ ...conversation, activeSpeakerId: sender.id });
+  for await (const participant of conversation.participants) {
+    await assignActivityToAgent(participant, conversation.id);
+  }
+
+  const m = await updateConversation({
+    ...conversation,
+    activeSpeakerId: sender.id,
+  });
+  console.log(m);
+
   await createInitConversationMessage(simulation, conversation, sender);
 
   await conversationQueue.add("conversation.converse", {
     conversationId: conversation.id,
   });
+
+  return;
 };
 
 export const conversate = async (conversationId: string) => {
   const conversation = await getConversation(conversationId);
+
   const { id, activeSpeakerId, participants, simulationId, messages } =
     conversation;
 
   const senderId = participants.find((agent) => agent !== activeSpeakerId);
   const sender = await getAgentById(senderId || "");
 
-  const { text, usage, toolCalls } = await generateText({
+  const { text, usage, toolCalls, steps } = await generateText({
     model: openai(sender.llmSettings.model),
     system: await parsePrompt(sender),
     messages: parseMessages(messages || [], sender.id),
+    maxSteps: 10,
     tools: {
-      findConversationPartnerTool,
       startConversationTool,
-      conversateTool,
+      converseTool,
       endConversationTool,
     },
   });
+
+  console.log(text);
+
+  console.log(steps);
 
   // Execute tool calls if any
   if (toolCalls && toolCalls.length > 0) {
     console.log(`Agent ${sender.id} made ${toolCalls.length} tool calls`);
     for (const toolCall of toolCalls) {
-      console.log(`Executing tool: ${toolCall.toolName} with args:`, toolCall.args);
+      console.log(
+        `Executing tool: ${toolCall.toolName} with args:`,
+        toolCall.args
+      );
       // Tool execution happens automatically in the generateText call
     }
   }

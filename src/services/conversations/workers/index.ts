@@ -10,20 +10,33 @@ new Worker(
   QUEUE_NAME,
   async (job) => {
     if (job.name === "conversation.start") {
+      console.log(
+        `Job id ${job.data.conversation.id} added to START in ${QUEUE_NAME}.`
+      );
+
       const { simulation, conversation, sender } = job.data;
+
       await startConversation(simulation, conversation, sender);
-      return;
+
+      await job.isCompleted();
     }
 
     if (job.name === "conversation.converse") {
+      console.log(
+        `Job id ${job.data.conversation.id} added to CONVERSE in ${QUEUE_NAME}.`
+      );
       const { conversationId } = job.data;
       await conversate(conversationId);
-      return;
+      await job.isCompleted();
     }
 
     if (job.name === "conversation.end") {
+      console.log(
+        `Job id ${job.data.conversation.id} added to END in ${QUEUE_NAME}.`
+      );
+
       await endConversation(job.data.conversationId);
-      return;
+      await job.isCompleted();
     }
   },
   {

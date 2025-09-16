@@ -6,7 +6,13 @@ import {
   BigFivePersonalityModel,
   Demographics,
 } from "../core";
-import { createAgents, generateAgent, generateRandomAgent } from "../services";
+import {
+  createAgents,
+  generateAgent,
+  generateRandomAgent,
+  getSimulation,
+  updateSimulation,
+} from "../services";
 
 export const createCustomAgentController = asyncHandler(
   async (
@@ -107,6 +113,9 @@ export const generateRandomAgents = asyncHandler(
         )
       );
     }
+
+    const simulation = await getSimulation(request.body.simulationId);
+    await updateSimulation({ ...simulation, stats: { agents: count } });
 
     await createAgents(agents);
 
