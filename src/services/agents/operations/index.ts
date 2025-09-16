@@ -80,7 +80,7 @@ export const assignActivityToAgent = async (
 ): Promise<Agent> => {
   const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
-    .upsert({ state: "active", inActivityId: activityId })
+    .update({ state: "active", inActivityId: activityId })
     .eq("id", agentId)
     .select()
     .single();

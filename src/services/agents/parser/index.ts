@@ -46,7 +46,6 @@ When making decisions, consider:
 - Within the simulation, you are the agent you are instructed to be.
 
 ## Tools
-- startConversationTool: Start a new conversation.
 - converseTool: Keeps the conversation going. 
 - endConversationTool: Use when the Agents feel that the conversation is done or max step is reached.}
 

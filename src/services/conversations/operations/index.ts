@@ -115,11 +115,10 @@ export const startConversation = async (
     await assignActivityToAgent(participant, conversation.id);
   }
 
-  const m = await updateConversation({
+  await updateConversation({
     ...conversation,
     activeSpeakerId: sender.id,
   });
-  console.log(m);
 
   await createInitConversationMessage(simulation, conversation, sender);
 
@@ -139,33 +138,18 @@ export const conversate = async (conversationId: string) => {
   const senderId = participants.find((agent) => agent !== activeSpeakerId);
   const sender = await getAgentById(senderId || "");
 
-  const { text, usage, toolCalls, steps } = await generateText({
+  const { text, usage, toolResults } = await generateText({
     model: openai(sender.llmSettings.model),
     system: await parsePrompt(sender),
     messages: parseMessages(messages || [], sender.id),
     maxSteps: 10,
     tools: {
-      startConversationTool,
       converseTool,
       endConversationTool,
     },
   });
 
-  console.log(text);
-
-  console.log(steps);
-
-  // Execute tool calls if any
-  if (toolCalls && toolCalls.length > 0) {
-    console.log(`Agent ${sender.id} made ${toolCalls.length} tool calls`);
-    for (const toolCall of toolCalls) {
-      console.log(
-        `Executing tool: ${toolCall.toolName} with args:`,
-        toolCall.args
-      );
-      // Tool execution happens automatically in the generateText call
-    }
-  }
+  console.log(toolResults);
 
   // Only create message if there's text content
   if (text && text.trim()) {
@@ -189,8 +173,6 @@ export const conversate = async (conversationId: string) => {
 export const endConversation = async (
   conversationId: string
 ): Promise<void> => {
-  console.log(`Ending conversation ${conversationId}.`);
-
   const conversation = await getConversation(conversationId);
 
   // Update agents
@@ -205,6 +187,8 @@ export const endConversation = async (
     activeSpeakerId: null,
     active: false,
   });
+
+  console.log(`Conversation ${conversationId} ended.`);
 
   return;
 };

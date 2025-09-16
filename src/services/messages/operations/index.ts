@@ -45,7 +45,7 @@ export const createInitConversationMessage = async (
 
     await createMessage(initMessage);
 
-    console.log(`First message in conversation ${conversation.id} created.`);
+    console.log(`Init message in conversation ${conversation.id} created.`);
 
     return text;
   } catch (error) {

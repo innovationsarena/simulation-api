@@ -30,7 +30,9 @@ export const startConversationTool: Tool<any, string> = {
 export const converseTool: Tool<any, string> = {
   description: "Keep conversation going between senderId and receiverId.",
   parameters: z.object({
-    conversationId: z.string(),
+    conversationId: z
+      .string()
+      .describe("The Id of the conversation that are kept alive."),
   }),
   execute: async (args: { conversationId: string }) => {
     console.log("Tool: Keep conversation going triggered.");
@@ -46,13 +48,17 @@ export const converseTool: Tool<any, string> = {
 export const endConversationTool: Tool<any, string> = {
   description: "End conversation between senderId and receiverId.",
   parameters: z.object({
-    conversationId: z.string(),
+    conversationId: z
+      .string()
+      .describe("The Id of the conversation that are ending."),
   }),
   execute: async (args: { conversationId: string }) => {
     console.log("Tool: Ending conversation triggered.");
+
     await conversationQueue.add("conversation.end", {
       conversationId: args.conversationId,
     });
+
     return `conversationId ${args.conversationId} is ended.`;
   },
 };

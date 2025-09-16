@@ -9,7 +9,9 @@ export const conversationQueue = new Queue(QUEUE_NAME);
 new Worker(
   QUEUE_NAME,
   async (job) => {
-    if (job.name === "conversation.start") {
+    //    console.log("JOBOBOBOBO ---> ", job.name);
+
+    if (job.name == "conversation.start") {
       console.log(
         `Job id ${job.data.conversation.id} added to START in ${QUEUE_NAME}.`
       );
@@ -17,26 +19,25 @@ new Worker(
       const { simulation, conversation, sender } = job.data;
 
       await startConversation(simulation, conversation, sender);
-
-      await job.isCompleted();
+      return;
     }
 
-    if (job.name === "conversation.converse") {
-      console.log(
-        `Job id ${job.data.conversation.id} added to CONVERSE in ${QUEUE_NAME}.`
-      );
+    if (job.name == "conversation.converse") {
       const { conversationId } = job.data;
-      await conversate(conversationId);
-      await job.isCompleted();
-    }
-
-    if (job.name === "conversation.end") {
       console.log(
-        `Job id ${job.data.conversation.id} added to END in ${QUEUE_NAME}.`
+        `Job id ${conversationId} added to CONVERSE in ${QUEUE_NAME}.`
       );
 
-      await endConversation(job.data.conversationId);
-      await job.isCompleted();
+      await conversate(conversationId);
+      return;
+    }
+
+    if (job.name == "conversation.end") {
+      const { conversationId } = job.data;
+      console.log(`Job id ${conversationId} added to END in ${QUEUE_NAME}.`);
+
+      await endConversation(conversationId);
+      return;
     }
   },
   {
