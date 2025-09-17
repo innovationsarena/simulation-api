@@ -138,18 +138,18 @@ export const conversate = async (conversationId: string) => {
   const senderId = participants.find((agent) => agent !== activeSpeakerId);
   const sender = await getAgentById(senderId || "");
 
-  const { text, usage, toolCalls } = await generateText({
+  const { text, usage, toolResults } = await generateText({
     model: openai(sender.llmSettings.model),
     system: await parsePrompt(sender),
     messages: parseMessages(messages || [], sender.id),
-    maxSteps: 3,
+    maxSteps: 2,
     tools: {
       converseTool,
       endConversationTool,
     },
   });
 
-  console.log(toolCalls);
+  console.log(toolResults);
 
   // Only create message if there's text content
   if (text && text.trim()) {

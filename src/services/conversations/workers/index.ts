@@ -9,7 +9,7 @@ export const conversationQueue = new Queue(QUEUE_NAME);
 new Worker(
   QUEUE_NAME,
   async (job) => {
-    //    console.log("JOBOBOBOBO ---> ", job.name);
+    console.log("JOBOBOBOBO ---> ", job.name);
 
     if (job.name == "conversation.start") {
       console.log(

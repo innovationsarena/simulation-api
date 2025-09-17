@@ -104,11 +104,8 @@ export const stopSimulationController = asyncHandler(
         .status(404)
         .send({ message: "Simulation with given ID not found." });
 
-    await stopSimulation(simulation);
+    const stoppedSimulation = await stopSimulation(simulation);
 
-    return reply.status(200).send({
-      ...simulation,
-      state: "stopped",
-    });
+    return reply.status(200).send(stoppedSimulation);
   }
 );

@@ -72,13 +72,15 @@ export const startSimulation = async (simulation: Simulation) => {
 
 export const stopSimulation = async (
   simulation: Simulation
-): Promise<boolean> => {
+): Promise<Simulation> => {
   // Update simulation state
-  await updateSimulation({
+  const stoppedSimulation = await updateSimulation({
     ...simulation,
     state: "stopped",
   });
+
   // End all activities
+  // Update all Agents
 
   // Clear queues?
   await conversationQueue.drain();
@@ -86,8 +88,8 @@ export const stopSimulation = async (
 
   // Update all Agent states
 
-  console.log(`Simulation ${simulation.id} stopped.`);
-  return true;
+  console.log(`Simulation ${stoppedSimulation.id} stopped.`);
+  return stoppedSimulation;
 };
 
 export const updateSimulation = async (
