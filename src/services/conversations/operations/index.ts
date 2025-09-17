@@ -135,6 +135,7 @@ export const conversate = async (conversationId: string) => {
   const { id, activeSpeakerId, participants, simulationId, messages } =
     conversation;
 
+  // Switch to new sender
   const senderId = participants.find((agent) => agent !== activeSpeakerId);
   const sender = await getAgentById(senderId || "");
 
@@ -142,14 +143,15 @@ export const conversate = async (conversationId: string) => {
     model: openai(sender.llmSettings.model),
     system: await parsePrompt(sender),
     messages: parseMessages(messages || [], sender.id),
-    maxSteps: 2,
+    maxSteps: 10,
     tools: {
       converseTool,
       endConversationTool,
     },
+    toolChoice: "auto",
   });
 
-  console.log(toolResults);
+  console.log(text);
 
   // Only create message if there's text content
   if (text && text.trim()) {
@@ -168,6 +170,15 @@ export const conversate = async (conversationId: string) => {
     ...conversation,
     activeSpeakerId: senderId as string,
   });
+
+  if (
+    toolResults &&
+    toolResults.some((result: any) => result.toolName === "converseTool")
+  ) {
+    await conversationQueue.add("conversation.converse", {
+      conversationId,
+    });
+  }
 };
 
 export const endConversation = async (

@@ -28,29 +28,27 @@ export const startConversationTool: Tool<any, string> = {
 };
 
 export const converseTool: Tool<any, string> = {
-  description: "Keep conversation going between senderId and receiverId.",
+  description:
+    "Use this when you want to continue the conversation with the other agent. Call this tool with the current conversationId.",
   parameters: z.object({
-    conversationId: z
-      .string()
-      .describe("The Id of the conversation that are kept alive."),
+    conversationId: z.string().describe("The conversationId."),
   }),
   execute: async (args: { conversationId: string }) => {
     console.log("Tool: Keep conversation going triggered.");
-
+    /*
     await conversationQueue.add("conversation.converse", {
       conversationId: args.conversationId,
     });
-
+*/
     return `conversationId ${args.conversationId} is ongoing.`;
   },
 };
 
 export const endConversationTool: Tool<any, string> = {
-  description: "End conversation between senderId and receiverId.",
+  description:
+    "Use this when you feel the conversation has reached a natural conclusion or there's nothing more to discuss. Call this tool with the current conversationId.",
   parameters: z.object({
-    conversationId: z
-      .string()
-      .describe("The Id of the conversation that are ending."),
+    conversationId: z.string().describe("The conversationId."),
   }),
   execute: async (args: { conversationId: string }) => {
     console.log("Tool: Ending conversation triggered.");

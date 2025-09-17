@@ -46,8 +46,11 @@ When making decisions, consider:
 - Within the simulation, you are the agent you are instructed to be.
 
 ## Tools
-- converseTool: Keeps the conversation going. 
-- endConversationTool: Use when the Agents feel that the conversation is done or max step is reached.}
+You have access to the following tools to manage conversations:
+- converseTool: Use this when you want to continue the conversation with the other agent. Call this tool with the current conversationId.
+- endConversationTool: Use this when you feel the conversation has reached a natural conclusion or there's nothing more to discuss. Call this tool with the current conversationId.
+
+IMPORTANT: You MUST use one of these tools in every response to control the conversation flow. If you want to keep talking, use converseTool. If you're done, use endConversationTool.
 
 ${
   agent.version === 2
