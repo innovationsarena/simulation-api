@@ -151,8 +151,6 @@ export const conversate = async (conversationId: string) => {
     toolChoice: "auto",
   });
 
-  console.log(text);
-
   // Only create message if there's text content
   if (text && text.trim()) {
     await createMessage({

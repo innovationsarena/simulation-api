@@ -1,7 +1,7 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import {
   Agent,
-  Conversation,
+  Interaction,
   Message,
   Simulation,
   supabase,
@@ -24,7 +24,7 @@ export const createMessage = async (message: Message): Promise<Message> => {
 
 export const createInitConversationMessage = async (
   simulation: Simulation,
-  conversation: Conversation,
+  interaction: Interaction,
   sender: Agent
 ): Promise<string> => {
   try {
@@ -35,21 +35,39 @@ export const createInitConversationMessage = async (
     });
 
     const initMessage: Message = {
-      parentId: conversation.id,
-      parentType: "conversation",
+      interactionId: interaction.id,
+      interactionType: "conversation",
       content: text,
       senderId: sender.id,
       simulationId: simulation.id,
-      tokens: usage,
+      stats: usage,
     };
 
     await createMessage(initMessage);
 
-    console.log(`Init message in conversation ${conversation.id} created.`);
+    console.log(`Init message in conversation ${interaction.id} created.`);
 
     return text;
   } catch (error) {
     console.error(error);
     return "Error in creating init Message.";
+  }
+};
+
+export const listMessagesBySimulationId = async (
+  simulationId: string
+): Promise<Message[]> => {
+  try {
+    const { data: messages, error } = await supabase
+      .from(process.env.MESSAGES_TABLE as string)
+      .select("*")
+      .eq("simulationId", simulationId);
+
+    if (!messages) throw new Error(error.message);
+
+    return messages;
+  } catch (error) {
+    console.error(error);
+    return [];
   }
 };

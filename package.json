@@ -31,6 +31,7 @@
     "@semantic-release/git": "^10.0.1",
     "@supabase/supabase-js": "^2.50.2",
     "@types/js-yaml": "^4.0.9",
+    "@voltagent/core": "^1.1.15",
     "ai": "^4.3.16",
     "axios": "^1.10.0",
     "bullmq": "^5.58.5",

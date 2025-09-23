@@ -1,19 +1,12 @@
-import { FastifyInstance, RouteHandlerMethod } from "fastify";
-import { validateKey } from "../core";
+import { FastifyInstance } from "fastify";
+import { simulationInputSchema, validateKey } from "../core";
 import {
   createSimulationController,
   startSimulationController,
   stopSimulationController,
   getSimulationController,
+  listSimulationMessagesController,
 } from "../controllers";
-import z from "zod";
-
-const createSimulationSchema = z.strictObject({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  topic: z.string(),
-  type: z.enum(["conversation", "discussion", "survey"]),
-});
 
 export const simulationRouter = (fastify: FastifyInstance) => {
   fastify.get(
@@ -28,7 +21,7 @@ export const simulationRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/simulations",
     {
-      schema: createSimulationSchema,
+      schema: simulationInputSchema,
       preValidation: [validateKey],
     },
     createSimulationController
@@ -49,5 +42,13 @@ export const simulationRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     stopSimulationController
+  );
+
+  fastify.get(
+    "/simulations/:simulationId/messages",
+    {
+      preValidation: [validateKey],
+    },
+    listSimulationMessagesController
   );
 };

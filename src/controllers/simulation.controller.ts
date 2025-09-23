@@ -6,6 +6,8 @@ import {
   getSimulation,
   listAgents,
   stopSimulation,
+  listInteractions,
+  listMessagesBySimulationId,
 } from "../services";
 import { simulationQueue } from "../services/simulations/workers";
 
@@ -29,8 +31,7 @@ export const createSimulationController = asyncHandler(
       type: request.body.type,
       stats: {
         agents: 0,
-        conversations: 0,
-        discussions: 0,
+        interactions: 0,
         tokens: {
           promptTokens: 0,
           completionTokens: 0,
@@ -107,5 +108,50 @@ export const stopSimulationController = asyncHandler(
     const stoppedSimulation = await stopSimulation(simulation);
 
     return reply.status(200).send(stoppedSimulation);
+  }
+);
+
+export const listSimulationMessagesController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+
+    const messages = await listMessagesBySimulationId(simulationId);
+
+    return reply.status(200).send(messages);
+  }
+);
+
+export const listSimulationAgentsController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+
+    const agents = await listAgents(simulationId);
+
+    return reply.status(200).send(agents);
+  }
+);
+
+export const listInteractionsController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+
+    const interactions = await listInteractions(simulationId);
+
+    return reply.status(200).send(interactions);
   }
 );
