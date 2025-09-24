@@ -5,17 +5,23 @@ import { getAgentById, parsePrompt } from "../../agents";
 import { getSimulation } from "../../simulations";
 
 export const handleConversationStart = async (interaction: Interaction) => {
+  console.log(interaction);
+
   try {
     const agents = [];
     const simulation = await getSimulation(interaction.simulationId);
 
     for await (const participant of interaction.participants) {
       const agent = await getAgentById(participant);
+      console.log(agent);
+      const instructions = await parsePrompt(agent, simulation);
+      console.log(instructions);
+
       agents.push(
         new Agent({
           name: agent.name,
           purpose: "A participator in a conversation.",
-          instructions: await parsePrompt(agent, simulation),
+          instructions,
           model: openai(agent.llmSettings.model),
           hooks: {
             onEnd(props) {
@@ -26,16 +32,12 @@ export const handleConversationStart = async (interaction: Interaction) => {
       );
     }
 
-    console.log(agents);
-
     const supervisorAgent = new Agent({
       name: "Supervisor Agent",
       instructions: "You manage a conversation between two agents.",
       model: openai("gpt-5-mini"),
       subAgents: [...agents],
     });
-
-    console.log(supervisorAgent);
 
     // Run
     const results = await supervisorAgent.generateText(
@@ -44,6 +46,9 @@ export const handleConversationStart = async (interaction: Interaction) => {
 
     console.log(results);
   } catch (error: any) {
+    console.log(
+      "E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E "
+    );
     console.error(error);
   }
 };

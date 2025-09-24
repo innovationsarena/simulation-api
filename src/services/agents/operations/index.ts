@@ -74,13 +74,13 @@ export const createAgents = async (agents: Agent[]) => {
   return data;
 };
 
-export const assignActivityToAgent = async (
+export const assignInteractionToAgent = async (
   agentId: string,
-  activityId: string
+  interactionId: string
 ): Promise<Agent> => {
   const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
-    .update({ state: "active", inActivityId: activityId })
+    .update({ state: "active", inInteractionId: interactionId })
     .eq("id", agentId)
     .select()
     .single();
@@ -90,12 +90,12 @@ export const assignActivityToAgent = async (
   return agent;
 };
 
-export const removeActivityFromAgent = async (
+export const removeInteractionFromAgent = async (
   agentId: string
 ): Promise<Agent> => {
   const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
-    .update({ evaluate: "idle", inActivityId: null })
+    .update({ evaluate: "idle", inInteractionId: null })
     .eq("id", agentId)
     .select()
     .single();

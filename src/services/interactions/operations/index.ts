@@ -4,6 +4,7 @@ import {
 } from "@supabase/supabase-js";
 import { id, Interaction, SimulationType, supabase } from "../../../core";
 import { interactionsQueue } from "../workers";
+import { assignInteractionToAgent } from "../../agents";
 
 export const listInteractions = async (
   simulationId: string
@@ -59,6 +60,11 @@ export const createInteraction = async (
       .single();
 
   if (error) throw new Error(error.message);
+
+  // Update agents
+  for await (const agentId of participants) {
+    await assignInteractionToAgent(agentId, newInteraction.id);
+  }
 
   return interaction;
 };

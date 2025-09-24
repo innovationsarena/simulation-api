@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { asyncHandler, InteractionInput } from "../core";
 import {
+  assignInteractionToAgent,
   createInteraction,
   getInteraction,
   getSimulation,
