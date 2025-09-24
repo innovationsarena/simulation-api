@@ -53,7 +53,7 @@ export const getIdleAgent = async (
     .from(process.env.AGENTS_TABLE_NAME as string)
     .select("*")
     .eq("simulationId", simulationId)
-    .eq("inActivityId", null)
+    .eq("inInteractionId", null)
     .eq("state", "idle")
     .neq("id", senderId)
     .single();

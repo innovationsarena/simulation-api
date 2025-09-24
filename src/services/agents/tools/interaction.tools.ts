@@ -3,9 +3,9 @@ import { Tool } from "ai";
 import { getSimulation } from "../../simulations";
 import { getAgentById, getIdleAgent } from "../operations";
 
-export const InteractTool: Tool<any, string> = {
+export const InteractTool: Tool = {
   description: "Start a new interaction.",
-  parameters: z.object({
+  inputSchema: z.object({
     senderId: z.string(),
     simulationId: z.string(),
   }),

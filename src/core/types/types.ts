@@ -75,8 +75,9 @@ export type Demographics = {
 };
 
 export type TokenStats = {
-  promptTokens: number;
-  completionTokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
 };
 
 export type SimulationType = "discussion" | "conversation" | "survey";
@@ -131,7 +132,7 @@ export type Message = {
   interactionType: SimulationType;
   senderId: string; // Agent Id
   content: string; // Says what
-  stats?: TokenStats;
+  stats?: any;
 };
 
 export type MessageInput = Omit<Message, "id" | "stats">;
@@ -144,6 +145,7 @@ export type Interaction = {
   participants: string[]; // Agent Ids
   messages?: Message[];
   stats?: InteractionStats;
+  summary?: string;
 };
 
 export type InteractionInput = Pick<

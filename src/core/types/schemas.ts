@@ -4,8 +4,9 @@ import { z } from "zod";
  * Basic building blocks
  */
 export const tokenStatsSchema = z.object({
-  promptTokens: z.number().int().nonnegative(),
-  completionTokens: z.number().int().nonnegative(),
+  inputTokens: z.number().int().nonnegative(),
+  outputTokens: z.number().int().nonnegative(),
+  totalTokens: z.number().int().nonnegative(),
 });
 
 export const simulationTypeSchema = z.enum([
@@ -153,6 +154,7 @@ export const interactionSchema = z.object({
   participants: z.array(z.string()),
   messages: z.array(messageSchema).optional(),
   stats: interactionStatsSchema.optional(),
+  summary: z.string().optional(),
 });
 
 export const interactionInputSchema = interactionSchema.omit({
@@ -178,7 +180,7 @@ export const agentSchema = z.object({
   organization: organizationSchema.optional(),
   personality: bigFivePersonalitySchema,
   objectives: z.array(z.string()),
-  dynamicProps: z.array(z.record(z.any())).optional(),
+  dynamicProps: z.array(z.record(z.string(), z.any())).optional(),
   llmSettings: llmSettingsSchema,
   evaluations: evaluationsSchema.optional(),
   stats: tokenStatsSchema.optional(),

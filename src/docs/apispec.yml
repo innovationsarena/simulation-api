@@ -603,15 +603,19 @@ components:
     TokenStats:
       type: object
       required:
-        - promptTokens
-        - completionTokens
+        - inputTokens
+        - outputTokens
+        - totalTokens
       properties:
-        promptTokens:
+        inputTokens:
           type: integer
           example: 234
-        completionTokens:
+        outputTokens:
           type: integer
           example: 544
+        totalTokens:
+          type: integer
+          example: 778
 
     Evaluations:
       type: object

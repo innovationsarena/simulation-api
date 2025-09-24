@@ -1,42 +1,58 @@
-import { Agent } from "@voltagent/core";
+import VoltAgent, { Agent } from "@voltagent/core";
 import { Interaction } from "../../../core";
 import { openai } from "@ai-sdk/openai";
 import { getAgentById, parsePrompt } from "../../agents";
 import { getSimulation } from "../../simulations";
 
 export const handleConversationStart = async (interaction: Interaction) => {
-  console.log(interaction);
-
   try {
     const agents = [];
     const simulation = await getSimulation(interaction.simulationId);
 
     for await (const participant of interaction.participants) {
       const agent = await getAgentById(participant);
-      console.log(agent);
-      const instructions = await parsePrompt(agent, simulation);
-      console.log(instructions);
+      const subAgentInstructions = await parsePrompt(agent, simulation);
 
       agents.push(
         new Agent({
           name: agent.name,
+          id: agent.id,
           purpose: "A participator in a conversation.",
-          instructions,
+          instructions: subAgentInstructions,
           model: openai(agent.llmSettings.model),
           hooks: {
-            onEnd(props) {
-              console.log(props);
+            async onEnd(props) {
+              console.log("----------->>>>");
+              console.log(
+                (
+                  props.output?.providerResponse as unknown as {
+                    messages: any[];
+                  }
+                ).messages[0].content
+              );
+              console.log("----------->>>>");
             },
           },
         })
       );
     }
 
+    const supervisorAgentInstructions = `You manage a conversation between ${agents
+      .map((a) => `${a.name} (agentId: ${a.id})`)
+      .join(", ")}.`;
+
     const supervisorAgent = new Agent({
       name: "Supervisor Agent",
-      instructions: "You manage a conversation between two agents.",
+      instructions: supervisorAgentInstructions,
       model: openai("gpt-5-mini"),
       subAgents: [...agents],
+      maxSteps: 10,
+      hooks: {
+        async onEnd(props) {
+          console.log("Interaction ended");
+          console.log(JSON.stringify(props.output));
+        },
+      },
     });
 
     // Run
@@ -46,9 +62,6 @@ export const handleConversationStart = async (interaction: Interaction) => {
 
     console.log(results);
   } catch (error: any) {
-    console.log(
-      "E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E E "
-    );
     console.error(error);
   }
 };

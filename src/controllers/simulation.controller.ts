@@ -33,8 +33,9 @@ export const createSimulationController = asyncHandler(
         agents: 0,
         interactions: 0,
         tokens: {
-          promptTokens: 0,
-          completionTokens: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
         },
       },
     };

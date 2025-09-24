@@ -15,9 +15,9 @@ Name: ${agent.name}
 Gender: ${agent.demographics?.sex}
 Age: ${agent.demographics?.age}
 
-SenderId: ${agent.id}
-InteractionId: ${agent.inInteractionId}
-SimulationId: ${agent.simulationId}
+agentId: ${agent.id}
+interactionId: ${agent.inInteractionId}
+simulationId: ${agent.simulationId}
 
 ## Basic Instructions
 You must always embody the personality traits assigned to you at the beginning of the simulation.
