@@ -3,6 +3,7 @@ import {
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
 import { id, Interaction, SimulationType, supabase } from "../../../core";
+import { interactionsQueue } from "../workers";
 
 export const listInteractions = async (
   simulationId: string
@@ -44,7 +45,7 @@ export const createInteraction = async (
 ): Promise<Interaction> => {
   const newInteraction = {
     id: id(16),
-    active: true,
+    active: false,
     simulationId,
     type,
     participants,
@@ -60,4 +61,35 @@ export const createInteraction = async (
   if (error) throw new Error(error.message);
 
   return interaction;
+};
+
+export const updateInteraction = async (
+  interaction: Interaction
+): Promise<Interaction> => {
+  const {
+    data: updatedInteraction,
+    error,
+  }: PostgrestSingleResponse<Interaction> = await supabase
+    .from(process.env.INTERACTIONS_TABLE_NAME as string)
+    .update(interaction)
+    .eq("id", interaction.id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return updatedInteraction;
+};
+
+export const startInteraction = async (
+  interactionId: string
+): Promise<void> => {
+  const interaction = await getInteraction(interactionId);
+
+  await interactionsQueue.add(
+    `interaction.${interaction.id}.start`,
+    interaction
+  );
+
+  return;
 };

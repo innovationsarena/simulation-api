@@ -1,10 +1,11 @@
 import {
   createInteractionController,
   getInteractionController,
+  startInteractionController,
 } from "../controllers";
 import { FastifyInstance } from "fastify";
 import { interactionInputSchema, validateKey } from "../core";
-import z from "zod";
+import { startInteraction } from "../services";
 
 export const interactionRouter = (fastify: FastifyInstance) => {
   fastify.post(
@@ -23,5 +24,14 @@ export const interactionRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     getInteractionController
+  );
+
+  fastify.patch(
+    "/interactions/:interactionId/start",
+    {
+      schema: {},
+      preValidation: [validateKey],
+    },
+    startInteractionController
   );
 };

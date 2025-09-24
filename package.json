@@ -1,7 +1,7 @@
 {
   "name": "simulator-api",
   "version": "1.0.0",
-  "description": "GR Innovationarena API Agentic simulations.",
+  "description": "GR Innovationarena API for Agentic simulations.",
   "main": "index.ts",
   "type": "commonjs",
   "scripts": {
@@ -10,15 +10,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/innovationsarena/human-blueprint-model.git"
+    "url": "git+https://github.com/innovationsarena/simulator-api.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "agents",
+    "simulations",
+    "abs",
+    "mass"
+  ],
+  "author": "johan @ innovationsarenan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/innovationsarena/human-blueprint-model/issues"
+    "url": "https://github.com/innovationsarena/simulator-api/issues"
   },
-  "homepage": "https://github.com/innovationsarena/human-blueprint-model#readme",
+  "homepage": "https://github.com/innovationsarena/simulator-api#readme",
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
     "@ai-sdk/google": "^1.2.22",

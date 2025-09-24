@@ -5,10 +5,17 @@ const QUEUE_NAME = "messageQueue";
 export const messageQueue = new Queue(QUEUE_NAME);
 
 // WORKERS
-new Worker(QUEUE_NAME, async (job) => {}, {
-  connection: {
-    host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT as string),
+new Worker(
+  QUEUE_NAME,
+  async (job) => {
+    if (job.name === "message.create") {
+    }
   },
-  concurrency: 50,
-});
+  {
+    connection: {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT as string),
+    },
+    concurrency: 50,
+  }
+);
