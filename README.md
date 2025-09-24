@@ -13,7 +13,8 @@
 | /simulations/:id/agents       | _GET_    | NO    | -                  | `Agent[]`                | List all agents in a simulation.            |
 | /simulations/:id/interactions | _GET_    | NO    | -                  | `Interaction[]`          | List all interactions in a simulation.      |
 | /simulations/:id/messages     | _GET_    | NO    | -                  | `Message[]`              | List all messages produced in a simulation. |
-| /agents                       | _POST_   | NO    | `AgentInput`       | `Agent`                  | Creates new **Custom** `Agent`.             |
+| /agents                       | _POST_   | NO    | `AgentInput`       | `Agent`                  | Creates new **Data derived** `Agent`.       |
+| /agents/custom                | _POST_   | NO    | `CustomAgentInput` | `Agent`                  | Creates new **Custom** `Agent`.             |
 | /agents/random                | _POST_   | NO    | `RandomAgentInput` | `Agent`                  | Creates new **Random** `Agent`.             |
 | /agents/:id                   | _GET_    | NO    | -                  | `Agent`                  | Returns `Agent`.                            |
 | /agents/:id                   | _PATCH_  | NO    | `AgentInput`       | `Agent`                  | Updates `Agent`.                            |

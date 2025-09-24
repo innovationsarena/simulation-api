@@ -5,12 +5,10 @@ import helmet from "@fastify/helmet";
 import formbody from "@fastify/formbody";
 
 import {
-  conversationRouter,
-  evaluationsRouter,
-  discussionRouter,
-  simulationRouter,
-  agentRouter,
   docsRouter,
+  agentRouter,
+  simulationRouter,
+  interactionRouter,
 } from "./routes";
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -26,10 +24,8 @@ server.register(cors);
 server.register(helmet);
 
 // Routes
-server.register(conversationRouter);
-server.register(evaluationsRouter);
 server.register(simulationRouter);
-server.register(discussionRouter);
+server.register(interactionRouter);
 server.register(agentRouter);
 server.register(docsRouter);
 

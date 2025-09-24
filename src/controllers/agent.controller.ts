@@ -3,13 +3,17 @@ import {
   Agent,
   id,
   asyncHandler,
-  BigFivePersonalityModel,
-  Demographics,
+  CustomAgentInput,
+  RandomAgentInput,
+  AgentInput,
+  EvaluationInput,
 } from "../core";
 import {
   createAgents,
+  evaluationsQueue,
   generateAgent,
   generateRandomAgent,
+  getAgentById,
   getSimulation,
   updateSimulation,
 } from "../services";
@@ -17,14 +21,7 @@ import {
 export const createCustomAgentController = asyncHandler(
   async (
     request: FastifyRequest<{
-      Body: {
-        simulationId: string;
-        id: string;
-        personality: BigFivePersonalityModel;
-        name: string;
-        demographics: Demographics;
-        objectives: string[];
-      };
+      Body: CustomAgentInput;
     }>,
     reply: FastifyReply
   ) => {
@@ -33,6 +30,7 @@ export const createCustomAgentController = asyncHandler(
       personality,
       demographics,
       name,
+      type,
       simulationId,
       objectives,
     } = request.body;
@@ -42,8 +40,9 @@ export const createCustomAgentController = asyncHandler(
       version: 2,
       name,
       simulationId,
+      type,
       state: "idle",
-      inActivityId: null,
+      inInteractionId: null,
       objectives,
       demographics,
       personality,
@@ -64,25 +63,18 @@ export const createCustomAgentController = asyncHandler(
 export const generateAgentsController = asyncHandler(
   async (
     request: FastifyRequest<{
-      Body: {
-        simulationId: string;
-        version: string;
-        count: number;
-      };
+      Body: AgentInput;
     }>,
     reply: FastifyReply
   ) => {
     const count: number = request.body.count ?? 1;
+    const version: number = request.body.version ?? 2;
+    const { simulationId } = request.body;
 
     const agents: Agent[] = [];
 
     for (let i = 0; i < count; i++) {
-      agents.push(
-        await generateAgent(
-          parseInt(request.body.version),
-          request.body.simulationId
-        )
-      );
+      agents.push(await generateAgent(version, simulationId));
     }
 
     await createAgents(agents);
@@ -91,34 +83,63 @@ export const generateAgentsController = asyncHandler(
   }
 );
 
-type GenerateAgent = {
-  Body: {
-    simulationId: string;
-    version: string;
-    count: number;
-  };
-};
-
 export const generateRandomAgents = asyncHandler(
-  async (request: FastifyRequest<GenerateAgent>, reply: FastifyReply) => {
+  async (
+    request: FastifyRequest<{ Body: RandomAgentInput }>,
+    reply: FastifyReply
+  ) => {
     const count: number = request.body.count ?? 1;
+    const version: number = request.body.version ?? 2;
+    const { simulationId } = request.body;
 
     const agents: Agent[] = [];
 
     for (let i = 0; i < count; i++) {
-      agents.push(
-        await generateRandomAgent(
-          parseInt(request.body.version),
-          request.body.simulationId
-        )
-      );
+      agents.push(await generateRandomAgent(version, simulationId));
     }
 
     const simulation = await getSimulation(request.body.simulationId);
+
     await updateSimulation({ ...simulation, stats: { agents: count } });
 
     await createAgents(agents);
 
     return reply.status(201).send({ agents });
+  }
+);
+
+export const getAgentController = asyncHandler(
+  async (
+    request: FastifyRequest<{ Params: { agentId: string } }>,
+    reply: FastifyReply
+  ) => {
+    const agent = await getAgentById(request.params.agentId);
+
+    return reply.status(200).send(agent);
+  }
+);
+
+export const evaluateAgentController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: EvaluationInput;
+      Params: { agentId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { agentId } = request.params;
+    const { samples, type } = request.body;
+
+    if (type === "bigfive") {
+      await evaluationsQueue.add(
+        "evaluation.bigfive",
+        { agentId, samples },
+        { removeOnComplete: true, removeOnFail: true }
+      );
+    }
+
+    return reply
+      .status(200)
+      .send({ message: `Evaluation of agent ${agentId} started.` });
   }
 );

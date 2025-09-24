@@ -2,9 +2,9 @@ import { createHash } from "crypto";
 
 export const createConversationId = (
   senderId: string,
-  recieverId: string
+  receiverId: string
 ): string => {
-  const sortedIds = [senderId, recieverId].sort();
+  const sortedIds = [senderId, receiverId].sort();
 
   return createHash("shake256", { outputLength: 8 })
     .update(sortedIds.sort().join(""))

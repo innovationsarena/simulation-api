@@ -13,20 +13,20 @@ import {
 export const createConversationController = asyncHandler(
   async (
     request: FastifyRequest<{
-      Body: { senderId: string; recieverId: string; simulationId: string };
+      Body: { senderId: string; receiverId: string; simulationId: string };
     }>,
     reply: FastifyReply
   ) => {
     console.log("Creating conversation...");
 
-    const { senderId, recieverId, simulationId } = request.body;
+    const { senderId, receiverId, simulationId } = request.body;
 
     const simulation = await getSimulation(simulationId);
     const sender = await getAgentById(senderId);
-    const reciever = await getAgentById(recieverId);
+    const receiver = await getAgentById(receiverId);
 
     // Create conversation
-    const conversation = await createConversation(simulation, sender, reciever);
+    const conversation = await createConversation(simulation, sender, receiver);
 
     // Update agent states
     for await (const agentId of conversation.participants) {
@@ -68,18 +68,20 @@ export const startConversationController = asyncHandler(
 
     const { senderId } = request.body;
 
-    const recieverId = conversation.participants.find((p) => p !== senderId);
-    if (!recieverId) throw new Error("Reciever Id in conversation not found.");
+    const receiverId = conversation.participants.find(
+      (p: string) => p !== senderId
+    );
+    if (!receiverId) throw new Error("receiver Id in conversation not found.");
 
     // get Agents
     const sender = await getAgentById(senderId);
-    const reciever = await getAgentById(recieverId as string);
+    const receiver = await getAgentById(receiverId);
 
     // Send to Conversation Queue
     await conversationQueue.add("conversation.start", conversation);
 
     return reply.status(200).send({
-      message: `Conversation ${conversationId} between ${sender.name} and ${reciever.name} has started.`,
+      message: `Conversation ${conversationId} between ${sender.name} and ${receiver.name} has started.`,
     });
   }
 );

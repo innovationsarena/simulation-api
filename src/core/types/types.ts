@@ -3,9 +3,9 @@ export type Agent = {
   version: number; // Agent version
   name: string; // Random swe name based on sex
   simulationId: string;
-  type: "custom" | "random";
+  type: "custom" | "random" | "data";
   state: "idle" | "active";
-  ininteractionId: null | string;
+  inInteractionId: null | string;
   demographics?: Demographics;
   organization?: Organization;
   personality: BigFivePersonalityModel<string>;
@@ -16,7 +16,17 @@ export type Agent = {
   stats?: TokenStats;
 };
 
-export type AgentInput = Omit<Agent, "id" | "stats">;
+export type CustomAgentInput = Omit<
+  Agent,
+  "state" | "stats" | "inInteractionId" | "evaluations"
+>;
+
+export type RandomAgentInput = {
+  count: number;
+  version: number;
+  simulationId: string;
+};
+export type AgentInput = RandomAgentInput;
 
 export type Evaluations = {
   bigFive: BigFiveEvaluation;
@@ -40,8 +50,8 @@ export type QuestionnaireEvaluation = {
 };
 
 export type EvaluationInput = {
-  agentId: string;
-  samples: number;
+  type: "bigfive" | "questionnaire";
+  samples?: number;
 };
 
 export type Organization = {
@@ -136,9 +146,9 @@ export type Interaction = {
   stats?: InteractionStats;
 };
 
-export type InteractionInput = Omit<
+export type InteractionInput = Pick<
   Interaction,
-  "id" | "active" | "messages" | "stats"
+  "participants" | "simulationId"
 >;
 
 export type InteractionStats = {

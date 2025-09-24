@@ -1,11 +1,13 @@
 import { FastifyInstance } from "fastify";
 import { simulationInputSchema, validateKey } from "../core";
 import {
-  createSimulationController,
-  startSimulationController,
-  stopSimulationController,
   getSimulationController,
+  stopSimulationController,
+  startSimulationController,
+  createSimulationController,
+  listSimulationAgentsController,
   listSimulationMessagesController,
+  listSimulationInteractionsController,
 } from "../controllers";
 
 export const simulationRouter = (fastify: FastifyInstance) => {
@@ -50,5 +52,21 @@ export const simulationRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     listSimulationMessagesController
+  );
+
+  fastify.get(
+    "/simulations/:simulationId/agents",
+    {
+      preValidation: [validateKey],
+    },
+    listSimulationAgentsController
+  );
+
+  fastify.get(
+    "/simulations/:simulationId/interactions",
+    {
+      preValidation: [validateKey],
+    },
+    listSimulationInteractionsController
   );
 };

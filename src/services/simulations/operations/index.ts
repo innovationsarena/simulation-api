@@ -1,8 +1,7 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { conversationQueue, createConversation } from "../../conversations";
 import { supabase, Simulation, Agent } from "../../../core";
 import { listAgents } from "../../agents";
-import { discussionQueue } from "../../discussions";
+import { createInteraction, interactionsQueue } from "../../interactions";
 
 export const getSimulation = async (
   simulationId: string
@@ -37,31 +36,32 @@ export const startSimulation = async (simulation: Simulation) => {
   console.log(`Starting simulation ${simulation.id}...`);
 
   await updateSimulation({ ...simulation, state: "running" });
+
   const agents = await listAgents(simulation.id);
 
   if (simulation.type === "conversation") {
     // Start conversations by split in half and start conversate.
     const halfAgentCount = Math.ceil(agents.length / 2);
     const senders = agents.slice(0, halfAgentCount);
-    const recievers = agents.slice(halfAgentCount);
+    const receivers = agents.slice(halfAgentCount);
 
     for await (const sender of senders) {
-      if (recievers.length) {
-        const reciever = recievers.pop() as Agent;
+      if (receivers.length) {
+        const receiver = receivers.pop() as Agent;
 
-        // create conversation
-        const conversation = await createConversation(
-          simulation,
-          sender,
-          reciever
+        // create interaction
+        const conversation = await createInteraction(
+          simulation.id,
+          simulation.type,
+          [sender.id, receiver.id]
         );
 
         // Send to Conversation Queue
-        await conversationQueue.add("conversation.start", {
+        await interactionsQueue.add("interaction.start", {
           simulation,
           conversation,
           sender,
-          reciever,
+          receiver,
         });
       }
     }
@@ -83,8 +83,7 @@ export const stopSimulation = async (
   // Update all Agents
 
   // Clear queues?
-  await conversationQueue.drain();
-  await discussionQueue.drain();
+  await interactionsQueue.drain();
 
   // Update all Agent states
 

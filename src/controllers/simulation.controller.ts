@@ -141,7 +141,7 @@ export const listSimulationAgentsController = asyncHandler(
   }
 );
 
-export const listInteractionsController = asyncHandler(
+export const listSimulationInteractionsController = asyncHandler(
   async (
     request: FastifyRequest<{
       Params: { simulationId: string };

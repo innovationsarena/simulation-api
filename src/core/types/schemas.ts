@@ -158,6 +158,7 @@ export const interactionSchema = z.object({
 export const interactionInputSchema = interactionSchema.omit({
   id: true,
   active: true,
+  type: true,
   messages: true,
   stats: true,
 });
@@ -183,12 +184,25 @@ export const agentSchema = z.object({
   stats: tokenStatsSchema.optional(),
 });
 
-export const agentInputSchema = agentSchema.omit({ id: true, stats: true });
+export const customAgentInputSchema = agentSchema.omit({
+  id: true,
+  stats: true,
+});
+
+export const agentInputSchema = z.object({
+  count: z.number(),
+  version: z.number().min(1).max(2),
+  simulationId: z.string(),
+});
+
+export const randomAgentInputSchema = agentInputSchema;
 
 /**
  * Small utility input types
  */
+
 export const evaluationInputSchema = z.object({
   agentId: z.string(),
-  samples: z.number().int().nonnegative(),
+  type: z.enum(["bigfive", "questionnaire"]),
+  samples: z.number().int().min(1).max(10),
 });

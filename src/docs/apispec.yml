@@ -252,14 +252,14 @@ paths:
               type: object
               required:
                 - senderId
-                - recieverId
+                - receiverId
                 - simulationId
               properties:
                 senderId:
                   type: string
                   description: ID of the agent initiating the conversation
                   example: "uC3BVPe3"
-                recieverId:
+                receiverId:
                   type: string
                   description: ID of the agent receiving the conversation
                   example: "bH8KlMn2"

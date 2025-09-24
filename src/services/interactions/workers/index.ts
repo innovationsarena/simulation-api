@@ -1,16 +1,15 @@
 import { Queue, Worker } from "bullmq";
 
 // QUEUE
-const QUEUE_NAME = "discussionQueue";
-export const discussionQueue = new Queue(QUEUE_NAME);
+export const QUEUE_NAME = "interactionsQueue";
+export const interactionsQueue = new Queue(QUEUE_NAME);
 
 // WORKERS
 new Worker(
   QUEUE_NAME,
   async (job) => {
-    // Get conversation
-    // find out whos turn it is
-    // Parse messages
+    if (job.name === "interaction.start") {
+    }
   },
   {
     connection: {

@@ -1,33 +1,33 @@
 import { FastifyInstance } from "fastify";
-import { validateKey } from "../core";
+import {
+  agentInputSchema,
+  customAgentInputSchema,
+  evaluationInputSchema,
+  randomAgentInputSchema,
+  validateKey,
+} from "../core";
+
 import {
   generateRandomAgents,
   generateAgentsController,
   createCustomAgentController,
+  getAgentController,
 } from "../controllers";
-import z from "zod";
-
-const createAgentSchema = z.strictObject({
-  id: z.string(),
-  simulationId: z.string(),
-  version: z.string(),
-  name: z.string(),
-  objectives: z.array(z.unknown()),
-  personality: z.object({}).passthrough(),
-  demographics: z.object({}).passthrough(),
-});
-
-const generateAgentsSchema = z.strictObject({
-  simulationId: z.string(),
-  version: z.string(),
-  count: z.number(),
-});
 
 export const agentRouter = (fastify: FastifyInstance) => {
+  fastify.get(
+    "/agent/:agentId",
+    {
+      schema: {},
+      preValidation: [validateKey],
+    },
+    getAgentController
+  );
+
   fastify.post(
     "/agents",
     {
-      schema: generateAgentsSchema,
+      schema: agentInputSchema,
       preValidation: [validateKey],
     },
     generateAgentsController
@@ -36,7 +36,7 @@ export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agents/custom",
     {
-      schema: createAgentSchema,
+      schema: customAgentInputSchema,
       preValidation: [validateKey],
     },
     createCustomAgentController
@@ -45,9 +45,18 @@ export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agents/random",
     {
-      schema: generateAgentsSchema,
+      schema: randomAgentInputSchema,
       preValidation: [validateKey],
     },
     generateRandomAgents
+  );
+
+  fastify.post(
+    "/agent/:agentId/evaluate",
+    {
+      schema: evaluationInputSchema,
+      preValidation: [validateKey],
+    },
+    getAgentController
   );
 };
