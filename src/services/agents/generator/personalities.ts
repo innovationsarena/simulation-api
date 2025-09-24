@@ -1,8 +1,4 @@
-import {
-  BigFivePersonalityModel,
-  ExtendedBigFivePersonalityModel,
-  DataItem,
-} from "../../../core";
+import { BigFivePersonalityModel, DataItem } from "../../../core";
 import { personalities } from "../parser/personality.models.en";
 import { items } from "./bigfivedata";
 
@@ -39,12 +35,4 @@ export const getBigFivePersonality = (
       neuroticism: selected.neuroticism,
     },
   } as BigFivePersonalityModel;
-};
-
-// Extended
-export const getExtendedBigFivePersonality = (
-  sex: string,
-  age: number
-): ExtendedBigFivePersonalityModel => {
-  return {} as ExtendedBigFivePersonalityModel;
 };

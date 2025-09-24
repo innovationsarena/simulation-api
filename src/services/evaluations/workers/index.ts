@@ -2,7 +2,7 @@ import { Queue, Worker } from "bullmq";
 import { handleBigfiveEvaluation } from "./bigfive.worker";
 
 // QUEUE
-export const QUEUE_NAME = "evaluationsQueue";
+const QUEUE_NAME = "evaluationsQueue";
 export const evaluationsQueue = new Queue(QUEUE_NAME);
 
 // WORKERS

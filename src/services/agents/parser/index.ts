@@ -1,15 +1,7 @@
-import type {
-  Agent,
-  BigFivePersonalityModel,
-  ExtendedBigFivePersonalityModel,
-  Simulation,
-} from "../../../core";
+import type { Agent, BigFivePersonalityModel, Simulation } from "../../../core";
 import { parseEnviroment } from "./environment";
 import { parseObjectives } from "./objectives";
-import {
-  parseBigFivePersonality,
-  parseExtendedBigFivePersonality,
-} from "./personalities";
+import { parseBigFivePersonality } from "./personalities";
 
 export const parsePrompt = async (
   agent: Agent,
@@ -24,7 +16,7 @@ Gender: ${agent.demographics?.sex}
 Age: ${agent.demographics?.age}
 
 SenderId: ${agent.id}
-ActivityId: ${agent.inActivityId}
+InteractionId: ${agent.inInteractionId}
 SimulationId: ${agent.simulationId}
 
 ## Basic Instructions
@@ -55,13 +47,6 @@ IMPORTANT: You MUST use one of these tools in every response to control the conv
 ${
   agent.version === 2
     ? parseBigFivePersonality(agent.personality as BigFivePersonalityModel)
-    : ""
-}
-${
-  agent.version === 3
-    ? parseExtendedBigFivePersonality(
-        agent.personality as ExtendedBigFivePersonalityModel
-      )
     : ""
 }
 

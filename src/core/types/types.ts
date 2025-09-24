@@ -155,3 +155,14 @@ export type InteractionStats = {
   messages: number;
   tokens: TokenStats;
 };
+
+export type DataItem = {
+  id: string;
+  age: number;
+  sex: "female" | "male";
+  agreeableness: number;
+  extraversion: number;
+  openness: number;
+  conscientiousness: number;
+  neuroticism: number;
+};
