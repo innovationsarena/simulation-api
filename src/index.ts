@@ -10,6 +10,7 @@ import {
   simulationRouter,
   interactionRouter,
 } from "./routes";
+import { environmentRouter } from "./routes/environment.route";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -26,6 +27,7 @@ server.register(helmet);
 // Routes
 server.register(simulationRouter);
 server.register(interactionRouter);
+server.register(environmentRouter);
 server.register(agentRouter);
 server.register(docsRouter);
 

@@ -88,7 +88,7 @@ export type Simulation = {
   type: SimulationType;
   name: string;
   description?: string;
-  environment?: Environment;
+  environmentId?: string;
   topic: string;
   stats: SimulationStats;
 };
@@ -106,6 +106,7 @@ export type SimulationStats = {
 
 export type Environment = {
   id: string;
+  simulationId: string;
   description: string;
   objectives?: string[]; // Goals
   constraints?: string[]; // Budget

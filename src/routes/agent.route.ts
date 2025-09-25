@@ -1,9 +1,9 @@
 import { FastifyInstance } from "fastify";
 import {
-  agentInputSchema,
-  customAgentInputSchema,
-  evaluationInputSchema,
-  randomAgentInputSchema,
+  AgentInputSchema,
+  CustomAgentInputSchema,
+  EvaluationInputSchema,
+  RandomAgentInputSchema,
   validateKey,
 } from "../core";
 
@@ -27,7 +27,7 @@ export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agents",
     {
-      schema: agentInputSchema,
+      schema: AgentInputSchema,
       preValidation: [validateKey],
     },
     generateAgentsController
@@ -36,7 +36,7 @@ export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agents/custom",
     {
-      schema: customAgentInputSchema,
+      schema: CustomAgentInputSchema,
       preValidation: [validateKey],
     },
     createCustomAgentController
@@ -45,7 +45,7 @@ export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agents/random",
     {
-      schema: randomAgentInputSchema,
+      schema: RandomAgentInputSchema,
       preValidation: [validateKey],
     },
     generateRandomAgents
@@ -54,7 +54,7 @@ export const agentRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/agent/:agentId/evaluate",
     {
-      schema: evaluationInputSchema,
+      schema: EvaluationInputSchema,
       preValidation: [validateKey],
     },
     getAgentController

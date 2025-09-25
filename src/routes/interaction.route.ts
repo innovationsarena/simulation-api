@@ -4,14 +4,13 @@ import {
   startInteractionController,
 } from "../controllers";
 import { FastifyInstance } from "fastify";
-import { interactionInputSchema, validateKey } from "../core";
-import { startInteraction } from "../services";
+import { InteractionInputSchema, validateKey } from "../core";
 
 export const interactionRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/interactions",
     {
-      schema: interactionInputSchema,
+      schema: InteractionInputSchema,
       preValidation: [validateKey],
     },
     createInteractionController

@@ -17,7 +17,7 @@ export const handleConversationStart = async (interaction: Interaction) => {
         new Agent({
           name: agent.name,
           id: agent.id,
-          purpose: "A participator in a conversation.",
+          purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
           model: openai(agent.llmSettings.model),
           hooks: {
@@ -39,7 +39,9 @@ export const handleConversationStart = async (interaction: Interaction) => {
 
     const supervisorAgentInstructions = `You manage a conversation between ${agents
       .map((a) => `${a.name} (agentId: ${a.id})`)
-      .join(", ")}.`;
+      .join(
+        ", "
+      )}. Your assigment is to stere the conversation one Agent at the time.`;
 
     const supervisorAgent = new Agent({
       name: "Supervisor Agent",

@@ -16,7 +16,7 @@ export const createSimulationController = asyncHandler(
     request: FastifyRequest<{
       Body: Pick<
         Simulation,
-        "id" | "name" | "description" | "type" | "topic" | "environment"
+        "id" | "name" | "description" | "type" | "topic" | "environmentId"
       >;
     }>,
     reply: FastifyReply
@@ -65,7 +65,7 @@ export const getSimulationController = asyncHandler(
 
     simulation.stats.agents = agents.length;
 
-    reply.status(200).send({ simulation });
+    reply.status(200).send(simulation);
   }
 );
 

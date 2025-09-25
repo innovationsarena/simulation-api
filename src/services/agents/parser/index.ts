@@ -53,8 +53,8 @@ ${
 ${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
 
 ${
-  simulation && simulation.environment
-    ? parseEnviroment(simulation?.environment)
+  simulation && simulation.environmentId
+    ? parseEnviroment(simulation?.environmentId)
     : ""
 }
   `;

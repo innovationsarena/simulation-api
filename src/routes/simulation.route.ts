@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { simulationInputSchema, validateKey } from "../core";
+import { SimulationInputSchema, validateKey } from "../core";
 import {
   getSimulationController,
   stopSimulationController,
@@ -23,7 +23,7 @@ export const simulationRouter = (fastify: FastifyInstance) => {
   fastify.post(
     "/simulations",
     {
-      schema: simulationInputSchema,
+      schema: SimulationInputSchema,
       preValidation: [validateKey],
     },
     createSimulationController
