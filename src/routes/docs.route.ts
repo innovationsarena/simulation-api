@@ -23,7 +23,7 @@ export async function docsRouter(fastify: FastifyInstance) {
   await fastify.register(swaggerUi, {
     routePrefix: "/",
     uiConfig: {
-      docExpansion: "full",
+      docExpansion: "list",
       deepLinking: false,
     },
     staticCSP: true,

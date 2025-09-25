@@ -4,7 +4,7 @@ info:
   description: API for create and monitor Agent Based Simulations @ Göteborgsregionen
   version: 1.0.0
 servers:
-  - url: https://api.innovationsarenan.dev/sim
+  - url: https://simulations.innovationsarenan.dev/api
     description: Main production server
 security:
   - ApiKeyAuth: []
@@ -408,6 +408,112 @@ paths:
                 $ref: "#/components/schemas/Interaction"
         "404":
           description: Interaction not found
+        "500":
+          description: Server error
+
+  /environments:
+    post:
+      summary: Create a new environment
+      description: Creates a new environment for a simulation
+      operationId: createEnvironment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnvironmentInput"
+      responses:
+        "201":
+          description: Environment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Environment"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+
+  /environments/{environmentId}:
+    get:
+      summary: Get an environment
+      description: Retrieves a specific environment by its ID
+      operationId: getEnvironment
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          description: ID of the environment to retrieve
+          schema:
+            type: string
+            example: "env123"
+      responses:
+        "200":
+          description: Environment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Environment"
+        "404":
+          description: Environment not found
+        "500":
+          description: Server error
+    patch:
+      summary: Update an environment
+      description: Updates an existing environment
+      operationId: updateEnvironment
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          description: ID of the environment to update
+          schema:
+            type: string
+            example: "env123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnvironmentInput"
+      responses:
+        "200":
+          description: Environment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Environment"
+        "400":
+          description: Invalid input
+        "404":
+          description: Environment not found
+        "500":
+          description: Server error
+    delete:
+      summary: Delete an environment
+      description: Deletes a specific environment by its ID
+      operationId: deleteEnvironment
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          description: ID of the environment to delete
+          schema:
+            type: string
+            example: "env123"
+      responses:
+        "200":
+          description: Environment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Environment with id env123 deleted."
+        "404":
+          description: Environment not found
         "500":
           description: Server error
 
@@ -837,8 +943,10 @@ components:
           type: string
           description: Optional description of the simulation
           example: "A discussion about climate change policies"
-        environment:
-          $ref: "#/components/schemas/Environment"
+        environmentId:
+          type: string
+          description: ID of the environment for this simulation
+          example: "env123"
         topic:
           type: string
           description: Topic for the simulation
@@ -884,12 +992,50 @@ components:
       type: object
       required:
         - id
+        - simulationId
         - description
       properties:
         id:
           type: string
           description: Unique identifier for the environment
           example: "env123"
+        simulationId:
+          type: string
+          description: ID of the simulation this environment belongs to
+          example: "iLVieMGDrI6GTBLq"
+        description:
+          type: string
+          description: Description of the environment
+          example: "A formal meeting room setting"
+        objectives:
+          type: array
+          description: Goals for the environment
+          items:
+            type: string
+            example: "Reach consensus on climate policy"
+        constraints:
+          type: array
+          description: Constraints within the environment
+          items:
+            type: string
+            example: "Budget limitations"
+        values:
+          type: array
+          description: Values emphasized in the environment
+          items:
+            type: string
+            example: "Sustainability"
+
+    EnvironmentInput:
+      type: object
+      required:
+        - simulationId
+        - description
+      properties:
+        simulationId:
+          type: string
+          description: ID of the simulation this environment belongs to
+          example: "iLVieMGDrI6GTBLq"
         description:
           type: string
           description: Description of the environment
