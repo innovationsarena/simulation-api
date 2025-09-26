@@ -1,10 +1,10 @@
 import { FastifyInstance } from "fastify";
+import { validateKey } from "../middlewares";
 import {
   AgentInputSchema,
   CustomAgentInputSchema,
   EvaluationInputSchema,
   RandomAgentInputSchema,
-  validateKey,
 } from "../core";
 
 import {
