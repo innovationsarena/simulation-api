@@ -26,7 +26,5 @@ export async function docsRouter(fastify: FastifyInstance) {
       docExpansion: "list",
       deepLinking: false,
     },
-    staticCSP: true,
-    transformStaticCSP: (header) => header,
   });
 }
