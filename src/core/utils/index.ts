@@ -1,5 +1,4 @@
 import type { Message } from "../types";
-import type { CoreMessage } from "ai";
 
 export const toLocalISO = (date: Date) => {
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
@@ -10,10 +9,7 @@ export const toLocalISO = (date: Date) => {
   return isoLocal;
 };
 
-export const parseMessages = (
-  messages: Message[],
-  senderid: string
-): CoreMessage[] => {
+export const parseMessages = (messages: Message[], senderid: string): any[] => {
   return messages.map((message) => {
     return {
       role: message.senderId === senderid ? "user" : "assistant",

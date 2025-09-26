@@ -1,10 +1,14 @@
-import { FastifyReply } from "fastify";
+import { FastifyReply, FastifyRequest } from "fastify";
 
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly isOperational: boolean;
 
-  constructor(message: string, statusCode: number = 500, isOperational: boolean = true) {
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    isOperational: boolean = true
+  ) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
@@ -13,21 +17,16 @@ export class AppError extends Error {
   }
 }
 
-export const handleControllerError = (error: unknown, reply: FastifyReply): void => {
+export const handleControllerError = (error: unknown): never => {
   if (error instanceof AppError) {
-    reply.log.error(error.message);
-    reply.status(error.statusCode).send({ error: error.message });
-    return;
+    throw new AppError(error.message, error.statusCode);
   }
 
   if (error instanceof Error) {
-    reply.log.error(error.message);
-    reply.status(500).send({ error: error.message });
-    return;
+    throw new AppError(error.message, 500);
   }
 
-  reply.log.error("Unknown error occurred");
-  reply.status(500).send({ error: "Internal server error" });
+  throw new AppError("Internal server error", 500);
 };
 
 export const asyncHandler = (fn: Function) => {
@@ -35,7 +34,18 @@ export const asyncHandler = (fn: Function) => {
     try {
       return await fn(request, reply);
     } catch (error) {
-      handleControllerError(error, reply);
+      if (error instanceof AppError) {
+        reply.log.error(error.message);
+        return reply.status(error.statusCode).send({ error: error.message });
+      }
+
+      if (error instanceof Error) {
+        reply.log.error(error.message);
+        return reply.status(500).send({ error: error.message });
+      }
+
+      reply.log.error("Unknown error occurred");
+      return reply.status(500).send({ error: "Internal server error" });
     }
   };
 };

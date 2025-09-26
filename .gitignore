@@ -137,3 +137,9 @@ dist
 
 # OSX
 /**/.DS_*
+
+# db
+dump.rdb
+
+# Claude
+.claude

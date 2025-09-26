@@ -3,79 +3,25 @@ import {
   Agent,
   id,
   asyncHandler,
-  BigFivePersonalityModel,
-  handleControllerError,
-  Demographics,
+  CustomAgentInput,
+  RandomAgentInput,
+  AgentInput,
+  EvaluationInput,
 } from "../core";
-import { generateAgent, generateRandomAgent, supabase } from "../services";
+import {
+  createAgents,
+  evaluationsQueue,
+  generateAgent,
+  generateRandomAgent,
+  getAgentById,
+  getSimulation,
+  updateSimulation,
+} from "../services";
 
-type CreateAgentRequest = FastifyRequest<{
-  Body: {
-    version: number;
-    count?: number;
-    simulationId?: string;
-  };
-}>;
-
-type AgentResponse = {
-  agents: Agent[];
-};
-
-export const generateAgentController = asyncHandler(
-  async (
-    request: CreateAgentRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply> => {
-    const count: number = request.body.count ?? 1;
-    const simulationId: string = request.body.simulationId
-      ? request.body.simulationId
-      : id(16);
-
-    const agents: Agent[] = [];
-
-    for (let i = 0; i < count; i++) {
-      agents.push(await generateAgent(request.body.version, simulationId));
-    }
-
-    const response: AgentResponse = { agents };
-    return reply.status(201).send(response);
-  }
-);
-
-export const generateRandomAgentController = asyncHandler(
-  async (
-    request: CreateAgentRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply> => {
-    const count: number = request.body.count ?? 1;
-    const simulationId: string = request.body.simulationId
-      ? request.body.simulationId
-      : id(16);
-
-    const agents: Agent[] = [];
-
-    for (let i = 0; i < count; i++) {
-      agents.push(
-        await generateRandomAgent(request.body.version, simulationId)
-      );
-    }
-
-    const response: AgentResponse = { agents };
-    return reply.status(201).send(response);
-  }
-);
-
-export const createAgentController = asyncHandler(
+export const createCustomAgentController = asyncHandler(
   async (
     request: FastifyRequest<{
-      Body: {
-        simulationId: string;
-        id: string;
-        personality: BigFivePersonalityModel;
-        name: string;
-        demographics: Demographics;
-        objectives: string[];
-      };
+      Body: CustomAgentInput;
     }>,
     reply: FastifyReply
   ) => {
@@ -84,6 +30,7 @@ export const createAgentController = asyncHandler(
       personality,
       demographics,
       name,
+      type,
       simulationId,
       objectives,
     } = request.body;
@@ -93,41 +40,106 @@ export const createAgentController = asyncHandler(
       version: 2,
       name,
       simulationId,
+      type,
       state: "idle",
-      inActivityId: null,
+      inInteractionId: null,
       objectives,
       demographics,
       personality,
       llmSettings: {
-        provider: "openai",
-        model: "gpt-5-mini",
+        provider: process.env.DEFAULT_LLM_PROVIDER as string,
+        model: process.env.DEFAULT_LLM_MODEL as string,
         temperature: 0.5,
         messageToken: 500,
       },
     };
 
-    console.log(agent);
-
-    const { data, error } = await supabase
-      .from(process.env.AGENTS_TABLE_NAME as string)
-      .insert(agent)
-      .select();
-    console.log(error);
-    console.log(data);
-    if (error) handleControllerError(error, reply);
+    await createAgents([agent]);
 
     return reply.status(201).send(agent);
   }
 );
 
-export const agentSubscribe = async (agent: Agent) => {
-  const channel = supabase.channel(agent.inActivityId as string);
-  channel.subscribe((msg) => {
-    console.log(msg);
-  });
-};
+export const generateAgentsController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: AgentInput;
+    }>,
+    reply: FastifyReply
+  ) => {
+    const count: number = request.body.count ?? 1;
+    const version: number = request.body.version ?? 2;
+    const { simulationId } = request.body;
 
-export const agentUnsubscribe = async (agent: Agent) => {
-  const channel = supabase.channel(agent.inActivityId as string);
-  channel.unsubscribe();
-};
+    const agents: Agent[] = [];
+
+    for (let i = 0; i < count; i++) {
+      agents.push(await generateAgent(version, simulationId));
+    }
+
+    await createAgents(agents);
+
+    return reply.status(201).send({ agents });
+  }
+);
+
+export const generateRandomAgents = asyncHandler(
+  async (
+    request: FastifyRequest<{ Body: RandomAgentInput }>,
+    reply: FastifyReply
+  ) => {
+    const count: number = request.body.count ?? 1;
+    const version: number = request.body.version ?? 2;
+    const { simulationId } = request.body;
+
+    const agents: Agent[] = [];
+
+    for (let i = 0; i < count; i++) {
+      agents.push(await generateRandomAgent(version, simulationId));
+    }
+
+    const simulation = await getSimulation(request.body.simulationId);
+
+    await updateSimulation({ ...simulation, stats: { agents: count } });
+
+    await createAgents(agents);
+
+    return reply.status(201).send({ agents });
+  }
+);
+
+export const getAgentController = asyncHandler(
+  async (
+    request: FastifyRequest<{ Params: { agentId: string } }>,
+    reply: FastifyReply
+  ) => {
+    const agent = await getAgentById(request.params.agentId);
+
+    return reply.status(200).send(agent);
+  }
+);
+
+export const evaluateAgentController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: EvaluationInput;
+      Params: { agentId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { agentId } = request.params;
+    const { samples, type } = request.body;
+
+    if (type === "bigfive") {
+      await evaluationsQueue.add(
+        "evaluation.bigfive",
+        { agentId, samples },
+        { removeOnComplete: true, removeOnFail: true }
+      );
+    }
+
+    return reply
+      .status(200)
+      .send({ message: `Evaluation of agent ${agentId} started.` });
+  }
+);

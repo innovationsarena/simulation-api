@@ -1,11 +1,13 @@
 import { createHash } from "crypto";
 
 export const createConversationId = (
-  agentAid: string,
-  agentBid: string
+  senderId: string,
+  receiverId: string
 ): string => {
+  const sortedIds = [senderId, receiverId].sort();
+
   return createHash("shake256", { outputLength: 8 })
-    .update([agentAid, agentBid].sort().join(""))
+    .update(sortedIds.sort().join(""))
     .digest("hex");
 };
 
@@ -39,5 +41,5 @@ export const generateSimName = () => {
 
   return `${pre[Math.floor(Math.random() * pre.length)]} ${
     post[Math.floor(Math.random() * post.length)]
-  }`;
+  } simulation`;
 };

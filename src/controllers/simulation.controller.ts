@@ -1,219 +1,158 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import {
-  Agent,
-  asyncHandler,
-  generateSimName,
-  handleControllerError,
-  id,
-  Message,
-  Simulation,
-} from "../core";
+import { asyncHandler, generateSimName, id, Simulation } from "../core";
 
 import {
-  createConversation,
-  createMessage,
-  generateRandomAgents,
+  createSimulation,
   getSimulation,
   listAgents,
-  parsePrompt,
-  supabase,
-  updateConversation,
+  stopSimulation,
+  listInteractions,
+  listMessagesBySimulationId,
 } from "../services";
+import { simulationQueue } from "../services/simulations/workers";
 
-import {
-  PostgrestResponse,
-  PostgrestSingleResponse,
-} from "@supabase/supabase-js";
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+export const createSimulationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: Pick<
+        Simulation,
+        "id" | "name" | "description" | "type" | "topic" | "environmentId"
+      >;
+    }>,
+    reply: FastifyReply
+  ) => {
+    const simulationId = id(12);
 
-type CreateSimulationRequest = FastifyRequest<{
-  Body: Pick<
-    Simulation,
-    | "id"
-    | "name"
-    | "description"
-    | "type"
-    | "agentCount"
-    | "topic"
-    | "environment"
-  >;
-}>;
+    const newSimulation: Simulation = {
+      ...request.body,
+      id: simulationId,
+      name: request.body.name.length ? request.body.name : generateSimName(),
+      state: "primed",
+      type: request.body.type,
+      stats: {
+        agents: 0,
+        interactions: 0,
+        tokens: {
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+        },
+      },
+    };
 
-export const createSimulation = asyncHandler(
-  async (request: CreateSimulationRequest, reply: FastifyReply) => {
-    try {
-      const simulationId = id(12);
-
-      const simulation: Simulation = {
-        ...request.body,
-        id: simulationId,
-        name: request.body.name.length ? request.body.name : generateSimName(),
-        state: "primed",
-        type: request.body.type,
-      };
-
-      // Write simulation to db
-      const {
-        data: simulationData,
-        error: createSimulationError,
-      }: PostgrestSingleResponse<Simulation> = await supabase
-        .from(process.env.SIMULATIONS_TABLE_NAME as string)
-        .insert(simulation)
-        .select()
-        .single();
-
-      if (!simulationData && createSimulationError)
-        handleControllerError(createSimulationError, reply);
-
-      // Generate agents
-      console.log("Generating random agents...");
-      const agents = await generateRandomAgents(
-        simulation.agentCount,
-        2,
-        simulation.id
-      );
-
-      // Writes agents to db
-      const {
-        data: agentsData,
-        error: createAgentsError,
-      }: PostgrestResponse<Agent> = await supabase
-        .from(process.env.AGENTS_TABLE_NAME as string)
-        .insert([...agents])
-        .select();
-
-      if (!agentsData && createAgentsError)
-        handleControllerError(createSimulationError, reply);
-
-      // Return simulation object
-      const response: { simulation: Simulation; agents: Agent[] } = {
-        simulation,
-        agents,
-      };
-
-      return reply.status(201).send(response);
-    } catch (error) {
-      handleControllerError(error, reply);
-    }
+    const simulation = await createSimulation(newSimulation);
+    return reply.status(201).send(simulation);
   }
 );
 
-export const startSimulation = asyncHandler(
+export const getSimulationController = asyncHandler(
   async (
     request: FastifyRequest<{
       Params: { simulationId: string };
     }>,
     reply: FastifyReply
   ) => {
-    try {
-      const simulationId = request.params.simulationId;
+    const { simulationId } = request.params;
 
-      if (!simulationId)
-        reply
-          .status(400)
-          .send(
-            "Missing simulationId in URL - /simulations/:simulationId/start"
-          );
+    const simulation = await getSimulation(simulationId);
 
-      const simulation = await getSimulation(simulationId, reply);
+    if (!simulation)
+      reply
+        .status(404)
+        .send({ message: "Simulation with given ID not found." });
 
-      const { data, error } = await supabase
-        .from(process.env.SIMULATIONS_TABLE_NAME as string)
-        .update({ state: "running" })
-        .eq("id", simulationId)
-        .select();
+    const agents = await listAgents(simulationId);
 
-      if (error) handleControllerError(error, reply);
+    simulation.stats.agents = agents.length;
 
-      const agents = await listAgents(simulationId, reply);
-
-      // Start conversations by split in half and start conversate.
-      const halfAgentCount = Math.ceil(agents.length / 2);
-      const senders = agents.slice(0, halfAgentCount);
-      const recievers = agents.slice(halfAgentCount);
-
-      for await (const sender of senders) {
-        if (recievers.length) {
-          const reciever = recievers.pop();
-          if (reciever) {
-            // create conversation
-            if (simulation.type === "conversation") {
-              const conversation = await createConversation(
-                simulation,
-                sender,
-                reciever,
-                reply
-              );
-
-              const { text, usage } = await generateText({
-                model: openai(process.env.DEFAULT_LLM_MODEL as string),
-                system: await parsePrompt(sender, simulation),
-                prompt: `Formulera endast EN genomtänkt och tydlig fråga kring följande topic: ${simulation.topic}. Du skall endast ställa frågor. Inget resonemang. 1-2st mening.`,
-              });
-
-              const initMessage: Message = {
-                parentId: conversation.id,
-                content: text,
-                senderId: sender.id,
-                simulationId,
-                tokens: usage,
-              };
-
-              await createMessage(initMessage, reply);
-              await updateConversation(conversation.id, sender.id);
-            }
-          }
-        }
-      }
-
-      reply.status(200).send({
-        ...simulation,
-        state: "running",
-      });
-    } catch (error) {
-      console.log(error);
-      // Handle errors
-      reply.status(500).send({ error: "Failed to start simulation." });
-    }
+    reply.status(200).send(simulation);
   }
 );
 
-export const stopSimulation = asyncHandler(
+export const startSimulationController = asyncHandler(
   async (
     request: FastifyRequest<{
       Params: { simulationId: string };
     }>,
     reply: FastifyReply
   ) => {
-    try {
-      if (!request.params.simulationId)
-        reply
-          .status(400)
-          .send(
-            "Missing simulationId in URL - /simulations/:simulationId/stop"
-          );
+    const { simulationId } = request.params;
 
-      const simulation = await getSimulation(
-        request.params.simulationId,
-        reply
-      );
+    const simulation = await getSimulation(simulationId);
 
-      supabase
-        .from(process.env.SIMULATIONS_TABLE_NAME as string)
-        .update({ state: "stopped" })
-        .eq("id", request.params.simulationId)
-        .select();
+    if (!simulation)
+      reply
+        .status(404)
+        .send({ message: "Simulation with given ID not found." });
 
-      // Start conversations
+    await simulationQueue.add("simulation.start", simulation);
 
-      return reply.status(200).send({
-        ...simulation,
-        state: "stopped",
-      });
-    } catch (error) {
-      // Handle errors
-      reply.status(500).send({ error: "Failed to stop simulation." });
-    }
+    reply.status(200).send({ message: `Simulation ${simulationId} started.` });
+  }
+);
+
+export const stopSimulationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+    const simulation = await getSimulation(simulationId);
+
+    if (!simulation)
+      reply
+        .status(404)
+        .send({ message: "Simulation with given ID not found." });
+
+    const stoppedSimulation = await stopSimulation(simulation);
+
+    return reply.status(200).send(stoppedSimulation);
+  }
+);
+
+export const listSimulationMessagesController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+
+    const messages = await listMessagesBySimulationId(simulationId);
+
+    return reply.status(200).send(messages);
+  }
+);
+
+export const listSimulationAgentsController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+
+    const agents = await listAgents(simulationId);
+
+    return reply.status(200).send(agents);
+  }
+);
+
+export const listSimulationInteractionsController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+
+    const interactions = await listInteractions(simulationId);
+
+    return reply.status(200).send(interactions);
   }
 );

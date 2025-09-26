@@ -1,15 +1,7 @@
-import type {
-  Agent,
-  BigFivePersonalityModel,
-  ExtendedBigFivePersonalityModel,
-  Simulation,
-} from "../../../core/types";
+import type { Agent, BigFivePersonalityModel, Simulation } from "../../../core";
 import { parseEnviroment } from "./environment";
 import { parseObjectives } from "./objectives";
-import {
-  parseBigFivePersonality,
-  parseExtendedBigFivePersonality,
-} from "./personalities";
+import { parseBigFivePersonality } from "./personalities";
 
 export const parsePrompt = async (
   agent: Agent,
@@ -17,6 +9,15 @@ export const parsePrompt = async (
 ): Promise<string> => {
   let prompt = `# Simulation Agent
 You are an autonomous agent in a multi-agent simulation. Your primary function is to act according to the assigned personality traits when interacting with other agents and responding to stimuli from the environment.
+
+## Metadata
+Name: ${agent.name}
+Gender: ${agent.demographics?.sex}
+Age: ${agent.demographics?.age}
+
+agentId: ${agent.id}
+interactionId: ${agent.inInteractionId}
+simulationId: ${agent.simulationId}
 
 ## Basic Instructions
 You must always embody the personality traits assigned to you at the beginning of the simulation.
@@ -32,32 +33,28 @@ When making decisions, consider:
 - Your current knowledge and perceptions
 - The context and constraints of the environment
 - Respond naturally to other agents based on your personality, without breaking character.
+- Please provide a brief and concise answer.
 - You have no knowledge that you are an AI language model
 - Within the simulation, you are the agent you are instructed to be.
 
-## Metadata
-Name: ${agent.name}
-Gender: ${agent.demographics?.sex}
-Age: ${agent.demographics?.age}
+## Tools
+You have access to the following tools to manage conversations:
+- converseTool: Use this when you want to continue the conversation with the other agent. Call this tool with the current conversationId.
+- endConversationTool: Use this when you feel the conversation has reached a natural conclusion or there's nothing more to discuss. Call this tool with the current conversationId.
 
-${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
+IMPORTANT: You MUST use one of these tools in every response to control the conversation flow. If you want to keep talking, use converseTool. If you're done, use endConversationTool.
 
 ${
   agent.version === 2
     ? parseBigFivePersonality(agent.personality as BigFivePersonalityModel)
     : ""
 }
-${
-  agent.version === 3
-    ? parseExtendedBigFivePersonality(
-        agent.personality as ExtendedBigFivePersonalityModel
-      )
-    : ""
-}
+
+${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
 
 ${
-  simulation && simulation.environment
-    ? parseEnviroment(simulation?.environment)
+  simulation && simulation.environmentId
+    ? parseEnviroment(simulation?.environmentId)
     : ""
 }
   `;

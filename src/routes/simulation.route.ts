@@ -1,74 +1,73 @@
-import { FastifyInstance, RouteHandlerMethod } from "fastify";
-import { validateKey } from "../core";
+import { FastifyInstance } from "fastify";
+import { SimulationInputSchema } from "../core";
 import {
-  createSimulation,
-  startSimulation,
-  stopSimulation,
+  getSimulationController,
+  stopSimulationController,
+  startSimulationController,
+  createSimulationController,
+  listSimulationAgentsController,
+  listSimulationMessagesController,
+  listSimulationInteractionsController,
 } from "../controllers";
+import { validateKey } from "../middlewares";
 
-export const simulatorRouter = (fastify: FastifyInstance) => {
+export const simulationRouter = (fastify: FastifyInstance) => {
+  fastify.get(
+    "/simulations/:simulationId",
+    {
+      preValidation: [validateKey],
+      preHandler: [],
+    },
+    getSimulationController
+  );
+
   fastify.post(
     "/simulations",
     {
-      schema: {
-        description: "Creates a simulation.",
-        tags: ["simulations"],
-        body: {
-          type: "object",
-          properties: {
-            agentCount: { type: "integer" },
-            name: { type: "string" },
-            description: { type: "string" },
-            topic: { type: "string" },
-            type: { type: "string" },
-          },
-          required: ["agentCount", "type", "name", "topic"],
-          additionalProperties: false,
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      schema: SimulationInputSchema,
+      preValidation: [validateKey],
     },
-    createSimulation as unknown as RouteHandlerMethod
+    createSimulationController
   );
 
   fastify.patch(
     "/simulations/:simulationId/start",
     {
-      schema: {
-        description: "Starts a simulation.",
-        tags: ["simulations"],
-        params: {
-          type: "object",
-          properties: {
-            simulationId: { type: "string" },
-          },
-          required: ["simulationId"],
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      preValidation: [validateKey],
+      preHandler: [],
     },
-    startSimulation as unknown as RouteHandlerMethod
+    startSimulationController
   );
 
   fastify.patch(
     "/simulations/:simulationId/stop",
     {
-      schema: {
-        description: "Stops a simulation.",
-        tags: ["simulations"],
-        params: {
-          type: "object",
-          properties: {
-            simulationId: { type: "string" },
-          },
-          required: ["simulationId"],
-        },
-      },
-      preValidation: [],
-      preHandler: [validateKey],
+      preValidation: [validateKey],
     },
-    stopSimulation as unknown as RouteHandlerMethod
+    stopSimulationController
+  );
+
+  fastify.get(
+    "/simulations/:simulationId/messages",
+    {
+      preValidation: [validateKey],
+    },
+    listSimulationMessagesController
+  );
+
+  fastify.get(
+    "/simulations/:simulationId/agents",
+    {
+      preValidation: [validateKey],
+    },
+    listSimulationAgentsController
+  );
+
+  fastify.get(
+    "/simulations/:simulationId/interactions",
+    {
+      preValidation: [validateKey],
+    },
+    listSimulationInteractionsController
   );
 };

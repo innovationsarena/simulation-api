@@ -1,7 +1,7 @@
 {
-  "name": "human-blueprint-model",
+  "name": "simulator-api",
   "version": "1.0.0",
-  "description": "Human blueprint model for Agentic simulations.",
+  "description": "GR Innovationarena API for Agentic simulations.",
   "main": "index.ts",
   "type": "commonjs",
   "scripts": {
@@ -10,19 +10,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/innovationsarena/human-blueprint-model.git"
+    "url": "git+https://github.com/innovationsarena/simulator-api.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "agents",
+    "simulations",
+    "abs",
+    "mass"
+  ],
+  "author": "johan @ innovationsarenan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/innovationsarena/human-blueprint-model/issues"
+    "url": "https://github.com/innovationsarena/simulator-api/issues"
   },
-  "homepage": "https://github.com/innovationsarena/human-blueprint-model#readme",
+  "homepage": "https://github.com/innovationsarena/simulator-api#readme",
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.2.12",
-    "@ai-sdk/google": "^1.2.22",
-    "@ai-sdk/openai": "^1.3.22",
+    "@ai-sdk/anthropic": "^2.0.18",
+    "@ai-sdk/google": "^2.0.16",
+    "@ai-sdk/openai": "^2.0.34",
     "@fastify/cors": "^11.0.1",
     "@fastify/formbody": "^8.0.2",
     "@fastify/helmet": "^13.0.1",
@@ -31,14 +36,17 @@
     "@semantic-release/git": "^10.0.1",
     "@supabase/supabase-js": "^2.50.2",
     "@types/js-yaml": "^4.0.9",
-    "ai": "^4.3.16",
+    "@voltagent/core": "^1.1.16",
+    "ai": "^5.0.51",
     "axios": "^1.10.0",
+    "bullmq": "^5.58.5",
     "dotenv": "^16.5.0",
     "fastify": "^5.4.0",
+    "fastify-type-provider-zod": "^6.0.0",
     "js-yaml": "^4.1.0",
     "nodemon": "^3.1.10",
     "semantic-release": "^24.2.5",
-    "zod": "^3.25.76"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",

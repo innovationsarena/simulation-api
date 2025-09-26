@@ -1,18 +1,16 @@
 import "dotenv/config";
 import fastify from "fastify";
-import formbody from "@fastify/formbody";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import formbody from "@fastify/formbody";
 
 import {
-  pingRouter,
-  simulatorRouter,
-  agentRouter,
   docsRouter,
-  conversationRouter,
-  discussionRouter,
-  evaluationsRouter,
+  agentRouter,
+  simulationRouter,
+  interactionRouter,
 } from "./routes";
+import { environmentRouter } from "./routes/environment.route";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -26,23 +24,12 @@ server.register(formbody);
 server.register(cors);
 server.register(helmet);
 
-server.setErrorHandler((error, _request, reply) => {
-  server.log.error(error);
-  if (error.message) {
-    reply.status(400).send({ error: error.message });
-  } else {
-    reply.status(500).send({ error: "Oh poo, something went wrong!" });
-  }
-});
-
 // Routes
-server.register(docsRouter);
-server.register(pingRouter);
-server.register(simulatorRouter);
-server.register(conversationRouter);
-server.register(discussionRouter);
+server.register(simulationRouter);
+server.register(interactionRouter);
+server.register(environmentRouter);
 server.register(agentRouter);
-server.register(evaluationsRouter);
+server.register(docsRouter);
 
 server.listen({
   port: PORT,

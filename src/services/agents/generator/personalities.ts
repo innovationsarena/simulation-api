@@ -1,9 +1,5 @@
-import {
-  BigFivePersonalityModel,
-  ExtendedBigFivePersonalityModel,
-  DataItem,
-} from "../../../core/types";
-import { personalities } from "../parser/personality.models.sv";
+import { BigFivePersonalityModel, DataItem } from "../../../core";
+import { personalities } from "../parser/personality.models.en";
 import { items } from "./bigfivedata";
 
 // Simple
@@ -23,7 +19,7 @@ export const getBigFivePersonality = (
   const len = filteredItems.length;
 
   if (!len)
-    throw new Error("No matching item (age, sex) data in bigfivedata file.");
+    throw new Error("No matching (age, sex) data in big five data file.");
 
   const rand = Math.floor(Math.random() * len);
 
@@ -39,12 +35,4 @@ export const getBigFivePersonality = (
       neuroticism: selected.neuroticism,
     },
   } as BigFivePersonalityModel;
-};
-
-// Extended
-export const getExtendedBigFivePersonality = (
-  sex: string,
-  age: number
-): ExtendedBigFivePersonalityModel => {
-  return {} as ExtendedBigFivePersonalityModel;
 };

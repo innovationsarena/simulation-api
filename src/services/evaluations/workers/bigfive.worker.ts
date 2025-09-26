@@ -1,13 +1,69 @@
-import { FastifyReply } from "fastify";
-import { getAgentById, supabase } from "../supabase";
+import { Job } from "bullmq";
+import { Agent, BigFiveEvaluation, supabase } from "../../../core";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { parsePrompt } from "../agents";
 import z from "zod";
+import {
+  createBigFiveEvaluation,
+  getAgentById,
+  parsePrompt,
+} from "../../agents";
 
-export const evaluateBigfive = async (agentId: string, reply: FastifyReply) => {
-  const agent = await getAgentById(agentId, reply);
+export const handleBigfiveEvaluation = async (job: Job) => {
+  const { agentId, sample } = job.data;
+  const resultsArr = [];
+  const agent = await getAgentById(agentId);
 
+  for (let i = 0; i < sample * 1; i++) {
+    console.log(`Evaluating sample ${i + 1} in job ${job.id}...`);
+    const percent = await evaluateBigfive(agent);
+    resultsArr.push(percent);
+  }
+
+  const results: BigFiveEvaluation = {
+    samples: sample,
+    results: {
+      min: Math.min(...resultsArr),
+      max: Math.max(...resultsArr),
+      avg: resultsArr.reduce((a, b) => a + b) / resultsArr.length,
+    },
+  };
+
+  console.log(
+    `Evaluation done and written to Agent. Results in ${sample} samples: ${JSON.stringify(
+      results.results
+    )}`
+  );
+  await createBigFiveEvaluation(agentId, results);
+  return results;
+};
+
+function itemSimilarity(a: string, b: string): number {
+  const A = parseInt(a);
+  const B = parseInt(b);
+  // Similarity decreases as difference increases (range 0 to 1)
+  const max = Math.max(Math.abs(A), Math.abs(B), 1); // Prevent division by zero
+  const result = 1 - Math.abs(A - B) / max;
+
+  return result;
+}
+
+export function arraySimilarity(
+  arr1: string[],
+  arr2: string[]
+): { percent: number } {
+  const minLength = Math.min(arr1.length, arr2.length);
+  if (minLength === 0) return { percent: 0 };
+
+  const similarities: number[] = [];
+  for (let i = 0; i < minLength; i++) {
+    similarities.push(itemSimilarity(arr1[i], arr2[i]));
+  }
+  const percent = (similarities.reduce((a, b) => a + b, 0) / minLength) * 100;
+  return { percent };
+}
+
+export const evaluateBigfive = async (agent: Agent) => {
   const prompt = `
   Prompt:
 
@@ -134,7 +190,6 @@ const questions = [
     "I am someone who has little interest in speculating about things", // R
     "I am someone who is intellectually curious"
   ];
-
 `;
 
   const { object } = await generateObject({
@@ -148,37 +203,10 @@ const questions = [
   const { data } = await supabase
     .from(process.env.BFI_TABLE_NAME as string)
     .select("*")
-    .eq("email", agentId)
+    .eq("email", agent.id)
     .single();
-
-  console.log(data);
 
   const results = arraySimilarity(object.results, data?.answers as string[]);
 
   return results.percent;
 };
-
-function itemSimilarity(a: string, b: string): number {
-  const A = parseInt(a);
-  const B = parseInt(b);
-  // Similarity decreases as difference increases (range 0 to 1)
-  const max = Math.max(Math.abs(A), Math.abs(B), 1); // Prevent division by zero
-  const result = 1 - Math.abs(A - B) / max;
-
-  return result;
-}
-
-export function arraySimilarity(
-  arr1: string[],
-  arr2: string[]
-): { percent: number } {
-  const minLength = Math.min(arr1.length, arr2.length);
-  if (minLength === 0) return { percent: 0 };
-
-  const similarities: number[] = [];
-  for (let i = 0; i < minLength; i++) {
-    similarities.push(itemSimilarity(arr1[i], arr2[i]));
-  }
-  const percent = (similarities.reduce((a, b) => a + b, 0) / minLength) * 100;
-  return { percent };
-}

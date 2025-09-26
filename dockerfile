@@ -7,7 +7,7 @@ WORKDIR /api
 USER node
 
 COPY --chown=node:node . .
-RUN npm install
+RUN npm install --force
 RUN npm run build
 
 ENV NODE_ENV="production"

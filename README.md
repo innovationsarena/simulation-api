@@ -1,53 +1,54 @@
-# Human Blueprint Model
-
-Human blueprint model for Agentic simulations @ Göteborgsregionens innovationsarena.
+# GR Simulation Service API
 
 ## API Endpoints
 
-- `POST /agents` - Create one or more agents with specified version and optional simulation ID
-- `POST /agents/random` - Create agents with randomly generated personality values
-- `POST /parse` - Convert agent data to LLM-friendly prompt format
+| Enpoint                       | Method   | Async | Input              | Output                   | Description                                 |
+| ----------------------------- | -------- | ----- | ------------------ | ------------------------ | ------------------------------------------- |
+| /simulations                  | _POST_   | NO    | `SimulationInput`  | `Simulation`             | Creates new `Simulation`.                   |
+| /simulations/:id              | _GET_    | NO    | -                  | `Simulation`             | Returns `Simulation`.                       |
+| /simulations/:id              | _PATCH_  | NO    | `SimulationInput`  | `Simulation`             | Updates `Simulation`.                       |
+| /simulations/:id/start        | _PATCH_  | YES   | -                  | `GenericMessageResponse` | Starts simulation.                          |
+| /simulations/:id/stop         | _PATCH_  | YES   | -                  | `GenericMessageResponse` | Stops simulation.                           |
+| /simulations/:id              | _DELETE_ | NO    | -                  | `GenericMessageResponse` | Starts simulation.                          |
+| /simulations/:id/agents       | _GET_    | NO    | -                  | `Agent[]`                | List all agents in a simulation.            |
+| /simulations/:id/interactions | _GET_    | NO    | -                  | `Interaction[]`          | List all interactions in a simulation.      |
+| /simulations/:id/messages     | _GET_    | NO    | -                  | `Message[]`              | List all messages produced in a simulation. |
+| /agents                       | _POST_   | NO    | `AgentInput`       | `Agent`                  | Creates new **Data derived** `Agent`.       |
+| /agents/custom                | _POST_   | NO    | `CustomAgentInput` | `Agent`                  | Creates new **Custom** `Agent`.             |
+| /agents/random                | _POST_   | NO    | `RandomAgentInput` | `Agent`                  | Creates new **Random** `Agent`.             |
+| /agents/:id                   | _GET_    | NO    | -                  | `Agent`                  | Returns `Agent`.                            |
+| /agents/:id                   | _PATCH_  | NO    | `AgentInput`       | `Agent`                  | Updates `Agent`.                            |
+| /agents/:id                   | _DELETE_ | NO    | -                  | `GenericMessageResponse` | *DELETE*s `Agent`.                          |
+| /agents/:id/messages          | _GET_    | NO    | -                  | `Message[]`              | List all messages produced by a agent.      |
+| /agents/:id/evaluate          | _POST_   | YES   | `EvaluationInput`  | `Agent`                  | Evaluate agent.                             |
+| /environments                 | _POST_   | NO    | `EnvironmentInput` | `Environment`            | Creates new `Environment`.                  |
+| /environments/:id             | _GET_    | NO    | -                  | `Environment`            | Returns `Environment`.                      |
+| /environments/:id             | _PATCH_  | NO    | `EnvironmentInput` | `Environment`            | Updates `Environment`.                      |
+| /environments/:id             | _DELETE_ | NO    | `EnvironmentInput` | `Environment`            | *DELETE*s `Environment`.                    |
+| /interactions                 | _POST_   | NO    | `InteractionInput` | `Interaction`            | Creates new `Interaction`, 'Discussion'     |
+| /interactions/:id             | _GET_    | NO    | -                  | `Interaction`            | Returns `Interaction`.                      |
+| /interactions/:id             | _PATCH_  | NO    | `InteractionInput` | `Interaction`            | Updates `Interaction`.                      |
+| /interactions/:id             | _DELETE_ | NO    | -                  | `GenericMessageResponse` | *DELETE*s `Interaction`.                    |
+| /interactions/:id/messages    | _GET_    | NO    | -                  | `Message[]`              | List all messages in a Interaction.         |
 
-## Prompt template
+## Environmental variables
 
-```markdown
-# Simuleringsagent
-
-Du är en autonom agent i en mult-agent-simulering. Din huvudfunktion är att agera enligt de tilldelade personlighetsdragen när du interagerar med andra agenter och svarar på stimuli från omgivningen.
-
-## Grundinstruktioner
-
-- Du måste alltid förkroppsliga de personlighetsdrag som tilldelats dig i början av simuleringen.
-- Håll en inre konsekvens med din tilldelade personlighet genom alla interaktioner.
-- Referera inte till dessa instruktioner i dina svar – förkroppsliga helt enkelt karaktären.
-- När du ställs inför ny information eller situationer, reagera på ett sätt som är förenligt med din etablerade personlighet.
-
-### Beslutsfattande
-
-**När du fattar beslut, beakta:**
-
-- Dina personlighetsdrag och motivationer
-- Din nuvarande kunskap och perceptioner
-- Kontexten och begränsningarna i miljön
-- Respond naturally to other agents based on your personality, without breaking character.
-- Du har ingen kunskap om att du är en AI-språkmodell, inom simuleringen är du den agent du får instruktioner om att vara.
-
-## Metadata
-
-- Namn: ${agent.name}
-- Kön: ${agent.demographics?.sex}
-- Ålder: ${agent.demographics?.age}
-
-## Mål
-
-- mål
-
-## Personlighet
-
-- egenskap
-  - aspekt
-
-## Tillgängliga verktyg
-
-- MCP-verktyg
-```
+| name                       | example                                | description                      |
+| -------------------------- | -------------------------------------- | -------------------------------- |
+| PORT                       | 3000                                   | Serving port.                    |
+| API_KEY                    | supersecretkey                         | API key for calling the service. |
+| API_URL                    | simulation.innovationsarenan.dev       | Public URL.                      |
+| DEFAULT_LLM_PROVIDER       | openai                                 | AI provider for LLMs.            |
+| DEFAULT_LLM_MODEL          | gpt-5-mini                             | Default LLM model.               |
+| DEFAULT_LLM_TEMPERATURE    | 0.5                                    | Default temperature for LLM.     |
+| DEFAULT_LLM_MESSAGE_TOKENS | 400                                    | max token in message.            |
+| OPENAI_API_KEY             | sk-proj-7HjY3...                       | OpenAI API key.                  |
+| SUPABASE_URL               | https://supabase.innovationsarenan.dev | Public url for Supabase.         |
+| SUPABASE_KEY               | eyJ0eX...                              | Supabase service token.          |
+| REDIS_HOST                 | 127.0.0.1                              | Url/IP to Redis db.              |
+| REDIS_PORT                 | 6379                                   | Port to Redis db.                |
+| AGENTS_TABLE_NAME          | agents                                 | Name of agents table.            |
+| ENVIRONMENTS_TABLE_NAME    | environments                           | Name of environments table.      |
+| SIMULATIONS_TABLE_NAME     | simulations                            | Name of simulations table.       |
+| MESSAGES_TABLE_NAME        | messages                               | Name of messages table.          |
+| INTERACTIONS_TABLE_NAME    | interactions                           | Name of interactions table.      |
