@@ -36,8 +36,8 @@
 | name                       | example                                | description                      |
 | -------------------------- | -------------------------------------- | -------------------------------- |
 | PORT                       | 3000                                   | Serving port.                    |
-| API_KEY                    | supersecretkey                         | API key for calling the service. |
-| API_URL                    | simulation.innovationsarenan.dev       | Public URL.                      |
+| API_KEY                    | sup3rs3cr3tk3y                         | API key for calling the service. |
+| API_URL                    | simulation.innovationsarenan.dev/api   | Public URL.                      |
 | DEFAULT_LLM_PROVIDER       | openai                                 | AI provider for LLMs.            |
 | DEFAULT_LLM_MODEL          | gpt-5-mini                             | Default LLM model.               |
 | DEFAULT_LLM_TEMPERATURE    | 0.5                                    | Default temperature for LLM.     |
@@ -45,7 +45,7 @@
 | OPENAI_API_KEY             | sk-proj-7HjY3...                       | OpenAI API key.                  |
 | SUPABASE_URL               | https://supabase.innovationsarenan.dev | Public url for Supabase.         |
 | SUPABASE_KEY               | eyJ0eX...                              | Supabase service token.          |
-| REDIS_HOST                 | 127.0.0.1                              | Url/IP to Redis db.              |
+| REDIS_HOST                 | redis://.....                          | Url/IP to Redis db incl auth.    |
 | REDIS_PORT                 | 6379                                   | Port to Redis db.                |
 | AGENTS_TABLE_NAME          | agents                                 | Name of agents table.            |
 | ENVIRONMENTS_TABLE_NAME    | environments                           | Name of environments table.      |
