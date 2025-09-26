@@ -5,7 +5,8 @@ import {
   updateEnvironmentController,
   getEnvironmentController,
 } from "../controllers";
-import { EnvironmentInputSchema, validateKey } from "../core";
+import { EnvironmentInputSchema } from "../core";
+import { validateKey } from "../middlewares";
 
 export const environmentRouter = (fastify: FastifyInstance) => {
   fastify.post(
