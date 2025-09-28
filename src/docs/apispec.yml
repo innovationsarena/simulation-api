@@ -125,7 +125,7 @@ paths:
                 version:
                   type: integer
                   description: Agent version
-                  example: 3
+                  example: 2
                 simulationId:
                   type: string
                   description: Simulation ID to associate with the agents
@@ -835,32 +835,32 @@ components:
               type: number
               description: Curiosity, imagination, appreciation for art and beauty, emotional depth, and willingness to try new experiences and entertain unconventional ideas.
               minimum: 1
-              maximum: 10
-              example: 9
+              maximum: 5
+              example: 5
             conscientiousness:
               type: number
               description: Reflects a tendency toward organization, responsibility, reliability, and goal-directed behavior.
               minimum: 1
-              maximum: 10
-              example: 7
+              maximum: 5
+              example: 3
             extraversion:
               type: number
               description: Reflects a tendency toward sociability, assertiveness, talkativeness, and the seeking of stimulation and energy from interactions with others.
               minimum: 1
-              maximum: 10
-              example: 6
+              maximum: 5
+              example: 2
             agreeableness:
               type: number
               description: Reflects a tendency toward cooperation, compassion, politeness, and concern for maintaining social harmony and positive relationships with others.
               minimum: 1
-              maximum: 10
-              example: 8
+              maximum: 5
+              example: 3
             neuroticism:
               type: number
               description: Reflects a tendency toward emotional instability, anxiety, moodiness, irritability, and vulnerability to psychological stress.
               minimum: 1
-              maximum: 10
-              example: 3
+              maximum: 5
+              example: 1
 
     DataItem:
       type: object
@@ -889,27 +889,27 @@ components:
           type: number
           description: Openness value
           minimum: 1
-          maximum: 10
+          maximum: 5
         conscientiousness:
           type: number
           description: Conscientiousness value
           minimum: 1
-          maximum: 10
+          maximum: 5
         extraversion:
           type: number
           description: Extraversion value
           minimum: 1
-          maximum: 10
+          maximum: 5
         agreeableness:
           type: number
           description: Agreeableness value
           minimum: 1
-          maximum: 10
+          maximum: 5
         neuroticism:
           type: number
           description: Neuroticism value
           minimum: 1
-          maximum: 10
+          maximum: 5
 
     Simulation:
       type: object
