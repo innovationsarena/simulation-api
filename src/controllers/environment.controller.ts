@@ -74,7 +74,7 @@ export const updateEnvironmentController = asyncHandler(
         .status(404)
         .send({ message: "Environment with given ID not found." });
 
-    reply.status(200).send(updateEnvironment);
+    reply.status(200).send(updatedEnvironment);
   }
 );
 
