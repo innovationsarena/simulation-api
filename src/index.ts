@@ -24,12 +24,12 @@ server.register(formbody);
 server.register(cors);
 server.register(helmet);
 
-// Routes
+// Routes - docs must be registered first for static assets
+server.register(docsRouter);
 server.register(simulationRouter);
 server.register(interactionRouter);
 server.register(environmentRouter);
 server.register(agentRouter);
-server.register(docsRouter);
 
 server.listen({
   port: PORT,

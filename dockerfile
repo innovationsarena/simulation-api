@@ -9,7 +9,7 @@ USER node
 COPY --chown=node:node . .
 RUN npm install --force
 RUN npm run build
-RUN mkdir -p dist/docs && cp src/docs dist/docs/
+RUN mkdir -p dist/docs && cp src/docs/apispec.yml dist/docs/
 
 ENV NODE_ENV="production"
 
