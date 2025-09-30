@@ -11,6 +11,7 @@ security:
 paths:
   /agents:
     post:
+      tags: ["Agent"]
       summary: Create agents
       description: Creates one or more agents from BigFive data
       operationId: createAgents
@@ -56,6 +57,7 @@ paths:
 
   /agents/custom:
     post:
+      tags: ["Agent"]
       summary: Create a custom agent
       description: Creates a custom agent with specified parameters
       operationId: createCustomAgent
@@ -79,6 +81,7 @@ paths:
 
   /agents/random:
     post:
+      tags: ["Agent"]
       summary: Create random agents
       description: Creates one or more agents by randomly generating personality values
       operationId: createRandomAgent
@@ -124,6 +127,7 @@ paths:
 
   /agent/{agentId}:
     get:
+      tags: ["Agent"]
       summary: Get an agent
       description: Retrieves a specific agent by its ID
       operationId: getAgent
@@ -149,6 +153,7 @@ paths:
 
   /agent/{agentId}/evaluate:
     post:
+      tags: ["Agent"]
       summary: Evaluate an agent
       description: Evaluates an agent's personality traits or questionnaire responses
       operationId: evaluateAgent
@@ -182,6 +187,7 @@ paths:
 
   /simulations:
     post:
+      tags: ["Simulation"]
       summary: Create a new simulation
       description: Creates a new simulation with the specified parameters
       operationId: createSimulation
@@ -205,6 +211,7 @@ paths:
 
   /simulations/{simulationId}:
     get:
+      tags: ["Simulation"]
       summary: Get a simulation
       description: Retrieves a specific simulation by its ID
       operationId: getSimulation
@@ -230,6 +237,7 @@ paths:
 
   /simulations/{simulationId}/start:
     patch:
+      tags: ["Simulation"]
       summary: Start a simulation
       description: Changes the state of a simulation from 'primed' to 'running' and initiates conversations between agents
       operationId: startSimulation
@@ -257,6 +265,7 @@ paths:
 
   /simulations/{simulationId}/stop:
     patch:
+      tags: ["Simulation"]
       summary: Stop a simulation
       description: Changes the state of a simulation from 'running' to 'stopped'
       operationId: stopSimulation
@@ -284,6 +293,7 @@ paths:
 
   /simulations/{simulationId}/messages:
     get:
+      tags: ["Simulation"]
       summary: List simulation messages
       description: Retrieves all messages from a simulation
       operationId: listSimulationMessages
@@ -311,6 +321,7 @@ paths:
 
   /simulations/{simulationId}/agents:
     get:
+      tags: ["Simulation"]
       summary: List simulation agents
       description: Retrieves all agents from a simulation
       operationId: listSimulationAgents
@@ -338,6 +349,7 @@ paths:
 
   /simulations/{simulationId}/interactions:
     get:
+      tags: ["Simulation"]
       summary: List simulation interactions
       description: Retrieves all interactions from a simulation
       operationId: listSimulationInteractions
@@ -365,6 +377,7 @@ paths:
 
   /interactions:
     post:
+      tags: ["Interaction"]
       summary: Create a new interaction
       description: Creates a new interaction (conversation, discussion, or survey) between agents in a simulation
       operationId: createInteraction
@@ -388,6 +401,7 @@ paths:
 
   /interactions/{interactionId}:
     get:
+      tags: ["Interaction"]
       summary: Get an interaction
       description: Retrieves a specific interaction by its ID
       operationId: getInteraction
@@ -413,6 +427,7 @@ paths:
 
   /environments:
     post:
+      tags: ["Environment"]
       summary: Create a new environment
       description: Creates a new environment for a simulation
       operationId: createEnvironment
@@ -436,6 +451,7 @@ paths:
 
   /environments/{environmentId}:
     get:
+      tags: ["Environment"]
       summary: Get an environment
       description: Retrieves a specific environment by its ID
       operationId: getEnvironment
@@ -459,6 +475,7 @@ paths:
         "500":
           description: Server error
     patch:
+      tags: ["Environment"]
       summary: Update an environment
       description: Updates an existing environment
       operationId: updateEnvironment
@@ -490,6 +507,7 @@ paths:
         "500":
           description: Server error
     delete:
+      tags: ["Environment"]
       summary: Delete an environment
       description: Deletes a specific environment by its ID
       operationId: deleteEnvironment
