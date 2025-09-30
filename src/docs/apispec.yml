@@ -798,19 +798,6 @@ components:
           description: Number of samples for BigFive evaluation (optional)
           example: 50
 
-    Facet:
-      type: object
-      required:
-        - code
-        - value
-      properties:
-        code:
-          type: string
-        value:
-          oneOf:
-            - type: string
-            - type: number
-
     BigFivePersonalityModel:
       type: object
       required:
