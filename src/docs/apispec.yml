@@ -9,31 +9,6 @@ servers:
 security:
   - ApiKeyAuth: []
 paths:
-  /agent/{agentId}:
-    get:
-      summary: Get an agent
-      description: Retrieves a specific agent by its ID
-      operationId: getAgent
-      parameters:
-        - name: agentId
-          in: path
-          required: true
-          description: ID of the agent to retrieve
-          schema:
-            type: string
-            example: "uC3BVPe3"
-      responses:
-        "200":
-          description: Agent retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Agent"
-        "404":
-          description: Agent not found
-        "500":
-          description: Server error
-
   /agents:
     post:
       summary: Create agents
@@ -144,6 +119,31 @@ paths:
                       $ref: "#/components/schemas/Agent"
         "400":
           description: Invalid input
+        "500":
+          description: Server error
+
+  /agent/{agentId}:
+    get:
+      summary: Get an agent
+      description: Retrieves a specific agent by its ID
+      operationId: getAgent
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: ID of the agent to retrieve
+          schema:
+            type: string
+            example: "uC3BVPe3"
+      responses:
+        "200":
+          description: Agent retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+        "404":
+          description: Agent not found
         "500":
           description: Server error
 
