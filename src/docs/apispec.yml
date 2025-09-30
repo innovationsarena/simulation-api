@@ -862,55 +862,6 @@ components:
               maximum: 5
               example: 1
 
-    DataItem:
-      type: object
-      required:
-        - id
-        - sex
-        - age
-        - openness
-        - conscientiousness
-        - extraversion
-        - agreeableness
-        - neuroticism
-      properties:
-        id:
-          type: string
-          example: uC3BVPe3
-          description: Agent id
-        age:
-          type: integer
-          example: 32
-        sex:
-          type: string
-          enum: [male, female]
-          example: male
-        openness:
-          type: number
-          description: Openness value
-          minimum: 1
-          maximum: 5
-        conscientiousness:
-          type: number
-          description: Conscientiousness value
-          minimum: 1
-          maximum: 5
-        extraversion:
-          type: number
-          description: Extraversion value
-          minimum: 1
-          maximum: 5
-        agreeableness:
-          type: number
-          description: Agreeableness value
-          minimum: 1
-          maximum: 5
-        neuroticism:
-          type: number
-          description: Neuroticism value
-          minimum: 1
-          maximum: 5
-
     Simulation:
       type: object
       required:
