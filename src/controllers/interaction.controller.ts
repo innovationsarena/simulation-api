@@ -48,6 +48,8 @@ export const startInteractionController = asyncHandler(
       interaction
     );
 
+    delete interaction.summary;
+
     return reply.status(200).send(interaction);
   }
 );

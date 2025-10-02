@@ -2,9 +2,18 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import { id, Interaction, SimulationType, supabase } from "../../../core";
+import {
+  id,
+  Interaction,
+  Message,
+  SimulationType,
+  supabase,
+} from "../../../core";
 import { interactionsQueue } from "../workers";
 import { assignInteractionToAgent } from "../../agents";
+import { listMessagesByInteractionId } from "../../messages";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 export const listInteractions = async (
   simulationId: string
@@ -98,4 +107,24 @@ export const startInteraction = async (
   );
 
   return;
+};
+
+export const endInteraction = async (
+  interaction: Interaction
+): Promise<void> => {
+  const messages: Message[] = await listMessagesByInteractionId(interaction.id);
+  console.log(messages);
+  if (messages) {
+    const { text } = await generateText({
+      model: openai("gpt-5-mini"),
+      system:
+        "Summarize the following conversation between two or more agents in a single concise paragraph (no bullets or lists). Include a one-line TL;DR, key points and decisions, action item, unresolved questions/next steps, and tone/sentiment. Be factual, neutral, and concise; add timestamps or brief quotes when relevant.",
+      prompt: `#Messages \n\n ${messages.map((m) => m.content)}`,
+    });
+
+    if (text) {
+      await updateInteraction({ ...interaction, summary: text, active: false });
+    }
+    return;
+  }
 };

@@ -1,8 +1,10 @@
-import VoltAgent, { Agent } from "@voltagent/core";
-import { Interaction } from "../../../core";
+import { Agent } from "@voltagent/core";
+import { Interaction, Message } from "../../../core";
 import { openai } from "@ai-sdk/openai";
 import { getAgentById, parsePrompt } from "../../agents";
 import { getSimulation } from "../../simulations";
+import { createMessage } from "../../messages";
+import { endInteraction } from "../operations";
 
 export const handleConversationStart = async (interaction: Interaction) => {
   try {
@@ -19,18 +21,34 @@ export const handleConversationStart = async (interaction: Interaction) => {
           id: agent.id,
           purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
-          model: openai(agent.llmSettings.model),
+          model: openai("gpt-4-turbo"),
+          context: {
+            simulation,
+            interaction,
+          },
           hooks: {
-            async onEnd(props) {
-              console.log("----------->>>>");
-              console.log(
-                (
-                  props.output?.providerResponse as unknown as {
-                    messages: any[];
-                  }
-                ).messages[0].content
-              );
-              console.log("----------->>>>");
+            onStart: async (props) => {
+              console.log(`SubAgent (${props.agent.id}) started.`);
+            },
+            onEnd: async (props) => {
+              const providerResponse: any = props.output?.providerResponse;
+              const content = await extractMessage(providerResponse);
+              if (content) {
+                const interaction = props.context.context.get(
+                  "interaction"
+                ) as Interaction;
+
+                await createNewMessage(
+                  interaction,
+                  content,
+                  props.agent.id,
+                  props.output?.usage
+                );
+
+                console.log("------------------>>>");
+                console.log(content.trim());
+                console.log("------------------>>>");
+              }
             },
           },
         })
@@ -41,19 +59,30 @@ export const handleConversationStart = async (interaction: Interaction) => {
       .map((a) => `${a.name} (agentId: ${a.id})`)
       .join(
         ", "
-      )}. Your assigment is to stere the conversation one Agent at the time.`;
+      )}. Your assigment is to stere the conversation one Agent and one answer at the time. Make sure the agents are discussin the given topic thoroughly.`;
 
     const supervisorAgent = new Agent({
       name: "Supervisor Agent",
       instructions: supervisorAgentInstructions,
       model: openai("gpt-5-mini"),
       subAgents: [...agents],
-      maxSteps: 10,
+      maxSteps: 20,
       hooks: {
-        async onEnd(props) {
-          console.log("Interaction ended");
-          console.log(JSON.stringify(props.output));
+        onStart: () => {
+          console.log("Interaction started.");
         },
+        onEnd: async (props) => {
+          console.log("Interaction ended.");
+          // Summarize
+          const interaction = props.context.context.get(
+            "interaction"
+          ) as Interaction;
+
+          await endInteraction(interaction);
+        },
+      },
+      supervisorConfig: {
+        customGuidelines: ["Each Agent must give at least 3 answers."],
       },
     });
 
@@ -61,9 +90,39 @@ export const handleConversationStart = async (interaction: Interaction) => {
     const results = await supervisorAgent.generateText(
       `Start a conversation based on following topic: ${simulation.topic}. In swedish.`
     );
-
     console.log(results);
   } catch (error: any) {
     console.error(error);
   }
 };
+
+async function extractMessage(resp: any): Promise<string> {
+  const msg = resp.messages[0];
+  const content: string = await msg.content.find(
+    (c: any) => c.type === "text" && !c.text.includes("converseTool")
+  ).text;
+
+  return content;
+}
+
+async function createNewMessage(
+  interaction: Interaction,
+  text: string,
+  agentId: string,
+  tokens: any
+) {
+  const message: Message = {
+    simulationId: interaction.simulationId,
+    interactionId: interaction.id,
+    interactionType: interaction.type,
+    content: text,
+    senderId: agentId,
+    tokens: {
+      inputTokens: tokens.promptTokens || 0,
+      outputTokens: tokens.completionTokens || 0,
+      totalTokens: tokens.totalTokens || 0,
+    },
+  };
+
+  await createMessage(message);
+}

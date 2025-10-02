@@ -18,9 +18,27 @@ export const listMessagesBySimulationId = async (
 ): Promise<Message[]> => {
   try {
     const { data: messages, error } = await supabase
-      .from(process.env.MESSAGES_TABLE as string)
+      .from(process.env.MESSAGES_TABLE_NAME as string)
       .select("*")
       .eq("simulationId", simulationId);
+
+    if (!messages) throw new Error(error.message);
+
+    return messages;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+export const listMessagesByInteractionId = async (
+  interactionId: string
+): Promise<Message[]> => {
+  try {
+    const { data: messages, error } = await supabase
+      .from(process.env.MESSAGES_TABLE_NAME as string)
+      .select("*")
+      .eq("interactionId", interactionId);
 
     if (!messages) throw new Error(error.message);
 

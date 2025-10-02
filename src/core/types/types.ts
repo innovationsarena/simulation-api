@@ -133,7 +133,7 @@ export type Message = {
   interactionType: SimulationType;
   senderId: string; // Agent Id
   content: string; // Says what
-  stats?: any;
+  tokens?: TokenStats;
 };
 
 export type MessageInput = Omit<Message, "id" | "stats">;
