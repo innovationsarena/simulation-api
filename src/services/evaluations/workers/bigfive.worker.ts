@@ -10,18 +10,18 @@ import {
 } from "../../agents";
 
 export const handleBigfiveEvaluation = async (job: Job) => {
-  const { agentId, sample } = job.data;
+  const { agentId, samples, type } = job.data;
   const resultsArr = [];
   const agent = await getAgentById(agentId);
-
-  for (let i = 0; i < sample * 1; i++) {
+  console.log(agent);
+  for (let i = 0; i < samples * 1; i++) {
     console.log(`Evaluating sample ${i + 1} in job ${job.id}...`);
     const percent = await evaluateBigfive(agent);
     resultsArr.push(percent);
   }
 
   const results: BigFiveEvaluation = {
-    samples: sample,
+    samples,
     results: {
       min: Math.min(...resultsArr),
       max: Math.max(...resultsArr),
@@ -30,7 +30,7 @@ export const handleBigfiveEvaluation = async (job: Job) => {
   };
 
   console.log(
-    `Evaluation done and written to Agent. Results in ${sample} samples: ${JSON.stringify(
+    `Evaluation done and written to Agent. Results in ${samples} samples: ${JSON.stringify(
       results.results
     )}`
   );

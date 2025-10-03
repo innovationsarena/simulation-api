@@ -172,6 +172,7 @@ export const InteractionSchema = z.object({
   type: SimulationTypeEnum,
   simulationId: z.string(),
   active: z.boolean(),
+  turns: z.number().optional(),
   participants: z.array(z.string()),
   messages: z.array(MessageSchema).optional(),
   stats: z
@@ -191,4 +192,5 @@ export const InteractionStatsSchema = z.object({
 export const InteractionInputSchema = z.object({
   participants: z.array(z.string()),
   simulationId: z.string(),
+  turns: z.number(),
 });

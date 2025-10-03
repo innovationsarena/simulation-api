@@ -79,7 +79,7 @@ export const handleConversationStart = async (interaction: Interaction) => {
       },
       supervisorConfig: {
         customGuidelines: [
-          `Each Agent must give at least ${interaction.turns} answers.`,
+          `Each Agent must give at least ${interaction.turns || 3} answers.`,
         ],
       },
     });

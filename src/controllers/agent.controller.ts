@@ -133,7 +133,7 @@ export const evaluateAgentController = asyncHandler(
     if (type === "bigfive") {
       await evaluationsQueue.add(
         "evaluation.bigfive",
-        { agentId, samples },
+        { agentId, samples, type },
         { removeOnComplete: true, removeOnFail: true }
       );
     }
