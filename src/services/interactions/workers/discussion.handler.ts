@@ -44,10 +44,6 @@ export const handleConversationStart = async (interaction: Interaction) => {
                   props.agent.id,
                   props.output?.usage
                 );
-
-                console.log("------------------>>>");
-                console.log(content.trim());
-                console.log("------------------>>>");
               }
             },
           },
@@ -82,7 +78,9 @@ export const handleConversationStart = async (interaction: Interaction) => {
         },
       },
       supervisorConfig: {
-        customGuidelines: ["Each Agent must give at least 3 answers."],
+        customGuidelines: [
+          `Each Agent must give at least ${interaction.turns} answers.`,
+        ],
       },
     });
 
@@ -90,7 +88,8 @@ export const handleConversationStart = async (interaction: Interaction) => {
     const results = await supervisorAgent.generateText(
       `Start a conversation based on following topic: ${simulation.topic}. In swedish.`
     );
-    console.log(results);
+
+    return;
   } catch (error: any) {
     console.error(error);
   }

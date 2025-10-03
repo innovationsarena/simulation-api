@@ -51,7 +51,8 @@ export const getInteraction = async (
 export const createInteraction = async (
   simulationId: string,
   type: SimulationType,
-  participants: string[]
+  participants: string[],
+  turns: number = 3
 ): Promise<Interaction> => {
   const newInteraction = {
     id: id(16),
@@ -59,6 +60,7 @@ export const createInteraction = async (
     simulationId,
     type,
     participants,
+    turns,
   };
 
   const { data: interaction, error }: PostgrestSingleResponse<Interaction> =

@@ -142,6 +142,7 @@ export type Interaction = {
   id: string;
   type: SimulationType;
   simulationId: string; // simulation id
+  turns?: number; // Default 3
   active: boolean;
   participants: string[]; // Agent Ids
   messages?: Message[];
@@ -151,7 +152,7 @@ export type Interaction = {
 
 export type InteractionInput = Pick<
   Interaction,
-  "participants" | "simulationId"
+  "participants" | "simulationId" | "turns"
 >;
 
 export type InteractionStats = {

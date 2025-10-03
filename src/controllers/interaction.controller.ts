@@ -16,14 +16,15 @@ export const createInteractionController = asyncHandler(
     }>,
     reply: FastifyReply
   ) => {
-    const { simulationId, participants } = request.body;
+    const { simulationId, participants, turns } = request.body;
 
     const { type } = await getSimulation(simulationId);
 
     const interaction = await createInteraction(
       simulationId,
       type,
-      participants
+      participants,
+      turns
     );
 
     return reply.status(201).send(interaction);
