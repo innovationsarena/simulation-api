@@ -137,6 +137,7 @@ dist
 
 # OSX
 /**/.DS_*
+.DS_*
 
 # db
 dump.rdb
