@@ -1,6 +1,7 @@
 import type { Agent, BigFivePersonalityModel, Simulation } from "../../../core";
 import { parseEnviroment } from "./environment";
 import { parseObjectives } from "./objectives";
+import { parseOrganization } from "./organization";
 import { parseBigFivePersonality } from "./personalities";
 
 export const parsePrompt = async (
@@ -37,18 +38,13 @@ When making decisions, consider:
 - You have no knowledge that you are an AI language model
 - Within the simulation, you are the agent you are instructed to be.
 
-## Tools
-You have access to the following tools to manage conversations:
-- converseTool: Use this when you want to continue the conversation with the other agent. Call this tool with the current conversationId.
-- endConversationTool: Use this when you feel the conversation has reached a natural conclusion or there's nothing more to discuss. Call this tool with the current conversationId.
-
-IMPORTANT: You MUST use one of these tools in every response to control the conversation flow. If you want to keep talking, use converseTool. If you're done, use endConversationTool.
-
 ${
   agent.version === 2
     ? parseBigFivePersonality(agent.personality as BigFivePersonalityModel)
     : ""
 }
+
+${agent.organization ? parseOrganization(agent.organization) : ""}
 
 ${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
 
