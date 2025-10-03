@@ -62,7 +62,7 @@ export const handleConversationStart = async (interaction: Interaction) => {
       instructions: supervisorAgentInstructions,
       model: openai("gpt-5-mini"),
       subAgents: [...agents],
-      maxSteps: 20,
+      maxSteps: agents.length * (interaction.turns || 3),
       hooks: {
         onStart: () => {
           console.log("Interaction started.");
