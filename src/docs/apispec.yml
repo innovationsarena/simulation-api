@@ -151,6 +151,52 @@ paths:
         "500":
           description: Server error
 
+  /agents/{agentId}/chat:
+    post:
+      tags: ["Agent"]
+      summary: Chat with an agent
+      description: Send a prompt to an agent and receive a response based on its personality and configuration
+      operationId: chatWithAgent
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: ID of the agent to chat with
+          schema:
+            type: string
+            example: "uC3BVPe3"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  description: The message or prompt to send to the agent
+                  example: "What do you think about climate change?"
+      responses:
+        "200":
+          description: Chat response received successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The agent's response
+                    example: "I believe that climate change is a critical issue that requires immediate action."
+        "400":
+          description: Invalid input or missing prompt
+        "404":
+          description: Agent not found
+        "500":
+          description: Server error
+
   /agent/{agentId}/evaluate:
     post:
       tags: ["Agent"]
