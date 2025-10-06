@@ -7,6 +7,7 @@ import {
   RandomAgentInput,
   AgentInput,
   EvaluationInput,
+  AgentChatInput,
 } from "../core";
 
 import {
@@ -16,9 +17,12 @@ import {
   generateRandomAgent,
   getAgentById,
   getSimulation,
+  parsePrompt,
   updateAgent,
   updateSimulation,
 } from "../services";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 export const createCustomAgentController = asyncHandler(
   async (
@@ -161,5 +165,31 @@ export const evaluateAgentController = asyncHandler(
     return reply
       .status(200)
       .send({ message: `Evaluation of agent ${agentId} started.` });
+  }
+);
+
+export const AgentChatController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: AgentChatInput;
+      Params: { agentId: string };
+      Querystring: { includeHistory?: boolean };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { agentId } = request.params;
+    const { prompt } = request.body;
+
+    if (!prompt) throw new Error("Message to Agent missing.");
+
+    const agent = await getAgentById(agentId);
+
+    const { text } = await generateText({
+      model: openai(agent.llmSettings.model || "gpt-5-mini"),
+      system: await parsePrompt(agent),
+      prompt,
+    });
+
+    return reply.status(200).send({ message: text });
   }
 );

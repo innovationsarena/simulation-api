@@ -21,7 +21,7 @@ export const handleConversationStart = async (interaction: Interaction) => {
           id: agent.id,
           purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
-          model: openai("gpt-5-mini"), // gpt-4-turbo
+          model: openai(agent.llmSettings.model), // gpt-4-turbo
           context: {
             simulation,
             interaction,

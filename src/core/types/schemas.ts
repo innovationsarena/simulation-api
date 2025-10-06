@@ -194,3 +194,7 @@ export const InteractionInputSchema = z.object({
   simulationId: z.string(),
   turns: z.number(),
 });
+
+export const AgentChatInputSchema = z.object({
+  prompt: z.string(),
+});
