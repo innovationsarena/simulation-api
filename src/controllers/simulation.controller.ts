@@ -8,6 +8,7 @@ import {
   stopSimulation,
   listInteractions,
   listMessagesBySimulationId,
+  listMessagesByInteractionId,
 } from "../services";
 import { simulationQueue } from "../services/simulations/workers";
 
@@ -62,8 +63,25 @@ export const getSimulationController = asyncHandler(
         .send({ message: "Simulation with given ID not found." });
 
     const agents = await listAgents(simulationId);
+    const interactions = await listInteractions(simulationId);
+    const messages = await listMessagesBySimulationId(simulationId);
 
-    simulation.stats.agents = agents.length;
+    const tokenStatsInput = messages.reduce(
+      (acc, message) => acc + (message.tokens?.inputTokens || 0),
+      0
+    );
+    const tokenStatsOutput = messages.reduce(
+      (acc, message) => acc + (message.tokens?.outputTokens || 0),
+      0
+    );
+
+    simulation.stats.agents = agents.length || 0;
+    simulation.stats.interactions = interactions.length || 0;
+    simulation.stats.tokens = {
+      inputTokens: tokenStatsInput || 0,
+      outputTokens: tokenStatsOutput || 0,
+      totalTokens: tokenStatsInput + tokenStatsOutput,
+    };
 
     reply.status(200).send(simulation);
   }
