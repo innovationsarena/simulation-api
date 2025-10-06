@@ -1,4 +1,4 @@
-name: Deploy GR Questionnaire simulator API.
+name: Deploy GR simulator API.
 
 on:
   push:
