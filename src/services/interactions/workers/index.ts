@@ -11,16 +11,16 @@ new Worker(
   QUEUE_NAME,
   async (job) => {
     if (job.name === "interaction.conversation.start") {
-      console.log("starting conversation.");
+      console.log("starting Interaction flow of type 'conversation'.");
       await handleConversationStart(job.data as Interaction);
       return;
     }
 
     if (job.name === "interaction.discussion.start") {
-      console.log("starting discussion.");
+      console.log("starting Interaction flow of type 'discussion'.");
     }
     if (job.name === "interaction.survey.start") {
-      console.log("starting survey.");
+      console.log("starting Interaction flow of type 'survey'.");
     }
   },
   {
