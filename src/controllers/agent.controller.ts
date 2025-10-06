@@ -8,6 +8,7 @@ import {
   AgentInput,
   EvaluationInput,
 } from "../core";
+
 import {
   createAgents,
   evaluationsQueue,
@@ -15,6 +16,7 @@ import {
   generateRandomAgent,
   getAgentById,
   getSimulation,
+  updateAgent,
   updateSimulation,
 } from "../services";
 
@@ -33,6 +35,7 @@ export const createCustomAgentController = asyncHandler(
       type,
       simulationId,
       objectives,
+      organization,
     } = request.body;
 
     const agent: Agent = {
@@ -44,6 +47,7 @@ export const createCustomAgentController = asyncHandler(
       state: "idle",
       inInteractionId: null,
       objectives,
+      organization,
       demographics,
       personality,
       llmSettings: {
@@ -80,6 +84,22 @@ export const generateAgentsController = asyncHandler(
     await createAgents(agents);
 
     return reply.status(201).send({ agents });
+  }
+);
+
+export const updateAgentController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: CustomAgentInput;
+      Params: { agentId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const agent = await getAgentById(request.params.agentId);
+
+    const updatedAgent = await updateAgent({ ...agent, ...request.body });
+
+    return reply.status(200).send(updatedAgent);
   }
 );
 

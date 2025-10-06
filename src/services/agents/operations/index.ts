@@ -120,3 +120,17 @@ export const createBigFiveEvaluation = async (
 
   return agent;
 };
+
+export const updateAgent = async (agent: Agent): Promise<Agent> => {
+  const { data: updatedAgent, error }: PostgrestSingleResponse<Agent> =
+    await supabase
+      .from(process.env.AGENTS_TABLE_NAME as string)
+      .update(agent)
+      .eq("id", agent.id)
+      .select()
+      .single();
+
+  if (error) throw new Error(error.message);
+
+  return updatedAgent;
+};

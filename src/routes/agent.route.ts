@@ -13,6 +13,7 @@ import {
   createCustomAgentController,
   getAgentController,
   evaluateAgentController,
+  updateAgentController,
 } from "../controllers";
 
 export const agentRouter = (fastify: FastifyInstance) => {
@@ -32,6 +33,15 @@ export const agentRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     generateAgentsController
+  );
+
+  fastify.patch(
+    "/agents/:agentId",
+    {
+      schema: CustomAgentInputSchema,
+      preValidation: [validateKey],
+    },
+    updateAgentController
   );
 
   fastify.post(
