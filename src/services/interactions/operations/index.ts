@@ -128,7 +128,7 @@ export const endInteraction = async (
     const { text } = await generateText({
       model: openai("gpt-5-mini"),
       system:
-        "Summarize the following conversation between two or more agents in a single concise paragraph (no bullets or lists). Include key points and decisions, action item, unresolved questions/next steps, and tone/sentiment. Be factual, neutral, and concise; add timestamps or brief quotes when relevant.",
+        "Summarize the following conversation between two or more agents in a single concise paragraph (no bullets or lists). Include key points and decisions, action items, unresolved questions/next steps, and tone/sentiment. Be factual, neutral, and concise.",
       prompt: `#Messages \n\n ${messages.map((m) => m.content)}`,
     });
 
