@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { asyncHandler, InteractionInput } from "../core";
 import {
-  assignInteractionToAgent,
   createInteraction,
+  deleteInteraction,
   getInteraction,
   getSimulation,
   interactionsQueue,
@@ -71,6 +71,21 @@ export const getInteractionController = asyncHandler(
   }
 );
 
+export const deleteInteractionController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { interactionId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { interactionId } = request.params;
+
+    await deleteInteraction(interactionId);
+
+    return reply.status(200).send({ message: "Interaction deleted." });
+  }
+);
+
 export const getInteractionMessagesController = asyncHandler(
   async (
     request: FastifyRequest<{
@@ -82,6 +97,10 @@ export const getInteractionMessagesController = asyncHandler(
 
     const messages = await listMessagesByInteractionId(interactionId);
 
-    return reply.status(200).send(messages.map((c) => c.content));
+    return reply.status(200).send(
+      messages.map((c) => {
+        return { id: c.senderId, content: c.content };
+      })
+    );
   }
 );

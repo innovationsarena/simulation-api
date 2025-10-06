@@ -114,6 +114,18 @@ export const startInteraction = async (
   return;
 };
 
+export const deleteInteraction = async (
+  interactionId: string
+): Promise<void> => {
+  supabase
+    .from(process.env.INTERACTIONS_TABLE_NAME as string)
+    .delete()
+    .eq("id", interactionId)
+    .select()
+    .single();
+  return;
+};
+
 export const endInteraction = async (
   interaction: Interaction
 ): Promise<void> => {

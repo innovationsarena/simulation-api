@@ -470,6 +470,71 @@ paths:
           description: Interaction not found
         "500":
           description: Server error
+    delete:
+      tags: ["Interaction"]
+      summary: Delete an interaction
+      description: Deletes a specific interaction by its ID
+      operationId: deleteInteraction
+      parameters:
+        - name: interactionId
+          in: path
+          required: true
+          description: ID of the interaction to delete
+          schema:
+            type: string
+            example: "int123456"
+      responses:
+        "200":
+          description: Interaction deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Interaction deleted."
+        "404":
+          description: Interaction not found
+        "500":
+          description: Server error
+
+  /interactions/{interactionId}/messages:
+    get:
+      tags: ["Interaction"]
+      summary: Get interaction messages
+      description: Retrieves all messages from a specific interaction
+      operationId: getInteractionMessages
+      parameters:
+        - name: interactionId
+          in: path
+          required: true
+          description: ID of the interaction
+          schema:
+            type: string
+            example: "int123456"
+      responses:
+        "200":
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: ID of the agent who sent the message
+                      example: "uC3BVPe3"
+                    content:
+                      type: string
+                      description: Content of the message
+                      example: "I think we should consider renewable energy sources."
+        "404":
+          description: Interaction not found
+        "500":
+          description: Server error
 
   /environments:
     post:
