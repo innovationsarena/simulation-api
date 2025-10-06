@@ -21,14 +21,14 @@ export const handleConversationStart = async (interaction: Interaction) => {
           id: agent.id,
           purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
-          model: openai("gpt-4-turbo"),
+          model: openai("gpt-5-mini"), // gpt-4-turbo
           context: {
             simulation,
             interaction,
           },
           hooks: {
             onStart: async (props) => {
-              console.log(`SubAgent (${props.agent.id}) started.`);
+              console.log(`SubAgent (${props.agent.name}) started.`);
             },
             onEnd: async (props) => {
               const providerResponse: any = props.output?.providerResponse;
@@ -44,6 +44,8 @@ export const handleConversationStart = async (interaction: Interaction) => {
                   props.agent.id,
                   props.output?.usage
                 );
+
+                console.log(`SubAgent (${props.agent.name}) ended.`);
               }
             },
           },
@@ -60,7 +62,9 @@ export const handleConversationStart = async (interaction: Interaction) => {
     const supervisorAgent = new Agent({
       name: "Supervisor Agent",
       instructions: supervisorAgentInstructions,
-      model: openai("gpt-5-mini"),
+      model: openai(
+        (process.env.SUPERVISOR_AGENT_MODEL as string) || "gpt-5-mini"
+      ),
       subAgents: [...agents],
       maxSteps: agents.length * (interaction.turns || 3),
       hooks: {

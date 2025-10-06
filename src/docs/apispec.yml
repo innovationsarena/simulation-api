@@ -715,7 +715,7 @@ components:
         model:
           type: string
           description: LLM model
-          example: "gpt-4o-mini"
+          example: "gpt-5-mini"
         temperature:
           type: number
           description: LLM teperature. Dynamically set based on personality?

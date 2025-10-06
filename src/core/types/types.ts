@@ -63,7 +63,7 @@ export type Organization = {
 
 export type LLMSettings = {
   provider: string; // ex. 'openai'
-  model: string; // ex. 'gpt-4o-mini'
+  model: string; // ex. 'gpt-5-mini'
   temperature: number; // ex. 0.5, // Dynamically set based on personality?
   messageToken: number; // Long or short messages
 };
