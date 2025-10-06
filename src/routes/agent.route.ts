@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { validateKey } from "../middlewares";
 import {
+  AgentChatInputSchema,
   AgentInputSchema,
   CustomAgentInputSchema,
   EvaluationInputSchema,
@@ -14,6 +15,7 @@ import {
   getAgentController,
   evaluateAgentController,
   updateAgentController,
+  AgentChatController,
 } from "../controllers";
 
 export const agentRouter = (fastify: FastifyInstance) => {
@@ -42,6 +44,15 @@ export const agentRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     updateAgentController
+  );
+
+  fastify.post(
+    "/agents/:agentId/chat",
+    {
+      schema: AgentChatInputSchema,
+      preValidation: [validateKey],
+    },
+    AgentChatController
   );
 
   fastify.post(

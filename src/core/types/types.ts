@@ -170,3 +170,7 @@ export type DataItem = {
   conscientiousness: number;
   neuroticism: number;
 };
+
+export type AgentChatInput = {
+  prompt: string;
+};
