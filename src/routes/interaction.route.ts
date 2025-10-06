@@ -1,6 +1,7 @@
 import {
   createInteractionController,
   getInteractionController,
+  getInteractionMessagesController,
   startInteractionController,
 } from "../controllers";
 import { FastifyInstance } from "fastify";
@@ -33,5 +34,14 @@ export const interactionRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     startInteractionController
+  );
+
+  fastify.get(
+    "/interactions/:interactionId/messages",
+    {
+      schema: {},
+      preValidation: [validateKey],
+    },
+    getInteractionMessagesController
   );
 };

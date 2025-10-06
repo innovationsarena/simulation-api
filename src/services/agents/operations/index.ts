@@ -95,7 +95,7 @@ export const removeInteractionFromAgent = async (
 ): Promise<Agent> => {
   const { data: agent, error }: PostgrestSingleResponse<Agent> = await supabase
     .from(process.env.AGENTS_TABLE_NAME as string)
-    .update({ evaluate: "idle", inInteractionId: null })
+    .update({ state: "idle", inInteractionId: null })
     .eq("id", agentId)
     .select()
     .single();
