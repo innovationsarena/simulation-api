@@ -19,7 +19,6 @@ new Worker(
   {
     connection: {
       host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT as string),
     },
     concurrency: 50,
   }
