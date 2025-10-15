@@ -20,7 +20,7 @@ The API specifications can be found [here](https://simulation.innovationsarenan.
 | OPENAI_API_KEY             | sk-proj-7HjY3...                       | OpenAI API key.                   |
 | SUPABASE_URL               | https://supabase.innovationsarenan.dev | Public url for Supabase.          |
 | SUPABASE_KEY               | eyJ0eX...                              | Supabase service token.           |
-| REDIS_HOST                 | redis://.....                          | Url/IP to Redis db incl auth.     |
+| REDIS_HOST                 | my-redis-host                          | Url/IP to Redis db incl auth.     |
 | REDIS_PORT                 | 6379                                   | Port to Redis db.                 |
 | AGENTS_TABLE_NAME          | agents                                 | Name of agents table.             |
 | ENVIRONMENTS_TABLE_NAME    | environments                           | Name of environments table.       |

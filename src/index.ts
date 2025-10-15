@@ -9,8 +9,8 @@ import {
   agentRouter,
   simulationRouter,
   interactionRouter,
+  environmentRouter,
 } from "./routes";
-import { environmentRouter } from "./routes/environment.route";
 
 const PORT = Number(process.env.PORT) || 3000;
 
