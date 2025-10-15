@@ -1,9 +1,10 @@
 import { Queue, Worker } from "bullmq";
 import { startSimulation, stopSimulation } from "../operations";
+import { concurrency, connection } from "../../../core";
 
 // QUEUE
 const QUEUE_NAME = "simulationQueue";
-export const simulationQueue = new Queue(QUEUE_NAME);
+export const simulationQueue = new Queue(QUEUE_NAME, { connection });
 
 // WORKERS
 new Worker(
@@ -17,11 +18,7 @@ new Worker(
     }
   },
   {
-    connection: {
-      host: process.env.REDIS_HOST,
-      username: process.env.REDIS_USERNAME,
-      password: process.env.REDIS_PASSWORD,
-    },
-    concurrency: 50,
+    connection,
+    concurrency,
   }
 );

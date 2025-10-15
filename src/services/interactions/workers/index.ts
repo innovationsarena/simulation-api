@@ -1,10 +1,11 @@
 import { Queue, Worker } from "bullmq";
 import { Interaction } from "../../../core";
 import { handleConversationStart } from "./discussion.handler";
+import { concurrency, connection } from "../../../core";
 
 // QUEUE
 export const QUEUE_NAME = "interactionsQueue";
-export const interactionsQueue = new Queue(QUEUE_NAME);
+export const interactionsQueue = new Queue(QUEUE_NAME, { connection });
 
 // WORKERS
 new Worker(
@@ -24,11 +25,7 @@ new Worker(
     }
   },
   {
-    connection: {
-      host: process.env.REDIS_HOST,
-      username: process.env.REDIS_USERNAME,
-      password: process.env.REDIS_PASSWORD,
-    },
-    concurrency: 50,
+    connection,
+    concurrency,
   }
 );

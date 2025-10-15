@@ -1,3 +1,4 @@
+import { ConnectionOptions } from "bullmq";
 import type { Message } from "../types";
 
 export const toLocalISO = (date: Date) => {
@@ -17,6 +18,14 @@ export const parseMessages = (messages: Message[], senderid: string): any[] => {
     };
   });
 };
+
+export const connection: ConnectionOptions = {
+  host: process.env.REDIS_HOST,
+  username: process.env.REDIS_USERNAME,
+  password: process.env.REDIS_PASSWORD,
+};
+
+export const concurrency: number = 50;
 
 export * from "./errorHandler";
 export * from "./generators";
