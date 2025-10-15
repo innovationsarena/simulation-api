@@ -1,5 +1,5 @@
 {
-  "name": "simulator-api",
+  "name": "simulation-api",
   "version": "1.0.0",
   "description": "GR Innovationarena API for Agentic simulations.",
   "main": "index.ts",
