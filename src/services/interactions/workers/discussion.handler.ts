@@ -1,5 +1,5 @@
 import { Agent } from "@voltagent/core";
-import { Interaction, Message } from "../../../core";
+import { Interaction, Message, Simulation } from "../../../core";
 import { openai } from "@ai-sdk/openai";
 import { getAgentById, parsePrompt } from "../../agents";
 import { getSimulation } from "../../simulations";
@@ -90,7 +90,9 @@ export const handleConversationStart = async (interaction: Interaction) => {
 
     // Run
     const results = await supervisorAgent.generateText(
-      `Start a conversation based on following topic: ${simulation.topic}. In swedish.`
+      `Start a discussion based on following instructions: \n ${parseSimulationInput(
+        simulation
+      )}. In swedish.`
     );
 
     return;
@@ -129,3 +131,14 @@ async function createNewMessage(
 
   await createMessage(message);
 }
+
+const parseSimulationInput = (simulation: Simulation) => {
+  switch (simulation.input.type) {
+    case "topic":
+      return `${simulation.input.description}`;
+    case "challange":
+      return `${simulation.input.description}`;
+    case "issue":
+      return `${simulation.input.description}`;
+  }
+};

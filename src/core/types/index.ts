@@ -130,6 +130,7 @@ export const SimulationTypeSchema = z.enum([
   "conversation",
   "survey",
 ]);
+export type SimulationType = z.infer<typeof SimulationTypeSchema>;
 
 export const SimulationStateSchema = z.enum([
   "primed",
@@ -137,6 +138,7 @@ export const SimulationStateSchema = z.enum([
   "ended",
   "stopped",
 ]);
+export type SimulationState = z.infer<typeof SimulationStateSchema>;
 
 export const SimulationInputDescriptionSchema = z.object({
   type: z.enum(["topic", "issue", "challange"]), // kept original spelling

@@ -17,16 +17,14 @@ export const createSimulationController = asyncHandler(
     request: FastifyRequest<{
       Body: Pick<
         Simulation,
-        "id" | "name" | "description" | "type" | "topic" | "environmentId"
+        "id" | "name" | "description" | "type" | "input" | "environmentId"
       >;
     }>,
     reply: FastifyReply
   ) => {
-    const simulationId = id(12);
-
     const newSimulation: Simulation = {
       ...request.body,
-      id: simulationId,
+      id: request.body.id || id(12),
       name: request.body.name.length ? request.body.name : generateSimName(),
       state: "primed",
       type: request.body.type,
