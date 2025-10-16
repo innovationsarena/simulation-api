@@ -69,7 +69,7 @@ export const handleConversationStart = async (interaction: Interaction) => {
       maxSteps: agents.length * (interaction.turns || 3),
       hooks: {
         onStart: () => {
-          console.log("Interaction started.");
+          console.log(`Interaction started with ${interaction.turns || 3}.`);
         },
         onEnd: async (props) => {
           console.log("Interaction ended.");
