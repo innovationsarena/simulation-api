@@ -736,6 +736,7 @@ components:
         id:
           type: string
           example: uC3BVPe3
+          description: if missing - random will be generated. If given - its 8 character hashed with shake256-algorithm
         version:
           type: integer
           description: Agent version

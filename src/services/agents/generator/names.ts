@@ -319,3 +319,8 @@ export const generateName = (sex: string) => {
 
   return `${firstName} ${lastName}`;
 };
+
+export const generateRandomName = () => {
+  const sex: Sex = Math.floor(Math.random() * 100) > 50 ? "male" : "female";
+  return generateName(sex);
+};

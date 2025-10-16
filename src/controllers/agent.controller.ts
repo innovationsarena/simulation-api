@@ -8,6 +8,7 @@ import {
   AgentInput,
   EvaluationInput,
   AgentChatInput,
+  createShortHash,
 } from "../core";
 
 import {
@@ -20,9 +21,11 @@ import {
   parsePrompt,
   updateAgent,
   updateSimulation,
+  generateRandomName,
 } from "../services";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import {} from "../services/agents/generator/names";
 
 export const createCustomAgentController = asyncHandler(
   async (
@@ -43,9 +46,9 @@ export const createCustomAgentController = asyncHandler(
     } = request.body;
 
     const agent: Agent = {
-      id: agentId || id(),
+      id: createShortHash(agentId) || id(),
       version: 2,
-      name,
+      name: name ? name : generateRandomName(),
       simulationId,
       type,
       state: "idle",
