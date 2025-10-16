@@ -1,6 +1,6 @@
 import { Queue, Worker } from "bullmq";
 import { Interaction } from "../../../core";
-import { handleConversationStart } from "./discussion.handler";
+import { handleDiscussionStart } from "./discussion.handler";
 import { concurrency, connection } from "../../../core";
 
 // QUEUE
@@ -13,11 +13,11 @@ new Worker(
   async (job) => {
     if (job.name === "interaction.conversation.start") {
       console.log("starting Interaction flow of type 'conversation'.");
-      await handleConversationStart(job.data as Interaction);
       return;
     }
 
     if (job.name === "interaction.discussion.start") {
+      await handleDiscussionStart(job.data as Interaction);
       console.log("starting Interaction flow of type 'discussion'.");
     }
     if (job.name === "interaction.survey.start") {

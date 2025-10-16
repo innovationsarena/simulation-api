@@ -6,7 +6,7 @@ import { endInteraction } from "../operations";
 import { Agent } from "@voltagent/core";
 import { openai } from "@ai-sdk/openai";
 
-export const handleConversationStart = async (interaction: Interaction) => {
+export const handleDiscussionStart = async (interaction: Interaction) => {
   try {
     const agents = [];
     const simulation = await getSimulation(interaction.simulationId);
