@@ -1,6 +1,6 @@
-import { BigFivePersonalityModel, DataItem } from "../../../core";
+import { BigFivePersonalityModel } from "../../../core";
 import { personalities } from "../parser/personality.models.en";
-import { items } from "./bigfivedata";
+import { DataItem, items } from "./bigfivedata";
 
 // Simple
 export const getSimplePersonality = (): string => {

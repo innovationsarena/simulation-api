@@ -1,4 +1,13 @@
-import { DataItem } from "../../../core";
+export type DataItem = {
+  id: string;
+  age: number;
+  sex: "female" | "male";
+  agreeableness: number;
+  extraversion: number;
+  openness: number;
+  conscientiousness: number;
+  neuroticism: number;
+};
 
 export const items: DataItem[] = [
   {
