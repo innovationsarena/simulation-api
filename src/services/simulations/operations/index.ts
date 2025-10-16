@@ -1,7 +1,13 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { supabase, Simulation, Agent } from "../../../core";
 import { listAgents } from "../../agents";
-import { createInteraction, interactionsQueue } from "../../interactions";
+import {
+  createInteraction,
+  interactionsQueue,
+  listInteractions,
+} from "../../interactions";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 export const getSimulation = async (
   simulationId: string
@@ -79,7 +85,7 @@ export const stopSimulation = async (
     state: "stopped",
   });
 
-  // End all activities
+  // End all interactions
   // Update all Agents
 
   // Clear queues?
@@ -107,4 +113,46 @@ export const updateSimulation = async (
   if (error) throw new Error(error.message);
 
   return updatedSimulation;
+};
+
+export const summarizeSimulation = async (
+  simulationId: string
+): Promise<{ summary: string }> => {
+  const interactions = await listInteractions(simulationId);
+  const system = `# Instructions: 
+  You are the Ultimate Summarizer. Given a list of discussion summaries, produce a cross-summary synthesis (do not re-summarize each item).
+
+Output as bullet lists with these sections:
+
+Core insights: 5-10 distilled takeaways that hold across summaries; note strength/impact.
+Recurring patterns/themes: cluster common ideas; include frequency like [7/12] and cite sample IDs (e.g., S3, S8).
+Valuable specifics: concrete data points, decisions, constraints, definitions; cite IDs.
+Divergences/contradictions: what disagrees, where (IDs), and stated reasons if provided.
+Actions/next steps: prioritized, deduplicated, with owners/timelines if present.
+Open questions/risks: unknowns, assumptions, blockers.
+
+Requirements:
+Be concise; bullets only; no intro/outro.
+Synthesize across items; merge duplicates; avoid repetition.
+Use neutral, evidence-based language; no speculation beyond the text.
+Quantify when possible (counts, ranges).
+If information is insufficient, state whats missing.
+  `;
+  const prompt = `## Data to summarize (list of interactions): ${JSON.stringify(
+    interactions.map((i) => i.summary)
+  )} `;
+
+  const { text } = await generateText({
+    model: openai("gpt-5"),
+    system,
+    prompt,
+    providerOptions: {
+      openai: {
+        reasoningEffort: "high",
+        reasoningSummary: "auto",
+      },
+    },
+  });
+
+  return { summary: text };
 };

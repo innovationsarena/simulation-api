@@ -421,6 +421,39 @@ paths:
         "500":
           description: Server error
 
+  /simulations/{simulationId}/summary:
+    get:
+      tags: ["Simulation"]
+      summary: Get simulation summary
+      description: Retrieves a comprehensive summary of all interactions from a simulation using AI synthesis
+      operationId: summarizeSimulation
+      parameters:
+        - name: simulationId
+          in: path
+          required: true
+          description: ID of the simulation to summarize
+          schema:
+            type: string
+            example: "iLVieMGDrI6GTBLq"
+      responses:
+        "200":
+          description: Summary generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - summary
+                properties:
+                  summary:
+                    type: string
+                    description: AI-generated synthesis of all interaction summaries
+                    example: "Core insights:\n- Climate change requires immediate action\n- Renewable energy is a priority\n\nRecurring patterns/themes:\n- Sustainability mentioned in 7/12 interactions"
+        "404":
+          description: Simulation not found
+        "500":
+          description: Server error
+
   /interactions:
     post:
       tags: ["Interaction"]
@@ -986,7 +1019,7 @@ components:
         - state
         - type
         - name
-        - topic
+        - input
         - stats
       properties:
         id:
@@ -1015,10 +1048,10 @@ components:
           type: string
           description: ID of the environment for this simulation
           example: "env123"
-        topic:
-          type: string
-          description: Topic for the simulation
-          example: "Climate Change"
+        input:
+          $ref: "#/components/schemas/SimulationInputDescription"
+        output:
+          $ref: "#/components/schemas/SimulationOutputDescription"
         stats:
           $ref: "#/components/schemas/SimulationStats"
 
@@ -1027,7 +1060,12 @@ components:
       required:
         - name
         - type
+        - input
       properties:
+        id:
+          type: string
+          description: Optional custom ID for the simulation
+          example: "custom-sim-id"
         name:
           type: string
           description: Name of the simulation
@@ -1041,6 +1079,40 @@ components:
           type: string
           description: Optional description of the simulation
           example: "A discussion about climate change policies"
+        environmentId:
+          type: string
+          description: Optional ID of the environment for this simulation
+          example: "env123"
+        input:
+          $ref: "#/components/schemas/SimulationInputDescription"
+        output:
+          $ref: "#/components/schemas/SimulationOutputDescription"
+
+    SimulationInputDescription:
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          type: string
+          enum: [topic, issue, challange]
+          description: Type of simulation input (note - 'challange' is intentional spelling)
+          example: "topic"
+        description:
+          type: string
+          description: Description of the topic, issue, or challenge
+          example: "Climate change and its impact on global ecosystems"
+
+    SimulationOutputDescription:
+      type: object
+      required:
+        - description
+      properties:
+        description:
+          type: string
+          description: Description of the expected output
+          example: "A comprehensive analysis of climate change solutions"
 
     SimulationStats:
       type: object
@@ -1149,6 +1221,10 @@ components:
           type: string
           description: ID of the simulation this interaction belongs to
           example: "iLVieMGDrI6GTBLq"
+        turns:
+          type: integer
+          description: Number of turns/rounds in the interaction
+          example: 5
         active:
           type: boolean
           description: Whether the interaction is currently active
@@ -1166,6 +1242,10 @@ components:
             $ref: "#/components/schemas/Message"
         stats:
           $ref: "#/components/schemas/InteractionStats"
+        summary:
+          type: string
+          description: AI-generated summary of the interaction
+          example: "Discussion about renewable energy solutions with focus on solar and wind power"
 
     InteractionInput:
       type: object
@@ -1183,6 +1263,10 @@ components:
           type: string
           description: ID of the simulation this interaction belongs to
           example: "iLVieMGDrI6GTBLq"
+        turns:
+          type: integer
+          description: Optional number of turns/rounds for the interaction
+          example: 5
 
     InteractionStats:
       type: object

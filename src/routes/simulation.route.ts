@@ -8,6 +8,7 @@ import {
   listSimulationAgentsController,
   listSimulationMessagesController,
   listSimulationInteractionsController,
+  summarizeSimulationController,
 } from "../controllers";
 import { validateKey } from "../middlewares";
 
@@ -69,5 +70,12 @@ export const simulationRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     listSimulationInteractionsController
+  );
+  fastify.get(
+    "/simulations/:simulationId/summary",
+    {
+      preValidation: [validateKey],
+    },
+    summarizeSimulationController
   );
 };

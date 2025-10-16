@@ -8,6 +8,7 @@ import {
   stopSimulation,
   listInteractions,
   listMessagesBySimulationId,
+  summarizeSimulation,
 } from "../services";
 import { simulationQueue } from "../services/simulations/workers";
 
@@ -169,5 +170,20 @@ export const listSimulationInteractionsController = asyncHandler(
     const interactions = await listInteractions(simulationId);
 
     return reply.status(200).send(interactions);
+  }
+);
+
+export const summarizeSimulationController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { simulationId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { simulationId } = request.params;
+
+    const summary = await summarizeSimulation(simulationId);
+
+    return reply.status(200).send(summary);
   }
 );
