@@ -8,7 +8,6 @@ import {
   stopSimulation,
   listInteractions,
   listMessagesBySimulationId,
-  listMessagesByInteractionId,
 } from "../services";
 import { simulationQueue } from "../services/simulations/workers";
 

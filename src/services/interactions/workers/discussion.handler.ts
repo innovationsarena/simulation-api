@@ -1,10 +1,10 @@
-import { Agent } from "@voltagent/core";
 import { Interaction, Message, Simulation } from "../../../core";
-import { openai } from "@ai-sdk/openai";
 import { getAgentById, parsePrompt } from "../../agents";
 import { getSimulation } from "../../simulations";
 import { createMessage } from "../../messages";
 import { endInteraction } from "../operations";
+import { Agent } from "@voltagent/core";
+import { openai } from "@ai-sdk/openai";
 
 export const handleConversationStart = async (interaction: Interaction) => {
   try {
@@ -62,9 +62,7 @@ export const handleConversationStart = async (interaction: Interaction) => {
     const supervisorAgent = new Agent({
       name: "Supervisor Agent",
       instructions: supervisorAgentInstructions,
-      model: openai(
-        (process.env.SUPERVISOR_AGENT_MODEL as string) || "gpt-5-mini"
-      ),
+      model: openai((process.env.SUPERVISOR_AGENT_MODEL as string) || "gpt-5"),
       subAgents: [...agents],
       maxSteps: agents.length * (interaction.turns || 3),
       hooks: {

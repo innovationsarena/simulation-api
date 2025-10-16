@@ -55,6 +55,7 @@ export const BigFiveEvaluationResultsSchema = z.object({
   max: z.number(),
   avg: z.number(),
 });
+
 export const BigFiveEvaluationSchema = z.object({
   samples: z.number().int().nonnegative(),
   results: BigFiveEvaluationResultsSchema,
@@ -66,6 +67,10 @@ export const QuestionnaireEvaluationSchema = z.object({
     avg: z.number(),
   }),
 });
+export type BigFiveEvaluation = z.infer<typeof BigFiveEvaluationSchema>;
+export type BigFiveEvaluationResults = z.infer<
+  typeof BigFiveEvaluationResultsSchema
+>;
 
 export const EvaluationsSchema = z.object({
   bigFive: BigFiveEvaluationSchema,
