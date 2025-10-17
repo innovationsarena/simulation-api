@@ -15,7 +15,6 @@ new Worker(
       console.log("starting Interaction flow of type 'conversation'.");
       return;
     }
-
     if (job.name === "interaction.discussion.start") {
       await handleDiscussionStart(job.data as Interaction);
     }

@@ -28,7 +28,9 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
           },
           hooks: {
             onStart: async (props) => {
-              console.log(`SubAgent (${props.agent.name}) started.`);
+              console.log(
+                `SubAgent '${props.agent.name}' (${props.agent.id}) started.`
+              );
             },
             onEnd: async (props) => {
               const providerResponse: any = props.output?.providerResponse;
@@ -38,7 +40,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
                   "interaction"
                 ) as Interaction;
 
-                await createNewMessage(
+                await constructMessage(
                   interaction,
                   content,
                   props.agent.id,
@@ -108,7 +110,7 @@ async function extractMessage(resp: any): Promise<string> {
   return content;
 }
 
-async function createNewMessage(
+async function constructMessage(
   interaction: Interaction,
   text: string,
   agentId: string,
