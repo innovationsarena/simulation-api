@@ -9,7 +9,6 @@ USER node
 # Copy package files first for better caching
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node tsconfig*.json ./
-COPY --chown=node:node register-paths.js ./
 
 # Copy source code
 COPY --chown=node:node src/ ./src/
