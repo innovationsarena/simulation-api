@@ -1,0 +1,13 @@
+{
+  "baseUrl": "./dist",
+  "paths": {
+    "@services": ["./services"],
+    "@services/*": ["./services/*"],
+    "@controllers": ["./controllers"],
+    "@controllers/*": ["./controllers/*"],
+    "@core": ["./core"],
+    "@core/*": ["./core/*"],
+    "@middlewares": ["./middlewares"],
+    "@middlewares/*": ["./middlewares/*"]
+  }
+}

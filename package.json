@@ -8,7 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build && tsc-alias",
+    "start": "node -r tsconfig-paths/register -r ./register-paths.js dist/index.js",
     "dev": "nodemon -r tsconfig-paths/register src/index.ts",
     "test": "vitest",
     "test:coverage": "vitest --coverage"
@@ -53,6 +54,7 @@
     "mem0ai": "^2.1.38",
     "nodemon": "^3.1.10",
     "semantic-release": "^24.2.5",
+    "tsconfig-paths": "^4.2.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -60,7 +62,7 @@
     "@types/supertest": "^6.0.3",
     "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }
