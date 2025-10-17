@@ -144,7 +144,3 @@ dump.rdb
 
 # Claude
 .claude
-
-# Package build artifacts
-packages/*/dist
-packages/*/*.tsbuildinfo

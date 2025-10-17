@@ -4,9 +4,6 @@
   "description": "GR Innovationarena API for Agentic simulations.",
   "main": "index.ts",
   "type": "commonjs",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "build": "tsc --build && tsc-alias",
     "start": "node -r tsconfig-paths/register -r ./register-paths.js dist/index.js",

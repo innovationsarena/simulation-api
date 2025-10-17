@@ -1,13 +1,15 @@
 {
   "baseUrl": "./dist",
   "paths": {
-    "@services": ["./services"],
-    "@services/*": ["./services/*"],
-    "@controllers": ["./controllers"],
-    "@controllers/*": ["./controllers/*"],
-    "@core": ["./core"],
-    "@core/*": ["./core/*"],
-    "@middlewares": ["./middlewares"],
-    "@middlewares/*": ["./middlewares/*"]
+    "@services": ["services"],
+    "@services/*": ["services/*"],
+    "@controllers": ["controllers"],
+    "@controllers/*": ["controllers/*"],
+    "@routes": ["routes"],
+    "@routes/*": ["routes/*"],
+    "@core": ["core"],
+    "@core/*": ["core/*"],
+    "@middlewares": ["middlewares"],
+    "@middlewares/*": ["middlewares/*"]
   }
 }
