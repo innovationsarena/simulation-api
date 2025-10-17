@@ -8,10 +8,8 @@ USER node
 
 # Copy package files first for better caching
 COPY --chown=node:node package*.json ./
-COPY --chown=node:node tsconfig.json ./
-
-# Copy all package structure
-COPY --chown=node:node packages/ ./packages/
+COPY --chown=node:node tsconfig*.json ./
+COPY --chown=node:node register-paths.js ./
 
 # Copy source code
 COPY --chown=node:node src/ ./src/
@@ -22,8 +20,8 @@ RUN npm install --force
 # Build
 RUN npm run build
 
-# Copy docs to the correct location for routes package
-RUN mkdir -p packages/routes/dist/docs && cp packages/routes/docs/apispec.yml packages/routes/dist/docs/
+# Copy docs to the correct location
+RUN mkdir -p dist/docs && cp src/docs/apispec.yml dist/docs/
 
 ENV NODE_ENV="production"
 
