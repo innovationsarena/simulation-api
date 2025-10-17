@@ -51,7 +51,6 @@
     "mem0ai": "^2.1.38",
     "nodemon": "^3.1.10",
     "semantic-release": "^24.2.5",
-    "tsconfig-paths": "^4.2.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {
