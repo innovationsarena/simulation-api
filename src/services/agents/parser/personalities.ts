@@ -1,4 +1,4 @@
-import type { BigFivePersonalityModel } from "../../../core";
+import type { BigFivePersonalityModel } from "@core";
 import { bigFivePersonalityModel as bigFivePersonalityModelEnglish } from "./personality.models.en";
 
 export const parseBigFivePersonality = (

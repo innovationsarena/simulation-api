@@ -1,6 +1,6 @@
-import { Queue, Worker } from "bullmq";
 import { handleBigfiveEvaluation } from "./bigfive.worker";
-import { concurrency, connection } from "../../../core";
+import { concurrency, connection } from "@core";
+import { Queue, Worker } from "bullmq";
 
 // QUEUE
 const QUEUE_NAME = "evaluationsQueue";

@@ -10,7 +10,7 @@ import {
   simulationRouter,
   interactionRouter,
   environmentRouter,
-} from "./routes";
+} from "../packages/routes/src";
 
 const PORT = Number(process.env.PORT) || 3000;
 

@@ -1,13 +1,13 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { supabase, Simulation, Agent } from "../../../core";
-import { listAgents } from "../../agents";
+import { supabase, Simulation, Agent } from "@core";
+import { listAgents } from "@services/agents";
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 import {
   createInteraction,
   interactionsQueue,
   listInteractions,
-} from "../../interactions";
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+} from "@services/interactions";
 
 export const getSimulation = async (
   simulationId: string

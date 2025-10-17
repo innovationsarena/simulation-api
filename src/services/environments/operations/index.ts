@@ -1,5 +1,5 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { Environment, supabase } from "../../../core";
+import { Environment, supabase } from "@core";
 
 export const createEnvironment = async (
   environment: Environment

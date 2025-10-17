@@ -1,4 +1,4 @@
-export * from "../core/supabase";
+export * from "@core/supabase";
 
 export * from "./interactions";
 export * from "./environments";

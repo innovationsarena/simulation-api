@@ -1,5 +1,5 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { Message, supabase } from "../../../core";
+import { Message, supabase } from "@core";
 
 export const createMessage = async (message: Message): Promise<Message> => {
   const { data, error }: PostgrestSingleResponse<Message> = await supabase

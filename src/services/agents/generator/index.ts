@@ -1,6 +1,6 @@
-import { getRandomNumber, id } from "../../../core/utils";
+import { getRandomNumber, id } from "@core/utils";
 import { generateName } from "./names";
-import type { Agent } from "../../../core/types";
+import type { Agent } from "@core/types";
 import { getBigFivePersonality } from "./personalities";
 export * from "./names";
 

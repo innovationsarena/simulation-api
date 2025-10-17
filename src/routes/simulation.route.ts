@@ -1,16 +1,16 @@
 import { FastifyInstance } from "fastify";
-import { SimulationInputSchema } from "../core";
+import { SimulationInputSchema } from "@core";
 import {
   getSimulationController,
   stopSimulationController,
   startSimulationController,
   createSimulationController,
+  summarizeSimulationController,
   listSimulationAgentsController,
   listSimulationMessagesController,
   listSimulationInteractionsController,
-  summarizeSimulationController,
-} from "../controllers";
-import { validateKey } from "../middlewares";
+} from "@controllers";
+import { validateKey } from "@middlewares";
 
 export const simulationRouter = (fastify: FastifyInstance) => {
   fastify.get(

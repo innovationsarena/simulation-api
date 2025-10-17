@@ -2,19 +2,13 @@ import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import {
-  id,
-  Interaction,
-  Message,
-  SimulationType,
-  supabase,
-} from "../../../core";
-import { interactionsQueue } from "../workers";
+import { id, Interaction, Message, SimulationType, supabase } from "@core";
+import { interactionsQueue } from "@services/interactions";
 import {
   assignInteractionToAgent,
   removeInteractionFromAgent,
-} from "../../agents";
-import { listMessagesByInteractionId } from "../../messages";
+} from "@services/agents";
+import { listMessagesByInteractionId } from "@services/messages";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 

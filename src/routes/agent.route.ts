@@ -1,12 +1,12 @@
 import { FastifyInstance } from "fastify";
-import { validateKey } from "../middlewares";
+import { validateKey } from "@middlewares";
 import {
   AgentChatInputSchema,
   AgentInputSchema,
   CustomAgentInputSchema,
   EvaluationInputSchema,
   RandomAgentInputSchema,
-} from "../core";
+} from "@core";
 
 import {
   generateRandomAgents,
@@ -16,7 +16,7 @@ import {
   evaluateAgentController,
   updateAgentController,
   AgentChatController,
-} from "../controllers";
+} from "@controllers";
 
 export const agentRouter = (fastify: FastifyInstance) => {
   fastify.get(

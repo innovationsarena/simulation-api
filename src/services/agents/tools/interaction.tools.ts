@@ -1,6 +1,6 @@
 import z from "zod";
 import { Tool } from "ai";
-import { getSimulation } from "../../simulations";
+import { getSimulation } from "@services/simulations";
 import { getAgentById, getIdleAgent } from "../operations";
 
 export const InteractTool: Tool = {

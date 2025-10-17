@@ -1,9 +1,8 @@
+import { Agent, BigFiveEvaluation, supabase } from "@core";
 import {
   PostgrestResponse,
   PostgrestSingleResponse,
 } from "@supabase/supabase-js";
-import { Agent, BigFiveEvaluation } from "../../../core";
-import { supabase } from "../../../core/supabase";
 
 export const listAgents = async (simulationId: string): Promise<Agent[]> => {
   const { data: agents, error }: PostgrestResponse<Agent> = await supabase

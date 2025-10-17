@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import type { Message } from "../types";
+import type { Message } from "@core/types";
 
 export const createShortHash = (str: string, len: number = 8) => {
   return createHash("shake256", { outputLength: len })

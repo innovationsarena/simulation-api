@@ -1,8 +1,8 @@
-import { Interaction, Message, Simulation } from "../../../core";
-import { getAgentById, parsePrompt } from "../../agents";
-import { getSimulation } from "../../simulations";
-import { createMessage } from "../../messages";
-import { endInteraction } from "../operations";
+import type { Interaction, Message, Simulation } from "@core/types";
+import { getAgentById, parsePrompt } from "@services/agents";
+import { getSimulation } from "@services/simulations";
+import { createMessage } from "@services/messages";
+import { endInteraction } from "@services/interactions";
 import { Agent } from "@voltagent/core";
 import { openai } from "@ai-sdk/openai";
 
@@ -21,7 +21,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
           id: agent.id,
           purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
-          model: openai(agent.llmSettings.model), // gpt-4-turbo
+          model: openai(agent.llmSettings.model),
           context: {
             simulation,
             interaction,
