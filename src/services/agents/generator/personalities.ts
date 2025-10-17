@@ -1,4 +1,4 @@
-import { BigFivePersonalityModel } from "../../../core";
+import { BigFivePersonalityModel } from "@core/types";
 import { personalities } from "../parser/personality.models.en";
 import { DataItem, items } from "./bigfivedata";
 

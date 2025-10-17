@@ -1,8 +1,8 @@
-import type { Agent, BigFivePersonalityModel, Simulation } from "../../../core";
+import type { Agent, BigFivePersonalityModel, Simulation } from "@core";
+import { parseBigFivePersonality } from "./personalities";
+import { parseOrganization } from "./organization";
 import { parseEnviroment } from "./environment";
 import { parseObjectives } from "./objectives";
-import { parseOrganization } from "./organization";
-import { parseBigFivePersonality } from "./personalities";
 
 export const parsePrompt = async (
   agent: Agent,

@@ -1,5 +1,5 @@
 import { Job } from "bullmq";
-import { Agent, BigFiveEvaluation, supabase } from "../../../core";
+import { Agent, BigFiveEvaluation, supabase } from "@core";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import z from "zod";
@@ -7,7 +7,7 @@ import {
   createBigFiveEvaluation,
   getAgentById,
   parsePrompt,
-} from "../../agents";
+} from "@services/agents";
 
 export const handleBigfiveEvaluation = async (job: Job) => {
   const { agentId, samples, type } = job.data;

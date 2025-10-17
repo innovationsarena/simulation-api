@@ -1,5 +1,5 @@
 import { Queue, Worker } from "bullmq";
-import { concurrency, connection } from "../../../core";
+import { concurrency, connection } from "@core";
 
 // QUEUE
 const QUEUE_NAME = "messageQueue";

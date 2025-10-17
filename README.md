@@ -16,7 +16,7 @@ The API specifications can be found [here](https://simulation.innovationsarenan.
 | DEFAULT_LLM_TEMPERATURE    | 0.5                                    | Default temperature for LLM.      |
 | DEFAULT_LLM_MESSAGE_TOKENS | 400                                    | max token in message.             |
 | SUMMARIZER_AGENT_MODEL     | gpt-5                                  | Default LLM for summerizer agent. |
-| SUPERVISOR_AGENT_MODEL     | gpt-5-mini                             | Default LLM for supervisor agent. |
+| SUPERVISOR_AGENT_MODEL     | gpt-5                                  | Default LLM for supervisor agent. |
 | OPENAI_API_KEY             | sk-proj-7HjY3...                       | OpenAI API key.                   |
 | SUPABASE_URL               | https://supabase.innovationsarenan.dev | Public url for Supabase.          |
 | SUPABASE_KEY               | eyJ0eX...                              | Supabase service token.           |

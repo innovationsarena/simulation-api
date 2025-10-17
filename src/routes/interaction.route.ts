@@ -1,12 +1,12 @@
+import { InteractionInputSchema } from "@core";
+import { validateKey } from "@middlewares";
+import { FastifyInstance } from "fastify";
 import {
   createInteractionController,
   getInteractionController,
   getInteractionMessagesController,
   startInteractionController,
-} from "../controllers";
-import { FastifyInstance } from "fastify";
-import { InteractionInputSchema } from "../core";
-import { validateKey } from "../middlewares";
+} from "@controllers";
 
 export const interactionRouter = (fastify: FastifyInstance) => {
   fastify.post(

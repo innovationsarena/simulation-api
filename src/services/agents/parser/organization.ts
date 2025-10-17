@@ -1,4 +1,4 @@
-import { Organization } from "../../../core";
+import { Organization } from "@core";
 
 export const parseOrganization = ({
   role,
