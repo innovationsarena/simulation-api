@@ -3,6 +3,7 @@ import fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import formbody from "@fastify/formbody";
+import multipart from "@fastify/multipart";
 
 import {
   docsRouter,
@@ -10,6 +11,7 @@ import {
   simulationRouter,
   interactionRouter,
   environmentRouter,
+  knowledgeRouter,
 } from "./routes";
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -21,6 +23,12 @@ const server = fastify({
 });
 
 server.register(formbody);
+server.register(multipart, {
+  limits: {
+    fileSize: 52428800, // 50 MB
+    files: 10, // Max 10 files per request
+  },
+});
 server.register(cors);
 server.register(helmet);
 
@@ -30,6 +38,7 @@ server.register(simulationRouter);
 server.register(interactionRouter);
 server.register(environmentRouter);
 server.register(agentRouter);
+server.register(knowledgeRouter);
 
 server.listen({
   port: PORT,

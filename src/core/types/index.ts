@@ -102,7 +102,9 @@ export const AgentSchema = z.object({
   llmSettings: LLMSettingsSchema,
   evaluations: EvaluationsSchema.optional(),
   stats: TokenStatsSchema.optional(),
+  knowledge: z.array(z.string()).optional(),
 });
+
 export type Agent = z.infer<typeof AgentSchema>;
 
 export const CustomAgentInputSchema = AgentSchema.omit({
