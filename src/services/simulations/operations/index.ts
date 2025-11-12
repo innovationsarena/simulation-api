@@ -137,6 +137,7 @@ Synthesize across items; merge duplicates; avoid repetition.
 Use neutral, evidence-based language; no speculation beyond the text.
 Quantify when possible (counts, ranges).
 If information is insufficient, state whats missing.
+All text should be in swedish.
   `;
   const prompt = `## Data to summarize (list of interactions): ${JSON.stringify(
     interactions.map((i) => i.summary)

@@ -1,5 +1,9 @@
 import { Queue, Worker } from "bullmq";
-import { startSimulation, stopSimulation } from "../operations";
+import {
+  startSimulation,
+  stopSimulation,
+  summarizeSimulation,
+} from "../operations";
 import { concurrency, connection } from "@core";
 
 // QUEUE

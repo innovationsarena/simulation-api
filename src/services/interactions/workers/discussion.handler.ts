@@ -10,7 +10,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
   try {
     const agents = [];
     const simulation = await getSimulation(interaction.simulationId);
-
+    console.log(interaction);
     for await (const participant of interaction.participants) {
       const agent = await getAgentById(participant);
       const subAgentInstructions = await parsePrompt(agent, simulation);
