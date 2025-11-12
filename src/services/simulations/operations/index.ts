@@ -129,9 +129,9 @@ export const summarizeSimulation = async (
 Output as bullet lists with these sections:
 
 Core insights: 5-10 distilled takeaways that hold across summaries; note strength/impact.
-Recurring patterns/themes: cluster common ideas; include frequency like [7/12] and cite sample IDs (e.g., S3, S8).
+Recurring patterns/themes: cluster common ideas.
 Valuable specifics: concrete data points, decisions, constraints, definitions; cite IDs.
-Divergences/contradictions: what disagrees, where (IDs), and stated reasons if provided.
+Divergences/contradictions: what disagrees, where, and stated reasons if provided.
 Actions/next steps: prioritized, deduplicated, with owners/timelines if present.
 Open questions/risks: unknowns, assumptions, blockers.
 
@@ -139,7 +139,6 @@ Requirements:
 Be concise; bullets only; no intro/outro.
 Synthesize across items; merge duplicates; avoid repetition.
 Use neutral, evidence-based language; no speculation beyond the text.
-Quantify when possible (counts, ranges).
 If information is insufficient, state whats missing.
 All text should be in swedish.
   `;
