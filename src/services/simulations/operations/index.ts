@@ -119,6 +119,10 @@ export const summarizeSimulation = async (
   simulationId: string
 ): Promise<{ summary: string }> => {
   const interactions = await listInteractions(simulationId);
+  console.log(
+    interactions.length + " interactions found in " + simulationId + "."
+  );
+
   const system = `# Instructions: 
   You are the Ultimate Summarizer. Given a list of discussion summaries, produce a cross-summary synthesis (do not re-summarize each item).
 

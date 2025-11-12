@@ -182,7 +182,7 @@ export const summarizeSimulationController = asyncHandler(
   ) => {
     const { simulationId } = request.params;
 
-    const summary = await summarizeSimulation(simulationId);
+    const { summary } = await summarizeSimulation(simulationId);
 
     return reply.status(200).send(summary);
   }
