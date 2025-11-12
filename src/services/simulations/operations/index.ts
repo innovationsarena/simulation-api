@@ -159,5 +159,7 @@ All text should be in swedish.
     },
   });
 
+  console.log(text);
+
   return { summary: text };
 };
