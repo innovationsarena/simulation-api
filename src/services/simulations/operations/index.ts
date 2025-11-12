@@ -153,7 +153,7 @@ All text should be in swedish.
     prompt,
     providerOptions: {
       openai: {
-        reasoningEffort: "high",
+        reasoningEffort: "medium",
         reasoningSummary: "auto",
       },
     },
