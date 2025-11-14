@@ -85,6 +85,12 @@ export const EvaluationInputSchema = z.object({
 export type Evaluations = z.infer<typeof EvaluationsSchema>;
 export type EvaluationInput = z.infer<typeof EvaluationInputSchema>;
 
+export const BFI2AgentInputSchema = z.object({
+  bfiEmail: z.string(),
+  simulationId: z.string(),
+});
+export type BFI2AgentInput = z.infer<typeof BFI2AgentInputSchema>;
+
 /* AGENT - MAIN */
 export const AgentSchema = z.object({
   id: z.string(),

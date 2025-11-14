@@ -3,6 +3,7 @@ import { validateKey } from "@middlewares";
 import {
   AgentChatInputSchema,
   AgentInputSchema,
+  BFI2AgentInputSchema,
   CustomAgentInputSchema,
   EvaluationInputSchema,
   RandomAgentInputSchema,
@@ -16,6 +17,7 @@ import {
   evaluateAgentController,
   updateAgentController,
   AgentChatController,
+  bfi2AgentController,
 } from "@controllers";
 
 export const agentRouter = (fastify: FastifyInstance) => {
@@ -80,5 +82,13 @@ export const agentRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     evaluateAgentController
+  );
+  fastify.post(
+    "/agents/bfi2",
+    {
+      schema: BFI2AgentInputSchema,
+      preValidation: [validateKey],
+    },
+    bfi2AgentController
   );
 };

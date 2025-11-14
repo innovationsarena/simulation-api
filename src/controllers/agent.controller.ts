@@ -9,6 +9,7 @@ import {
   EvaluationInput,
   AgentChatInput,
   createShortHash,
+  BFI2AgentInput,
 } from "../core";
 
 import {
@@ -25,6 +26,7 @@ import {
 } from "../services";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { generateBFI2Agent } from "@services/agents/generator/bfi2form";
 
 export const createCustomAgentController = asyncHandler(
   async (
@@ -193,5 +195,20 @@ export const AgentChatController = asyncHandler(
     });
 
     return reply.status(200).send({ message: text });
+  }
+);
+
+export const bfi2AgentController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Body: BFI2AgentInput;
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { bfiEmail, simulationId } = request.body;
+
+    const agent = await generateBFI2Agent(bfiEmail, simulationId);
+
+    return reply.status(200).send(agent);
   }
 );
