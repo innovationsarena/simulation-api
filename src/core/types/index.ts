@@ -86,7 +86,7 @@ export type Evaluations = z.infer<typeof EvaluationsSchema>;
 export type EvaluationInput = z.infer<typeof EvaluationInputSchema>;
 
 export const BFI2AgentInputSchema = z.object({
-  bfiEmail: z.string(),
+  bfi2email: z.string(),
   simulationId: z.string(),
 });
 export type BFI2AgentInput = z.infer<typeof BFI2AgentInputSchema>;

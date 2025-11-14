@@ -10,6 +10,7 @@ import {
   AgentChatInput,
   createShortHash,
   BFI2AgentInput,
+  supabase,
 } from "../core";
 
 import {
@@ -205,9 +206,18 @@ export const bfi2AgentController = asyncHandler(
     }>,
     reply: FastifyReply
   ) => {
-    const { bfiEmail, simulationId } = request.body;
+    const { bfi2email, simulationId } = request.body;
 
-    const agent = await generateBFI2Agent(bfiEmail, simulationId);
+    const { data, error } = await supabase
+      .from(process.env.BFI_TABLE_NAME as string)
+      .select("*")
+      .eq("email", bfi2email)
+      .single();
+
+    if (error) console.error(error);
+
+    const agent = await generateBFI2Agent(data, simulationId);
+    await createAgents([agent]);
 
     return reply.status(200).send(agent);
   }

@@ -3,17 +3,11 @@ import { generateRandomName } from "./names";
 import { createShortHash, supabase } from "@core";
 
 export const generateBFI2Agent = async (
-  bfiEmail: string,
+  bfiFormAnswers: any,
   simulationId: string
 ): Promise<Agent> => {
-  const { data } = await supabase
-    .from(process.env.BFI_TABLE_NAME as string)
-    .select("*")
-    .eq("email", bfiEmail)
-    .single();
-
   const base = {
-    id: createShortHash(bfiEmail),
+    id: createShortHash(bfiFormAnswers.email),
     state: "idle" as const,
     simulationId,
     type: "bfi2",
@@ -33,13 +27,13 @@ export const generateBFI2Agent = async (
     objectives: [],
     dynamicProps: [],
     personality: {
-      source: "bfi2",
+      source: "BFI-2-form",
       traits: {
-        openness: Math.round(data.open_mindedness_overall),
-        conscientiousness: Math.round(data.conscientiousness_overall),
-        extraversion: Math.round(data.extraversion_overall),
-        agreeableness: Math.round(data.agreeableness_overall),
-        neuroticism: Math.round(data.negative_emotionality_overall),
+        openness: Math.round(bfiFormAnswers.open_mindedness_overall),
+        conscientiousness: Math.round(bfiFormAnswers.conscientiousness_overall),
+        extraversion: Math.round(bfiFormAnswers.extraversion_overall),
+        agreeableness: Math.round(bfiFormAnswers.agreeableness_overall),
+        neuroticism: Math.round(bfiFormAnswers.negative_emotionality_overall),
       },
     },
   } as Agent;
