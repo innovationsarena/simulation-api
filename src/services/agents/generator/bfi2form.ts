@@ -10,7 +10,7 @@ export const generateBFI2Agent = async (
     id: createShortHash(bfiFormAnswers.email),
     state: "idle" as const,
     simulationId,
-    type: "bfi2",
+    type: "discussion",
     inInteractionId: null,
     name: generateRandomName(),
     llmSettings: {
