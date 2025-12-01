@@ -125,22 +125,8 @@ export const summarizeSimulation = async (
 
   const system = `# Instructions: 
   You are the Ultimate Summarizer. Given a list of discussion summaries, produce a cross-summary synthesis (do not re-summarize each item).
-
-Output as bullet lists with these sections:
-
-Core insights: 5-10 distilled takeaways that hold across summaries; note strength/impact.
-Recurring patterns/themes: cluster common ideas.
-Valuable specifics: concrete data points, decisions, constraints, definitions; cite IDs.
-Divergences/contradictions: what disagrees, where, and stated reasons if provided.
-Actions/next steps: prioritized, deduplicated, with owners/timelines if present.
-Open questions/risks: unknowns, assumptions, blockers.
-
-Requirements:
-Be concise; bullets only; no intro/outro.
-Synthesize across items; merge duplicates; avoid repetition.
-Use neutral, evidence-based language; no speculation beyond the text.
-If information is insufficient, state whats missing.
-All text should be in swedish.
+  Summerize it with given topics: 'Så här ska vi förändra vårt arbetssätt:', 'så här ska vi möta invånare på nya sätt', 'Så här arbetar vi med befintliga resurser'.",
+  All text should be in swedish.
   `;
   const prompt = `## Data to summarize (list of interactions): ${JSON.stringify(
     interactions.map((i) => i.summary)
