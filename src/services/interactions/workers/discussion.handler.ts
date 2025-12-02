@@ -10,7 +10,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
   try {
     const agents = [];
     const simulation = await getSimulation(interaction.simulationId);
-    console.log(interaction);
+
     for await (const participant of interaction.participants) {
       const agent = await getAgentById(participant);
       const subAgentInstructions = await parsePrompt(agent, simulation);
@@ -21,7 +21,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
           id: agent.id,
           purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
-          model: openai(agent.llmSettings.model),
+          model: openai("gpt-5.1"), // openai(agent.llmSettings.model),
           context: {
             simulation,
             interaction,
@@ -47,7 +47,9 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
                   props.output?.usage
                 );
 
-                console.log(`SubAgent (${props.agent.name}) ended.`);
+                console.log(
+                  `SubAgent '${props.agent.name}' (${props.agent.id}) ended.`
+                );
               }
             },
           },
