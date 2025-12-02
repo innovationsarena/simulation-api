@@ -44,4 +44,13 @@ export const interactionRouter = (fastify: FastifyInstance) => {
     },
     getInteractionMessagesController
   );
+
+  fastify.get(
+    "/interactions/:interactionId/summary",
+    {
+      schema: {},
+      preValidation: [validateKey],
+    },
+    getInteractionMessagesController
+  );
 };

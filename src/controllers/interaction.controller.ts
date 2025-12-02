@@ -7,6 +7,7 @@ import {
   getSimulation,
   interactionsQueue,
   listMessagesByInteractionId,
+  summarizeInteractions,
   updateInteraction,
 } from "../services";
 
@@ -102,5 +103,20 @@ export const getInteractionMessagesController = asyncHandler(
         return { id: c.senderId, content: c.content };
       })
     );
+  }
+);
+
+export const getInteractionSummaryController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { interactionId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { interactionId } = request.params;
+
+    const summary = await summarizeInteractions(interactionId);
+
+    return reply.status(200).send(summary);
   }
 );
