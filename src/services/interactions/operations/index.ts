@@ -161,7 +161,7 @@ export const summarizeInteractions = async (
     });
 
     if (text) {
-      await updateInteraction({ ...interaction, summary: text, active: false });
+      await updateInteraction({ ...interaction, summary: text });
       return text;
     }
   }
