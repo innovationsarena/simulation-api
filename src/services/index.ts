@@ -4,5 +4,6 @@ export * from "./interactions";
 export * from "./environments";
 export * from "./simulations";
 export * from "./evaluations";
+export * from "./knowledge";
 export * from "./messages";
 export * from "./agents";

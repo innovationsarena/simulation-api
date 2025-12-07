@@ -144,3 +144,6 @@ dump.rdb
 
 # Claude
 .claude
+
+# Temp
+*/**/uploads
