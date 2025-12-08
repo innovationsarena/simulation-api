@@ -1,6 +1,11 @@
 import { Queue, Worker } from "bullmq";
 import { concurrency, connection } from "../../../core";
-import { parseFile } from "./knowledge.handler";
+import {
+  chunkFile,
+  convertFile,
+  createEmbeddings,
+  storeEmbeddings,
+} from "./knowledge.handler";
 
 // QUEUE
 export const QUEUE_NAME = "ragQueue";
@@ -10,18 +15,18 @@ export const ragQueue = new Queue(QUEUE_NAME, { connection });
 new Worker(
   QUEUE_NAME,
   async (job) => {
-    if (job.name === "knowledge.file.parse") {
-      await parseFile(job.data);
+    if (job.name === "knowledge.file.convert") {
+      await convertFile(job.data);
     }
     if (job.name === "knowledge.file.chunk") {
-      console.log("starting chunking file.");
+      await chunkFile(job.data);
     }
     if (job.name === "knowledge.file.embeddings") {
-      console.log("starting creating embeddings of file.");
+      await createEmbeddings(job.data);
     }
 
     if (job.name === "knowledge.file.vector") {
-      console.log("Store embedding in vector db.");
+      await storeEmbeddings(job.data);
     }
   },
   {

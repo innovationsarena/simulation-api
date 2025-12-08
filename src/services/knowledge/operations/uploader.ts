@@ -1,35 +1,20 @@
-import path from "path";
-import fs from "fs";
-import fsp from "fs/promises";
-import { pipeline } from "stream/promises";
 import { MultipartFile } from "@fastify/multipart";
-import { ragQueue } from "../workers";
-
-export const uploadsDir = path.join(__dirname, "uploads");
+import { supabase } from "@core";
 
 export const uploadFiles = async (files: MultipartFile[]) => {
-  // Ensure uploads directory exists
-  await fsp.mkdir(uploadsDir, { recursive: true });
-
-  const uploadedFiles: { filename: string; path: string; mimetype: string }[] =
-    [];
+  const uploadedFiles: string[] = [];
 
   for await (const file of files) {
-    const filename = `${Date.now()}-${file.filename}`;
-    const filepath = path.join(uploadsDir, filename);
+    const { data } = await supabase.storage
+      .from(process.env.TEMP_BUCKET as string)
+      .upload(`/${Date.now()}-${file.filename}`, await file.toBuffer(), {
+        contentType: file.mimetype,
+        upsert: true,
+      });
 
-    // Save file to disk
-    await pipeline(file.file, fs.createWriteStream(filepath));
-
-    uploadedFiles.push({
-      filename: file.filename,
-      path: filepath,
-      mimetype: file.mimetype,
-    });
-  }
-
-  for (const file of uploadedFiles) {
-    await ragQueue.add("knowledge.file.parse", file);
+    if (data) {
+      uploadedFiles.push(data?.path);
+    }
   }
 
   return uploadedFiles;

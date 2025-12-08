@@ -21,12 +21,12 @@ export const fileUploadController = asyncHandler(
       return reply.status(400).send({ error: "No files uploaded" });
     }
 
-    // Upload files
+    // Upload files to Supabase
     const uploadedFiles = await uploadFiles(files);
 
     // Send to queue
     for await (const file of uploadedFiles) {
-      await ragQueue.add("knowledge.file.parse", file);
+      await ragQueue.add("knowledge.file.convert", file);
     }
 
     return reply.status(200).send({
