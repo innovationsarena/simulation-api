@@ -7,7 +7,13 @@ import { embedMany } from "ai";
 import { ragQueue } from ".";
 import axios from "axios";
 
-export const convertFile = async (file: string): Promise<void> => {
+export const convertFile = async ({
+  file,
+  parent,
+}: {
+  file: string;
+  parent?: string;
+}): Promise<void> => {
   // Get file from supabase
   const { data: fileInfo } = await supabase.storage
     .from(process.env.TEMP_BUCKET as string)

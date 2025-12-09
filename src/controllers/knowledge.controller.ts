@@ -5,8 +5,20 @@ import { uploadFiles } from "../services";
 import { asyncHandler } from "../core";
 
 export const fileUploadController = asyncHandler(
-  async (request: FastifyRequest, reply: FastifyReply) => {
+  async (
+    request: FastifyRequest<{
+      Params: { agentId?: string; simulationId?: string };
+    }>,
+    reply: FastifyReply
+  ) => {
     const files: MultipartFile[] = [];
+
+    let parent = null;
+    // Check for path params
+    const { agentId, simulationId } = request.params;
+
+    if (agentId) parent = agentId;
+    if (simulationId) parent = simulationId;
 
     // Get all uploaded files
     const parts = request.parts();
@@ -26,7 +38,7 @@ export const fileUploadController = asyncHandler(
 
     // Send to queue
     for await (const file of uploadedFiles) {
-      await ragQueue.add("knowledge.file.convert", file);
+      await ragQueue.add("knowledge.file.convert", { file, parent });
     }
 
     return reply.status(200).send({
