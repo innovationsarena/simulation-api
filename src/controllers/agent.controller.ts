@@ -222,3 +222,21 @@ export const bfi2AgentController = asyncHandler(
     return reply.status(200).send(agent);
   }
 );
+
+export const getAgentPromptController = asyncHandler(
+  async (
+    request: FastifyRequest<{
+      Params: { agentId: string };
+    }>,
+    reply: FastifyReply
+  ) => {
+    const { agentId } = request.params;
+
+    const agent = await getAgentById(agentId);
+    const simulation = await getSimulation(agent.simulationId);
+
+    const prompt = await parsePrompt(agent, simulation);
+
+    return reply.status(200).send(prompt);
+  }
+);

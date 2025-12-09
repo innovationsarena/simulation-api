@@ -17,17 +17,26 @@ import {
   evaluateAgentController,
   updateAgentController,
   AgentChatController,
+  getAgentPromptController,
   bfi2AgentController,
 } from "@controllers";
 
 export const agentRouter = (fastify: FastifyInstance) => {
   fastify.get(
-    "/agent/:agentId",
+    "/agents/:agentId",
     {
       schema: {},
       preValidation: [validateKey],
     },
     getAgentController
+  );
+  fastify.get(
+    "/agents/:agentId/prompt",
+    {
+      schema: {},
+      preValidation: [validateKey],
+    },
+    getAgentPromptController
   );
 
   fastify.post(

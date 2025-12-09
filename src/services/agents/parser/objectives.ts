@@ -1,5 +1,5 @@
 export const parseObjectives = (objectives: string[]) => {
-  let result = "## Contextual information\n";
+  let result = "## Personal contextual information\n";
 
   objectives.forEach((objective) => {
     result += `- ${objective}\n`;

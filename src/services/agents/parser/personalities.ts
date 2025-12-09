@@ -4,8 +4,7 @@ import { bigFivePersonalityModel as bigFivePersonalityModelEnglish } from "./per
 export const parseBigFivePersonality = (
   personality: BigFivePersonalityModel
 ): string => {
-  let result = "## Personality\n\n";
-
+  let result = "## Personality\n";
   Object.entries(personality.traits).forEach(([traitName, value]) => {
     result += `- ${
       (bigFivePersonalityModelEnglish as any)[traitName]?.find(
