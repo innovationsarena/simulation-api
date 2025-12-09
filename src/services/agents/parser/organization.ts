@@ -6,10 +6,10 @@ export const parseOrganization = ({
   hierarchyWeight,
   subGroups,
 }: Organization) => {
-  let result = "## Organizational information\n\n";
+  let result = "## Organizational information\n";
 
-  if (role) result += `### Professional occupational role: ${role}\n`;
-  if (roleDescription) result += `Role description: ${roleDescription}\n`;
+  if (role) result += `### Professional occupational role: ${role}\n\n`;
+  if (roleDescription) result += `**Role description**: ${roleDescription}\n`;
 
   return result + "\n\n";
 };
