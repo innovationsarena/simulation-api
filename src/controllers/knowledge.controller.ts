@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ragQueue } from "@services/knowledge/workers";
-import { MultipartFile } from "@fastify/multipart";
 import { uploadFiles } from "../services";
 import { asyncHandler } from "../core";
 
@@ -11,21 +10,27 @@ export const fileUploadController = asyncHandler(
     }>,
     reply: FastifyReply
   ) => {
-    const files: MultipartFile[] = [];
+    const files: { buffer: Buffer; filename: string; mimetype: string }[] = [];
 
-    let parent = null;
+    let parentId = null;
+
     // Check for path params
     const { agentId, simulationId } = request.params;
 
-    if (agentId) parent = agentId;
-    if (simulationId) parent = simulationId;
+    if (agentId) parentId = agentId;
+    if (simulationId) parentId = simulationId;
 
-    // Get all uploaded files
+    // Get all uploaded files — consume buffers eagerly while iterating
     const parts = request.parts();
 
     for await (const part of parts) {
       if (part.type === "file") {
-        files.push(part);
+        const buffer = await part.toBuffer();
+        files.push({
+          buffer,
+          filename: part.filename,
+          mimetype: part.mimetype,
+        });
       }
     }
 
@@ -37,12 +42,12 @@ export const fileUploadController = asyncHandler(
     const uploadedFiles = await uploadFiles(files);
 
     // Send to queue
-    for await (const file of uploadedFiles) {
-      await ragQueue.add("knowledge.file.convert", { file, parent });
+    for (const file of uploadedFiles) {
+      await ragQueue.add("knowledge.file.convert", { file, parentId });
     }
 
     return reply.status(200).send({
-      message: "File upload successful.",
+      message: "File(s) upload successful.",
       files: uploadedFiles,
     });
   }

@@ -9,6 +9,15 @@ servers:
 security:
   - ApiKeyAuth: []
 paths:
+  /test:
+    get:
+      tags: ["Test"]
+      summary: Test endpoint
+      operationId: test
+      responses:
+        "200":
+          description: OK
+
   /agents:
     post:
       tags: ["Agent"]
@@ -566,6 +575,47 @@ paths:
                       example: "I think we should consider renewable energy sources."
         "404":
           description: Interaction not found
+        "500":
+          description: Server error
+
+  /knowledge/files:
+    post:
+      tags: ["Knowledge"]
+      summary: Upload files to the knowledge base
+      description: Uploads one or more files to Supabase storage and queues them for the RAG pipeline (convert, chunk, embed, store vectors)
+      operationId: uploadKnowledgeFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: One or more files to upload (max 30MB each)
+      responses:
+        "200":
+          description: Files uploaded and queued for processing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "File(s) upload successful."
+                  files:
+                    type: array
+                    description: Storage paths of the uploaded files
+                    items:
+                      type: string
+                      example: "1709500000000-document.pdf"
+        "400":
+          description: No files uploaded
         "500":
           description: Server error
 

@@ -24,7 +24,7 @@ const server = fastify({
 
 server.register(multipart, {
   limits: {
-    fileSize: 30 * 1024 * 1024, // 10MB
+    fileSize: 30 * 1024 * 1024, // 30MB
   },
 });
 server.register(formbody);

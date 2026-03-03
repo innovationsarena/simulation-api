@@ -40,6 +40,7 @@ ${
     ? parseBigFivePersonality(agent.personality as BigFivePersonalityModel)
     : ""
 }
+
 ${agent.organization ? parseOrganization(agent.organization) : ""}
 ${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
 ${simulation ? await parseEnviroment(simulation) : ""}`;

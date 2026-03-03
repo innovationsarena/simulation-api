@@ -1,18 +1,17 @@
 import { openai } from "@ai-sdk/openai";
-import { qdrant } from "../operations";
-import { randomUUID } from "crypto";
 import FormData from "form-data";
-import { supabase } from "@core";
+import { supabase, qdrantClient } from "@core";
 import { embedMany } from "ai";
 import { ragQueue } from ".";
 import axios from "axios";
+import { v5 as uuidv5 } from "uuid";
 
 export const convertFile = async ({
   file,
-  parent,
+  parentId,
 }: {
   file: string;
-  parent?: string;
+  parentId: string;
 }): Promise<void> => {
   // Get file from supabase
   const { data: fileInfo } = await supabase.storage
@@ -35,33 +34,49 @@ export const convertFile = async ({
       .from(process.env.TEMP_BUCKET as string)
       .remove([fileInfo.name]);
 
-    await ragQueue.add(
-      "knowledge.file.chunk",
-      JSON.stringify(parsedDocument.json_content)
-    );
+    await ragQueue.add("knowledge.file.chunk", {
+      data: parsedDocument.json_content,
+      parentId,
+    });
 
     return;
   }
 };
 
-export const chunkFile = async (parsedDocument: string): Promise<void> => {
+export const chunkFile = async ({
+  data,
+  parentId,
+}: {
+  data: string;
+  parentId: string;
+}): Promise<void> => {
   try {
-    const chunks = await docling.chunk(parsedDocument);
-    await ragQueue.add("knowledge.file.embeddings", chunks);
+    const chunks = await docling.chunk(data);
+    await ragQueue.add("knowledge.file.embeddings", { chunks, parentId });
     return;
   } catch (error) {
     console.error(error);
   }
 };
 
-export const createEmbeddings = async (chunks: any[]): Promise<void> => {
+export const createEmbeddings = async ({
+  chunks,
+  parentId,
+}: {
+  chunks: any[];
+  parentId: string;
+}): Promise<void> => {
   console.log("Creating embeddings...");
   try {
     const { embeddings } = await embedMany({
       model: openai.embedding("text-embedding-3-small"),
       values: chunks.map((c) => c.text),
     });
-    await ragQueue.add("knowledge.file.vector", { embeddings, chunks });
+    await ragQueue.add("knowledge.file.vector", {
+      embeddings,
+      chunks,
+      parentId,
+    });
     console.log("Embeddings created.");
     return;
   } catch (error) {
@@ -72,43 +87,53 @@ export const createEmbeddings = async (chunks: any[]): Promise<void> => {
 export const storeEmbeddings = async ({
   embeddings,
   chunks,
+  parentId,
 }: {
   embeddings: any[];
   chunks: any[];
+  parentId: string;
 }) => {
-  console.log("Store embeddings in qdrant...");
+  console.log("Store embeddings in vector Db...");
   try {
-    const COLLECTION = "test";
-
-    const points = embeddings.map((item, i) => {
+    const points = embeddings.map((vector, i) => {
       const chunk = chunks[i];
-
+      const id = uuidv5(
+        `${parentId}:${chunk.metadata.origin.filename.split("___")[1]}:${
+          chunk.chunk_index
+        }`,
+        uuidv5.DNS
+      );
       return {
-        id: randomUUID(), // any unique id
-        vector: item, // the embedding
+        id,
+        vector,
         payload: {
+          parentId,
           text: chunk.text,
-          filename: chunk.filename,
+          filename: chunk.metadata.origin.filename,
           chunk_index: chunk.chunk_index,
           headings: chunk.headings,
           page_numbers: chunk.page_numbers,
           num_tokens: chunk.num_tokens,
-          metadata: chunk.metadata,
+          // metadata: chunk.metadata,
         },
       };
     });
 
-    console.log(`Upserting ${points.length} points...`);
+    const collections = await qdrantClient.getCollections();
+    const exists = collections.collections.some((c) => c.name === parentId);
 
-    const res = await qdrant.upsert(COLLECTION, {
-      points,
-    });
+    if (!exists) {
+      await qdrantClient.createCollection(parentId, {
+        vectors: { size: 1536, distance: "Cosine" },
+      });
+    }
 
-    console.log(res);
+    await qdrantClient.upsert(parentId, { points });
+
     console.log("Embeddings stored.");
     return;
   } catch (error) {
-    console.error("Error storing embeddings:", error);
+    console.error("Error storing embeddings: ", error);
     throw error;
   }
 };
@@ -144,15 +169,17 @@ const docling = {
       return "File convertion failed.";
     }
   },
-  async chunk(doc: string): Promise<any> {
+  async chunk(doc: any): Promise<any> {
     console.log("Chunking document...");
 
     try {
-      const base64String = Buffer.from(doc, "utf-8").toString("base64");
+      const docString = typeof doc === "string" ? doc : JSON.stringify(doc);
+      const base64String = Buffer.from(docString, "utf-8").toString("base64");
 
+      const docObj = typeof doc === "string" ? JSON.parse(doc) : doc;
       const source = {
         base64_string: base64String,
-        filename: `${JSON.parse(doc).name}.json`,
+        filename: `${docObj.name}.json`,
         kind: "file",
       };
 
