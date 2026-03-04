@@ -158,6 +158,7 @@ export const SimulationInputDescriptionSchema = z.object({
 
 export const SimulationOutputDescriptionSchema = z.object({
   description: z.string(),
+  summaryPrompt: z.string().optional(),
 });
 
 export const SimulationStatsSchema = z.object({

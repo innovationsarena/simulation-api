@@ -7,6 +7,10 @@ export const createShortHash = (str: string, len: number = 8) => {
     .digest("hex");
 };
 
+export const createDeterministicId = (str: string) => {
+  return createHash("sha1").update(str).digest("hex");
+};
+
 export const toLocalISO = (date: Date) => {
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
   const msLocal = date.getTime() - offsetMs;

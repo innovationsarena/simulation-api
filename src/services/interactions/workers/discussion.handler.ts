@@ -1,8 +1,9 @@
 import type { Interaction, Message, Simulation } from "@core/types";
 import { getAgentById, parsePrompt } from "@services/agents";
+import { endInteraction } from "@services/interactions";
 import { getSimulation } from "@services/simulations";
 import { createMessage } from "@services/messages";
-import { endInteraction } from "@services/interactions";
+// import { retriever } from "@services/knowledge";
 import { Agent } from "@voltagent/core";
 import { openai } from "@ai-sdk/openai";
 
@@ -22,6 +23,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
           purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
           model: openai("gpt-5.1"), // openai(agent.llmSettings.model),
+          //          retriever: retriever,
           context: {
             simulation,
             interaction,

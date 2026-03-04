@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
-  Agent,
   id,
+  Agent as AgentType,
   asyncHandler,
   CustomAgentInput,
   RandomAgentInput,
@@ -24,10 +24,12 @@ import {
   updateAgent,
   updateSimulation,
   generateRandomName,
+  retriever,
 } from "../services";
-import { generateText } from "ai";
+
 import { openai } from "@ai-sdk/openai";
 import { generateBFI2Agent } from "@services/agents/generator/bfi2form";
+import { Agent } from "@voltagent/core";
 
 export const createCustomAgentController = asyncHandler(
   async (
@@ -47,7 +49,7 @@ export const createCustomAgentController = asyncHandler(
       organization,
     } = request.body;
 
-    const agent: Agent = {
+    const agent: AgentType = {
       id: createShortHash(agentId) || id(),
       version: 2,
       name: name ? name : generateRandomName(),
@@ -84,7 +86,7 @@ export const generateAgentsController = asyncHandler(
     const version: number = request.body.version ?? 2;
     const { simulationId } = request.body;
 
-    const agents: Agent[] = [];
+    const agents: AgentType[] = [];
 
     for (let i = 0; i < count; i++) {
       agents.push(await generateAgent(version, simulationId));
@@ -121,7 +123,7 @@ export const generateRandomAgents = asyncHandler(
     const version: number = request.body.version ?? 2;
     const { simulationId } = request.body;
 
-    const agents: Agent[] = [];
+    const agents: AgentType[] = [];
 
     for (let i = 0; i < count; i++) {
       agents.push(await generateRandomAgent(version, simulationId));
@@ -188,11 +190,19 @@ export const AgentChatController = asyncHandler(
     if (!prompt) throw new Error("Message to Agent missing.");
 
     const agent = await getAgentById(agentId);
+    const instructions = await parsePrompt(agent);
 
-    const { text } = await generateText({
-      model: openai(agent.llmSettings.model || "gpt-5-mini"),
-      system: await parsePrompt(agent),
-      prompt,
+    const a = new Agent({
+      name: agent.name,
+      id: agent.id,
+      purpose: "An Agent in a simulation.",
+      instructions,
+      model: openai(agent.llmSettings.model),
+      retriever: retriever,
+    });
+
+    const { text } = await a.generateText(prompt, {
+      context: { parentId: agentId },
     });
 
     return reply.status(200).send({ message: text });

@@ -19,6 +19,7 @@ import {
   AgentChatController,
   getAgentPromptController,
   bfi2AgentController,
+  fileUploadController,
 } from "@controllers";
 
 export const agentRouter = (fastify: FastifyInstance) => {
@@ -99,5 +100,15 @@ export const agentRouter = (fastify: FastifyInstance) => {
       preValidation: [validateKey],
     },
     bfi2AgentController
+  );
+  fastify.post(
+    "/agents/:agentId/knowledge",
+    {
+      schema: {
+        consumes: ["multipart/form-data"],
+      },
+      preValidation: [validateKey],
+    },
+    fileUploadController
   );
 };

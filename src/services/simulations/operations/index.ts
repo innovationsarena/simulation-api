@@ -118,14 +118,14 @@ export const updateSimulation = async (
 export const summarizeSimulation = async (
   simulationId: string
 ): Promise<{ summary: string }> => {
+  const { output } = await getSimulation(simulationId);
   const interactions = await listInteractions(simulationId);
   console.log(
     interactions.length + " interactions found in " + simulationId + "."
   );
 
   const system = `# Instructions: 
-  You are the Ultimate Summarizer. Given a list of discussion summaries, produce a cross-summary synthesis (do not re-summarize each item).
-  Summerize it with given topics: 'Så här ska vi förändra vårt arbetssätt:', 'så här ska vi möta invånare på nya sätt', 'Så här arbetar vi med befintliga resurser'.",
+  You are an expert meta-summarizer specialized in compressing interaction-summaries into clear, factual, and context-preserving outputs. You never guess, invent, or over-generalize. You distill only what is present in the provided summaries.
   All text should be in swedish.
   `;
   const prompt = `## Data to summarize (list of interactions): ${JSON.stringify(
@@ -133,8 +133,8 @@ export const summarizeSimulation = async (
   )} `;
 
   const { text } = await generateText({
-    model: openai("gpt-5"),
-    system,
+    model: openai((process.env.SUMMARIZER_AGENT_MODEL as string) || "gpt-5.1"),
+    system: output?.summaryPrompt || system,
     prompt,
     providerOptions: {
       openai: {

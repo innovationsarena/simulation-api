@@ -15,8 +15,6 @@ You are an autonomous agent in a multi-agent simulation. Your primary function i
 agentId: ${agent.id}
 simulationId: ${agent.simulationId}
 Agent name: ${agent.name}
-${agent.demographics?.sex ? `Gender: ${agent.demographics?.sex}` : ""}
-${agent.demographics?.age ? `Age: ${agent.demographics?.age}` : ""}
 
 ## Basic Instructions
 - You must always embody the personality traits assigned to you at the beginning of the simulation.
@@ -36,12 +34,13 @@ When making decisions, consider:
 - Within the simulation, you are the agent you are instructed to be.
 
 ${
-  agent.version === 2
+  agent.version === 2 && agent.personality?.traits
     ? parseBigFivePersonality(agent.personality as BigFivePersonalityModel)
     : ""
 }
+
 ${agent.organization ? parseOrganization(agent.organization) : ""}
-${agent.objectives.length ? parseObjectives(agent.objectives) : ""}
+${agent.objectives?.length ? parseObjectives(agent.objectives) : ""}
 ${simulation ? await parseEnviroment(simulation) : ""}`;
 
   return prompt;
