@@ -186,21 +186,24 @@ export const AgentChatController = asyncHandler(
   ) => {
     const { agentId } = request.params;
     const { prompt } = request.body;
-    console.log(agentId);
+
     if (!prompt) throw new Error("Message to Agent missing.");
 
     const agent = await getAgentById(agentId);
+    const instructions = await parsePrompt(agent);
 
     const a = new Agent({
       name: agent.name,
       id: agent.id,
       purpose: "An Agent in a simulation.",
-      instructions: await parsePrompt(agent),
+      instructions,
       model: openai(agent.llmSettings.model),
       retriever: retriever,
     });
 
-    const { text } = await a.generateText(prompt);
+    const { text } = await a.generateText(prompt, {
+      context: { parentId: agentId },
+    });
 
     return reply.status(200).send({ message: text });
   }
