@@ -1,6 +1,10 @@
 import { openai } from "@ai-sdk/openai";
 import { qdrantClient } from "@core";
-import { BaseRetriever, type BaseMessage, type RetrieveOptions } from "@voltagent/core";
+import {
+  BaseRetriever,
+  type BaseMessage,
+  type RetrieveOptions,
+} from "@voltagent/core";
 import { embed } from "ai";
 
 class QdrantRetriever extends BaseRetriever {
@@ -15,10 +19,23 @@ class QdrantRetriever extends BaseRetriever {
     input: string | BaseMessage[],
     options: RetrieveOptions
   ): Promise<string> {
-    const searchText =
-      typeof input === "string"
-        ? input
-        : input[input.length - 1]?.content ?? "";
+    console.log("[QdrantRetriever] retrieve called");
+
+    let searchText: string;
+    if (typeof input === "string") {
+      searchText = input;
+    } else {
+      const last = input[input.length - 1];
+      searchText =
+        typeof last?.content === "string"
+          ? last.content
+          : Array.isArray(last?.content)
+          ? last.content
+              .filter((p: any) => p.type === "text")
+              .map((p: any) => p.text)
+              .join(" ")
+          : "";
+    }
 
     const parentId =
       options?.context?.get?.("parentId") ??
@@ -29,9 +46,14 @@ class QdrantRetriever extends BaseRetriever {
       return "";
     }
 
+    if (!searchText) {
+      console.warn("QdrantRetriever: empty search text, skipping");
+      return "";
+    }
+
     const { embedding: queryVector } = await embed({
       model: openai.embedding("text-embedding-3-small"),
-      value: searchText as string,
+      value: searchText,
     });
 
     const results = await qdrantClient.search(parentId as string, {
@@ -49,10 +71,7 @@ class QdrantRetriever extends BaseRetriever {
     }
 
     return results
-      .map(
-        (r, i) =>
-          `Document ${i + 1}:\n${r.payload?.text ?? ""}`
-      )
+      .map((r, i) => `Document ${i + 1}:\n${r.payload?.text ?? ""}`)
       .filter((t) => t.trim())
       .join("\n\n---\n\n");
   }

@@ -8,8 +8,6 @@ export const parsePrompt = async (
   agent: Agent,
   simulation?: Simulation
 ): Promise<string> => {
-  console.log("Constructing prompt...");
-  console.log(agent);
   let prompt = `# Simulation Agent
 You are an autonomous agent in a multi-agent simulation. Your primary function is to act according to the assigned personality traits when interacting with other agents and responding to stimuli from the environment.
 
