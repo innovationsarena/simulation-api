@@ -43,6 +43,6 @@ server.listen({
   port: PORT,
   host: "0.0.0.0",
   listenTextResolver: (address) => {
-    return `Simulator API server is listening at ${address}`;
+    return `GR Innovationarena Simulator API server is listening at ${address}`;
   },
 });

@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { mistral } from "@ai-sdk/mistral";
 import FormData from "form-data";
 import { supabase, qdrantClient } from "@core";
 import { embedMany } from "ai";
@@ -69,7 +69,7 @@ export const createEmbeddings = async ({
   console.log("Creating embeddings...");
   try {
     const { embeddings } = await embedMany({
-      model: openai.embedding("text-embedding-3-small"),
+      model: mistral.embedding("mistral-embed"),
       values: chunks.map((c) => c.text),
     });
     await ragQueue.add("knowledge.file.vector", {

@@ -27,7 +27,7 @@ import {
   retriever,
 } from "../services";
 
-import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { generateBFI2Agent } from "@services/agents/generator/bfi2form";
 import { Agent } from "@voltagent/core";
 
@@ -197,7 +197,7 @@ export const AgentChatController = asyncHandler(
       id: agent.id,
       purpose: "An Agent in a simulation.",
       instructions,
-      model: openai(agent.llmSettings.model),
+      model: anthropic("claude-sonnet-4-6"),
       retriever: retriever,
     });
 

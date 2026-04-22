@@ -1,7 +1,7 @@
 import { Job } from "bullmq";
 import { Agent, BigFiveEvaluation, supabase } from "@core";
 import { generateObject } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import z from "zod";
 import {
   createBigFiveEvaluation,
@@ -193,7 +193,7 @@ const questions = [
 `;
 
   const { object } = await generateObject({
-    model: openai(agent.llmSettings.model as string),
+    model: anthropic("claude-sonnet-4-6"),
     temperature: agent.llmSettings.temperature,
     system: await parsePrompt(agent),
     schema: z.object({ results: z.array(z.string()) }),

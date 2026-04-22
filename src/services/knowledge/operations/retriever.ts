@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { mistral } from "@ai-sdk/mistral";
 import { qdrantClient } from "@core";
 import {
   BaseRetriever,
@@ -52,7 +52,7 @@ class QdrantRetriever extends BaseRetriever {
     }
 
     const { embedding: queryVector } = await embed({
-      model: openai.embedding("text-embedding-3-small"),
+      model: mistral.embedding("mistral-embed"),
       value: searchText,
     });
 

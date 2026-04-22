@@ -10,7 +10,7 @@ import {
 } from "@services/agents";
 import { listMessagesByInteractionId } from "@services/messages";
 import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { mistral } from "@ai-sdk/mistral";
 
 export const listInteractions = async (
   simulationId: string
@@ -132,8 +132,8 @@ export const endInteraction = async (
   const messages: Message[] = await listMessagesByInteractionId(interaction.id);
   if (messages) {
     const { text } = await generateText({
-      model: openai(
-        (process.env.SUMMARIZER_AGENT_MODEL as string) || "gpt-5.1"
+      model: mistral(
+        (process.env.SUMMARIZER_AGENT_MODEL as string) || "mistral-large-latest"
       ),
       system:
         "Summarize the following conversation between two or more agents in a single concise paragraph (no bullets or lists). Include key points and decisions, action items, unresolved questions/next steps, and tone/sentiment. Be factual, neutral, and concise. Summerize it with given topics: 'Så här ska vi förändra vårt arbetssätt:', 'så här ska vi möta invånare på nya sätt', 'Så här arbetar vi med befintliga resurser'.",
@@ -155,7 +155,7 @@ export const summarizeInteractions = async (
 
   if (messages) {
     const { text } = await generateText({
-      model: openai((process.env.SUMMARIZER_AGENT_MODEL as string) || "gpt-5"),
+      model: mistral((process.env.SUMMARIZER_AGENT_MODEL as string) || "mistral-large-latest"),
       system:
         "Summarize the following conversation between two or more agents in a single concise paragraph (no bullets or lists). Include key points and decisions, action items, unresolved questions/next steps, and tone/sentiment. Be factual, neutral, and concise. Summerize it with given topics: 'Så här ska vi förändra vårt arbetssätt:', 'så här ska vi möta invånare på nya sätt', 'Så här arbetar vi med befintliga resurser'.",
       prompt: `#Messages \n\n ${messages.map((m) => m.content)}`,

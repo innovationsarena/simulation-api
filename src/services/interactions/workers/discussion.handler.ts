@@ -5,7 +5,7 @@ import { getSimulation } from "@services/simulations";
 import { createMessage } from "@services/messages";
 // import { retriever } from "@services/knowledge";
 import { Agent } from "@voltagent/core";
-import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 
 export const handleDiscussionStart = async (interaction: Interaction) => {
   try {
@@ -22,7 +22,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
           id: agent.id,
           purpose: "A participant in a conversation.",
           instructions: subAgentInstructions,
-          model: openai("gpt-5.1"), // openai(agent.llmSettings.model),
+          model: anthropic("claude-sonnet-4-6"),
           //          retriever: retriever,
           context: {
             simulation,
@@ -68,7 +68,7 @@ export const handleDiscussionStart = async (interaction: Interaction) => {
     const supervisorAgent = new Agent({
       name: "Supervisor Agent",
       instructions: supervisorAgentInstructions,
-      model: openai((process.env.SUPERVISOR_AGENT_MODEL as string) || "gpt-5"),
+      model: anthropic("claude-sonnet-4-6"),
       subAgents: [...agents],
       maxSteps: agents.length * (interaction.turns || 3),
       hooks: {

@@ -1,7 +1,7 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { supabase, Simulation, Agent } from "@core";
 import { listAgents } from "@services/agents";
-import { openai } from "@ai-sdk/openai";
+import { mistral } from "@ai-sdk/mistral";
 import { generateText } from "ai";
 import {
   createInteraction,
@@ -133,15 +133,9 @@ export const summarizeSimulation = async (
   )} `;
 
   const { text } = await generateText({
-    model: openai((process.env.SUMMARIZER_AGENT_MODEL as string) || "gpt-5.1"),
+    model: mistral((process.env.SUMMARIZER_AGENT_MODEL as string) || "mistral-large-latest"),
     system: output?.summaryPrompt || system,
     prompt,
-    providerOptions: {
-      openai: {
-        reasoningEffort: "medium",
-        reasoningSummary: "auto",
-      },
-    },
   });
 
   return { summary: text };
